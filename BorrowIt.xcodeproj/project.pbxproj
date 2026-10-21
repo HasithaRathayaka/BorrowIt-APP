@@ -1,0 +1,690 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B0010001 /* BorrowItApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010001 /* BorrowItApp.swift */; };
+		B0010002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010002 /* ContentView.swift */; };
+		B0010003 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010003 /* AppConfig.swift */; };
+		B0020001 /* BorrowItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020001 /* BorrowItem.swift */; };
+		B0020002 /* BorrowTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020002 /* BorrowTransaction.swift */; };
+		B0020003 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020003 /* ChatMessage.swift */; };
+		B0020004 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020004 /* UserProfile.swift */; };
+		B0020005 /* QRPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020005 /* QRPayload.swift */; };
+		B0030001 /* ServiceProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0030001 /* ServiceProtocols.swift */; };
+		B0030002 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0030002 /* PersistenceController.swift */; };
+		B0030003 /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0030003 /* SupabaseService.swift */; };
+		B0030004 /* BiometricAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0030004 /* BiometricAuthService.swift */; };
+		B0030005 /* LocationGeofenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0030005 /* LocationGeofenceService.swift */; };
+		B0030006 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0030006 /* NotificationService.swift */; };
+		B0030007 /* ImageClassifierService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0030007 /* ImageClassifierService.swift */; };
+		B0030008 /* QRCodeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0030008 /* QRCodeService.swift */; };
+		B0030009 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0030009 /* LiveActivityManager.swift */; };
+		B0030010 /* CalendarEventService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0030010 /* CalendarEventService.swift */; };
+		B0030011 /* AppSettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0030011 /* AppSettingsManager.swift */; };
+		B0040001 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0040001 /* AuthViewModel.swift */; };
+		B0040002 /* ExploreViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0040002 /* ExploreViewModel.swift */; };
+		B0040003 /* BorrowLifecycleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0040003 /* BorrowLifecycleViewModel.swift */; };
+		B0040004 /* AddItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0040004 /* AddItemViewModel.swift */; };
+		B0040005 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0040005 /* ChatViewModel.swift */; };
+		B0050001 /* WelcomeOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050001 /* WelcomeOnboardingView.swift */; };
+		B0050002 /* BiometricGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050002 /* BiometricGateView.swift */; };
+		B0050003 /* ExploreDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050003 /* ExploreDashboardView.swift */; };
+		B0050004 /* FilterSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050004 /* FilterSheetView.swift */; };
+		B0050005 /* ItemDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050005 /* ItemDetailView.swift */; };
+		B0050006 /* ScheduleBorrowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050006 /* ScheduleBorrowView.swift */; };
+		B0050007 /* RequestSentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050007 /* RequestSentView.swift */; };
+		B0050008 /* AddItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050008 /* AddItemView.swift */; };
+		B0050009 /* EmptyExploreStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050009 /* EmptyExploreStateView.swift */; };
+		B0050010 /* MessagesInboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050010 /* MessagesInboxView.swift */; };
+		B0050011 /* ChatThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050011 /* ChatThreadView.swift */; };
+		B0050012 /* HandoffQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050012 /* HandoffQRView.swift */; };
+		B0050013 /* PickupVerifiedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050013 /* PickupVerifiedView.swift */; };
+		B0050014 /* BorrowsTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050014 /* BorrowsTabView.swift */; };
+		B0050015 /* ReturnReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050015 /* ReturnReviewView.swift */; };
+		B0050016 /* ProfileStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050016 /* ProfileStatsView.swift */; };
+		B0050017 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050017 /* SettingsView.swift */; };
+		B0050018 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050018 /* DesignSystem.swift */; };
+		B0050019 /* iPadSplitDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0050019 /* iPadSplitDashboardView.swift */; };
+		B0060001 /* BorrowActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0060001 /* BorrowActivityAttributes.swift */; };
+		B0060002 /* BorrowItHomeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0060002 /* BorrowItHomeWidget.swift */; };
+		B0060003 /* ReturnItemAppIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0060003 /* ReturnItemAppIntent.swift */; };
+		B0070001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F0070001 /* Assets.xcassets */; };
+		B0070002 /* BorrowIt.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F0070002 /* BorrowIt.xcdatamodeld */; };
+		B0080001 /* BorrowItTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0080001 /* BorrowItTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		P0010001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00010001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = T0010001;
+			remoteInfo = BorrowIt;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		F0000001 /* BorrowIt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BorrowIt.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0000002 /* BorrowItTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BorrowItTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F0000004 /* BorrowIt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BorrowIt.entitlements; sourceTree = "<group>"; };
+
+		F0010001 /* BorrowItApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorrowItApp.swift; sourceTree = "<group>"; };
+		F0010002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		F0010003 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+
+		F0020001 /* BorrowItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorrowItem.swift; sourceTree = "<group>"; };
+		F0020002 /* BorrowTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorrowTransaction.swift; sourceTree = "<group>"; };
+		F0020003 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		F0020004 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
+		F0020005 /* QRPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRPayload.swift; sourceTree = "<group>"; };
+
+		F0030001 /* ServiceProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceProtocols.swift; sourceTree = "<group>"; };
+		F0030002 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
+		F0030003 /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
+		F0030004 /* BiometricAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricAuthService.swift; sourceTree = "<group>"; };
+		F0030005 /* LocationGeofenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationGeofenceService.swift; sourceTree = "<group>"; };
+		F0030006 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		F0030007 /* ImageClassifierService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageClassifierService.swift; sourceTree = "<group>"; };
+		F0030008 /* QRCodeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeService.swift; sourceTree = "<group>"; };
+		F0030009 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
+		F0030010 /* CalendarEventService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventService.swift; sourceTree = "<group>"; };
+		F0030011 /* AppSettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsManager.swift; sourceTree = "<group>"; };
+
+		F0040001 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		F0040002 /* ExploreViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreViewModel.swift; sourceTree = "<group>"; };
+		F0040003 /* BorrowLifecycleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorrowLifecycleViewModel.swift; sourceTree = "<group>"; };
+		F0040004 /* AddItemViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemViewModel.swift; sourceTree = "<group>"; };
+		F0040005 /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
+
+		F0050001 /* WelcomeOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeOnboardingView.swift; sourceTree = "<group>"; };
+		F0050002 /* BiometricGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricGateView.swift; sourceTree = "<group>"; };
+		F0050003 /* ExploreDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreDashboardView.swift; sourceTree = "<group>"; };
+		F0050004 /* FilterSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterSheetView.swift; sourceTree = "<group>"; };
+		F0050005 /* ItemDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailView.swift; sourceTree = "<group>"; };
+		F0050006 /* ScheduleBorrowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleBorrowView.swift; sourceTree = "<group>"; };
+		F0050007 /* RequestSentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestSentView.swift; sourceTree = "<group>"; };
+		F0050008 /* AddItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemView.swift; sourceTree = "<group>"; };
+		F0050009 /* EmptyExploreStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyExploreStateView.swift; sourceTree = "<group>"; };
+		F0050010 /* MessagesInboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesInboxView.swift; sourceTree = "<group>"; };
+		F0050011 /* ChatThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatThreadView.swift; sourceTree = "<group>"; };
+		F0050012 /* HandoffQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandoffQRView.swift; sourceTree = "<group>"; };
+		F0050013 /* PickupVerifiedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickupVerifiedView.swift; sourceTree = "<group>"; };
+		F0050014 /* BorrowsTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorrowsTabView.swift; sourceTree = "<group>"; };
+		F0050015 /* ReturnReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReturnReviewView.swift; sourceTree = "<group>"; };
+		F0050016 /* ProfileStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStatsView.swift; sourceTree = "<group>"; };
+		F0050017 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F0050018 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
+		F0050019 /* iPadSplitDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadSplitDashboardView.swift; sourceTree = "<group>"; };
+
+		F0060001 /* BorrowActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorrowActivityAttributes.swift; sourceTree = "<group>"; };
+		F0060002 /* BorrowItHomeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorrowItHomeWidget.swift; sourceTree = "<group>"; };
+		F0060003 /* ReturnItemAppIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReturnItemAppIntent.swift; sourceTree = "<group>"; };
+
+		F0070001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F0070002 /* BorrowIt.xcdatamodeld */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodeld; path = BorrowIt.xcdatamodeld; sourceTree = "<group>"; };
+
+		F0080001 /* BorrowItTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorrowItTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FW010001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FW020001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		G0000001 = {
+			isa = PBXGroup;
+			children = (
+				G0000002 /* BorrowIt */,
+				G0000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		G0000002 /* BorrowIt */ = {
+			isa = PBXGroup;
+			children = (
+				G0010001 /* App */,
+				G0020001 /* Models */,
+				G0030001 /* Services */,
+				G0040001 /* ViewModels */,
+				G0050001 /* Views */,
+				G0060001 /* WidgetsAndIntents */,
+				G0070001 /* Resources */,
+				G0080001 /* BorrowItTests */,
+				F0000003 /* Info.plist */,
+				F0000004 /* BorrowIt.entitlements */,
+			);
+			path = BorrowIt;
+			sourceTree = "<group>";
+		};
+		G0000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F0000001 /* BorrowIt.app */,
+				F0000002 /* BorrowItTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		G0010001 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				F0010001 /* BorrowItApp.swift */,
+				F0010002 /* ContentView.swift */,
+				F0010003 /* AppConfig.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		G0020001 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F0020001 /* BorrowItem.swift */,
+				F0020002 /* BorrowTransaction.swift */,
+				F0020003 /* ChatMessage.swift */,
+				F0020004 /* UserProfile.swift */,
+				F0020005 /* QRPayload.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		G0030001 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				G0030002 /* Protocols */,
+				G0030003 /* Backend */,
+				G0030004 /* NativeSDKs */,
+				G0030005 /* Settings */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		G0030002 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				F0030001 /* ServiceProtocols.swift */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		G0030003 /* Backend */ = {
+			isa = PBXGroup;
+			children = (
+				F0030002 /* PersistenceController.swift */,
+				F0030003 /* SupabaseService.swift */,
+			);
+			path = Backend;
+			sourceTree = "<group>";
+		};
+		G0030004 /* NativeSDKs */ = {
+			isa = PBXGroup;
+			children = (
+				F0030004 /* BiometricAuthService.swift */,
+				F0030005 /* LocationGeofenceService.swift */,
+				F0030006 /* NotificationService.swift */,
+				F0030007 /* ImageClassifierService.swift */,
+				F0030008 /* QRCodeService.swift */,
+				F0030009 /* LiveActivityManager.swift */,
+				F0030010 /* CalendarEventService.swift */,
+			);
+			path = NativeSDKs;
+			sourceTree = "<group>";
+		};
+		G0030005 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				F0030011 /* AppSettingsManager.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		G0040001 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				F0040001 /* AuthViewModel.swift */,
+				F0040002 /* ExploreViewModel.swift */,
+				F0040003 /* BorrowLifecycleViewModel.swift */,
+				F0040004 /* AddItemViewModel.swift */,
+				F0040005 /* ChatViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		G0050001 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				G0050002 /* Onboarding */,
+				G0050003 /* Explore */,
+				G0050004 /* Messages */,
+				G0050005 /* Handoff */,
+				G0050006 /* Borrows */,
+				G0050007 /* ProfileAndSettings */,
+				G0050008 /* Shared */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		G0050002 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				F0050001 /* WelcomeOnboardingView.swift */,
+				F0050002 /* BiometricGateView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		G0050003 /* Explore */ = {
+			isa = PBXGroup;
+			children = (
+				F0050003 /* ExploreDashboardView.swift */,
+				F0050004 /* FilterSheetView.swift */,
+				F0050005 /* ItemDetailView.swift */,
+				F0050006 /* ScheduleBorrowView.swift */,
+				F0050007 /* RequestSentView.swift */,
+				F0050008 /* AddItemView.swift */,
+				F0050009 /* EmptyExploreStateView.swift */,
+			);
+			path = Explore;
+			sourceTree = "<group>";
+		};
+		G0050004 /* Messages */ = {
+			isa = PBXGroup;
+			children = (
+				F0050010 /* MessagesInboxView.swift */,
+				F0050011 /* ChatThreadView.swift */,
+			);
+			path = Messages;
+			sourceTree = "<group>";
+		};
+		G0050005 /* Handoff */ = {
+			isa = PBXGroup;
+			children = (
+				F0050012 /* HandoffQRView.swift */,
+				F0050013 /* PickupVerifiedView.swift */,
+			);
+			path = Handoff;
+			sourceTree = "<group>";
+		};
+		G0050006 /* Borrows */ = {
+			isa = PBXGroup;
+			children = (
+				F0050014 /* BorrowsTabView.swift */,
+				F0050015 /* ReturnReviewView.swift */,
+			);
+			path = Borrows;
+			sourceTree = "<group>";
+		};
+		G0050007 /* ProfileAndSettings */ = {
+			isa = PBXGroup;
+			children = (
+				F0050016 /* ProfileStatsView.swift */,
+				F0050017 /* SettingsView.swift */,
+			);
+			path = ProfileAndSettings;
+			sourceTree = "<group>";
+		};
+		G0050008 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				F0050018 /* DesignSystem.swift */,
+				F0050019 /* iPadSplitDashboardView.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		G0060001 /* WidgetsAndIntents */ = {
+			isa = PBXGroup;
+			children = (
+				F0060001 /* BorrowActivityAttributes.swift */,
+				F0060002 /* BorrowItHomeWidget.swift */,
+				F0060003 /* ReturnItemAppIntent.swift */,
+			);
+			path = WidgetsAndIntents;
+			sourceTree = "<group>";
+		};
+		G0070001 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F0070001 /* Assets.xcassets */,
+				F0070002 /* BorrowIt.xcdatamodeld */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		G0080001 /* BorrowItTests */ = {
+			isa = PBXGroup;
+			children = (
+				F0080001 /* BorrowItTests.swift */,
+			);
+			path = BorrowItTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		T0010001 /* BorrowIt */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0010001 /* Build configuration list for PBXNativeTarget "BorrowIt" */;
+			buildPhases = (
+				S0010001 /* Sources */,
+				FW010001 /* Frameworks */,
+				R0010001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BorrowIt;
+			productName = BorrowIt;
+			productReference = F0000001 /* BorrowIt.app */;
+			productType = "com.apple.product-type.application";
+		};
+		T0020001 /* BorrowItTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0020001 /* Build configuration list for PBXNativeTarget "BorrowItTests" */;
+			buildPhases = (
+				S0020001 /* Sources */,
+				FW020001 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D0010001 /* PBXTargetDependency */,
+			);
+			name = BorrowItTests;
+			productName = BorrowItTests;
+			productReference = F0000002 /* BorrowItTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		00010001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					T0010001 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					T0020001 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = T0010001;
+					};
+				};
+			};
+			buildConfigurationList = C0000001 /* Build configuration list for PBXProject "BorrowIt" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = G0000001;
+			productRefGroup = G0000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				T0010001 /* BorrowIt */,
+				T0020001 /* BorrowItTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		R0010001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0070001 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		S0010001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0010001 /* BorrowItApp.swift in Sources */,
+				B0010002 /* ContentView.swift in Sources */,
+				B0010003 /* AppConfig.swift in Sources */,
+				B0020001 /* BorrowItem.swift in Sources */,
+				B0020002 /* BorrowTransaction.swift in Sources */,
+				B0020003 /* ChatMessage.swift in Sources */,
+				B0020004 /* UserProfile.swift in Sources */,
+				B0020005 /* QRPayload.swift in Sources */,
+				B0030001 /* ServiceProtocols.swift in Sources */,
+				B0030002 /* PersistenceController.swift in Sources */,
+				B0030003 /* SupabaseService.swift in Sources */,
+				B0030004 /* BiometricAuthService.swift in Sources */,
+				B0030005 /* LocationGeofenceService.swift in Sources */,
+				B0030006 /* NotificationService.swift in Sources */,
+				B0030007 /* ImageClassifierService.swift in Sources */,
+				B0030008 /* QRCodeService.swift in Sources */,
+				B0030009 /* LiveActivityManager.swift in Sources */,
+				B0030010 /* CalendarEventService.swift in Sources */,
+				B0030011 /* AppSettingsManager.swift in Sources */,
+				B0040001 /* AuthViewModel.swift in Sources */,
+				B0040002 /* ExploreViewModel.swift in Sources */,
+				B0040003 /* BorrowLifecycleViewModel.swift in Sources */,
+				B0040004 /* AddItemViewModel.swift in Sources */,
+				B0040005 /* ChatViewModel.swift in Sources */,
+				B0050001 /* WelcomeOnboardingView.swift in Sources */,
+				B0050002 /* BiometricGateView.swift in Sources */,
+				B0050003 /* ExploreDashboardView.swift in Sources */,
+				B0050004 /* FilterSheetView.swift in Sources */,
+				B0050005 /* ItemDetailView.swift in Sources */,
+				B0050006 /* ScheduleBorrowView.swift in Sources */,
+				B0050007 /* RequestSentView.swift in Sources */,
+				B0050008 /* AddItemView.swift in Sources */,
+				B0050009 /* EmptyExploreStateView.swift in Sources */,
+				B0050010 /* MessagesInboxView.swift in Sources */,
+				B0050011 /* ChatThreadView.swift in Sources */,
+				B0050012 /* HandoffQRView.swift in Sources */,
+				B0050013 /* PickupVerifiedView.swift in Sources */,
+				B0050014 /* BorrowsTabView.swift in Sources */,
+				B0050015 /* ReturnReviewView.swift in Sources */,
+				B0050016 /* ProfileStatsView.swift in Sources */,
+				B0050017 /* SettingsView.swift in Sources */,
+				B0050018 /* DesignSystem.swift in Sources */,
+				B0050019 /* iPadSplitDashboardView.swift in Sources */,
+				B0060001 /* BorrowActivityAttributes.swift in Sources */,
+				B0060002 /* BorrowItHomeWidget.swift in Sources */,
+				B0060003 /* ReturnItemAppIntent.swift in Sources */,
+				B0070002 /* BorrowIt.xcdatamodeld in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		S0020001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0080001 /* BorrowItTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D0010001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = T0010001 /* BorrowIt */;
+			targetProxy = P0010001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		CF000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		CF000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		CF001001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BorrowIt/BorrowIt.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BorrowIt/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.borrowit.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CF001002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BorrowIt/BorrowIt.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BorrowIt/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.borrowit.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CF002001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.borrowit.app.BorrowItTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BorrowIt.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BorrowIt";
+			};
+			name = Debug;
+		};
+		CF002002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.borrowit.app.BorrowItTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BorrowIt.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BorrowIt";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C0000001 /* Build configuration list for PBXProject "BorrowIt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CF000001 /* Debug */,
+				CF000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0010001 /* Build configuration list for PBXNativeTarget "BorrowIt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CF001001 /* Debug */,
+				CF001002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0020001 /* Build configuration list for PBXNativeTarget "BorrowItTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CF002001 /* Debug */,
+				CF002002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = 00010001 /* Project object */;
+}
