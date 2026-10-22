@@ -240,7 +240,7 @@ public extension BorrowItem {
         coordinate: Coordinate(latitude: 37.7758, longitude: -122.4188),
         lender: .maya,
         systemImageName: "bolt.fill",
-        imageURL: "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=800&q=80",
+        imageURL: "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=800&q=80",
         coreMLConfidence: 0.96,
         coreMLTag: "Power Tools"
     )

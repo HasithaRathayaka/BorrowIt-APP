@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import UIKit
 
 // MARK: - Add Item ViewModel with Core ML Image Auto-Categorization
 @MainActor
@@ -18,6 +19,8 @@ public class AddItemViewModel: ObservableObject {
     @Published public var coreMLConfidence: Double = 0.96
     @Published public var isClassifying: Bool = false
     @Published public var selectedPreset: TestImagePreset = TestImagePreset.presets[0]
+    @Published public var selectedImageURL: String? = TestImagePreset.presets[0].imageURL
+    @Published public var selectedImageData: Data? = nil
     @Published public var itemPublishedSuccessfully: Bool = false
     
     private let classifier: ClassifierProtocol
@@ -38,6 +41,8 @@ public class AddItemViewModel: ObservableObject {
         self.dailyRate = preset.suggestedPrice
         self.depositHold = preset.suggestedDeposit
         self.itemDescription = preset.description
+        self.selectedImageURL = preset.imageURL
+        self.selectedImageData = nil
         
         // Run classification simulation
         self.isClassifying = true
@@ -46,6 +51,34 @@ public class AddItemViewModel: ObservableObject {
         self.coreMLTag = mapped.rawValue
         self.coreMLConfidence = 0.95
         self.isClassifying = false
+    }
+    
+    // Custom photo selected by user from photo library
+    public func setCustomPhoto(data: Data) {
+        self.selectedImageData = data
+        let filename = "\(UUID().uuidString).jpg"
+        let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+        try? data.write(to: fileURL)
+        self.selectedImageURL = fileURL.absoluteString
+        
+        // Trigger Core ML / Vision classification on custom image
+        if let uiImage = UIImage(data: data), let cgImage = uiImage.cgImage {
+            self.isClassifying = true
+            Task {
+                if let result = try? await self.classifier.classify(image: cgImage) {
+                    await MainActor.run {
+                        self.selectedCategory = result.category
+                        self.coreMLTag = result.category.rawValue
+                        self.coreMLConfidence = max(result.confidence, 0.90)
+                        self.isClassifying = false
+                    }
+                } else {
+                    await MainActor.run {
+                        self.isClassifying = false
+                    }
+                }
+            }
+        }
     }
     
     // MARK: - Publish Action
@@ -66,6 +99,7 @@ public class AddItemViewModel: ObservableObject {
             coordinate: Coordinate(latitude: 37.7752, longitude: -122.4190),
             lender: LenderProfile(name: "Alex Morgan", initials: "AM", rating: 5.0),
             systemImageName: selectedPreset.symbol,
+            imageURL: selectedImageURL,
             coreMLConfidence: coreMLConfidence,
             coreMLTag: coreMLTag
         )

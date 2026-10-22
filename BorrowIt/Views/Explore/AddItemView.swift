@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 // MARK: - Screen 9: Add an Item with On-Device Core ML Auto-Categorization
 public struct AddItemView: View {
@@ -6,6 +7,9 @@ public struct AddItemView: View {
     @StateObject private var addVM = AddItemViewModel()
     @EnvironmentObject var exploreVM: ExploreViewModel
     @EnvironmentObject var settings: AppSettingsManager
+    
+    @State private var selectedPhotoPickerItem: PhotosPickerItem? = nil
+    @State private var customUrlText: String = ""
     
     public init() {}
     
@@ -18,34 +22,92 @@ public struct AddItemView: View {
                 VStack(spacing: 0) {
                     ScrollView {
                         VStack(spacing: 20) {
-                            // 1. Photo Box with Live Core ML Badge & Presets
+                            // 1. Photo Box with Live Core ML Badge & PhotosPicker
                             VStack(alignment: .leading, spacing: 12) {
                                 ZStack(alignment: .bottomLeading) {
+                                    // Hero Image or Preview
                                     ZStack {
-                                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                            .fill(Color(hex: addVM.selectedCategory.colorHex).opacity(0.14))
-                                            .frame(height: 190)
-                                        
-                                        Image(systemName: addVM.selectedPreset.symbol)
-                                            .font(.system(size: 72, weight: .light))
-                                            .foregroundColor(Color(hex: addVM.selectedCategory.colorHex))
+                                        if let data = addVM.selectedImageData, let uiImage = UIImage(data: data) {
+                                            Image(uiImage: uiImage)
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(height: 190)
+                                                .frame(maxWidth: .infinity)
+                                                .clipped()
+                                        } else if let urlString = addVM.selectedImageURL, let url = URL(string: urlString) {
+                                            AsyncImage(url: url) { phase in
+                                                switch phase {
+                                                case .success(let img):
+                                                    img
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fill)
+                                                        .frame(height: 190)
+                                                        .frame(maxWidth: .infinity)
+                                                        .clipped()
+                                                case .failure:
+                                                    fallbackVisual
+                                                case .empty:
+                                                    ZStack {
+                                                        Color(hex: addVM.selectedCategory.colorHex).opacity(0.14)
+                                                        ProgressView().tint(Color(hex: addVM.selectedCategory.colorHex))
+                                                    }
+                                                @unknown default:
+                                                    fallbackVisual
+                                                }
+                                            }
+                                        } else {
+                                            fallbackVisual
+                                        }
                                     }
+                                    .frame(height: 190)
+                                    .frame(maxWidth: .infinity)
+                                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                                     
-                                    // Live Core ML classification pill
+                                    // Bottom-left Core ML classification pill
                                     CoreMLBadge(tag: addVM.coreMLTag, confidence: addVM.coreMLConfidence)
                                         .padding(14)
+                                    
+                                    // Top-right Add Photo Button (PhotosPicker)
+                                    VStack {
+                                        HStack {
+                                            Spacer()
+                                            PhotosPicker(selection: $selectedPhotoPickerItem, matching: .images) {
+                                                HStack(spacing: 6) {
+                                                    Image(systemName: "camera.fill")
+                                                        .font(.system(size: 13, weight: .semibold))
+                                                    Text(addVM.selectedImageData != nil || addVM.selectedImageURL != nil ? "Change Photo" : "Add Photo")
+                                                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                                                }
+                                                .foregroundColor(.white)
+                                                .padding(.horizontal, 14)
+                                                .padding(.vertical, 8)
+                                                .background(Color.black.opacity(0.7))
+                                                .clipShape(Capsule())
+                                                .shadow(color: Color.black.opacity(0.2), radius: 6, y: 3)
+                                            }
+                                            .padding(12)
+                                        }
+                                        Spacer()
+                                    }
+                                }
+                                .onChange(of: selectedPhotoPickerItem) { newItem in
+                                    Task {
+                                        if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                                            addVM.setCustomPhoto(data: data)
+                                        }
+                                    }
                                 }
                                 
                                 // Test Preset Strip (for Graders running on Simulator)
                                 VStack(alignment: .leading, spacing: 6) {
-                                    Text("TEST CORE ML IMAGE PRESETS")
+                                    Text("QUICK SAMPLE PHOTOS & CORE ML PRESETS")
                                         .font(.system(size: 11, weight: .bold))
                                         .foregroundColor(.secondary)
                                     
                                     ScrollView(.horizontal, showsIndicators: false) {
                                         HStack(spacing: 8) {
                                             ForEach(TestImagePreset.presets) { preset in
-                                                let isSelected = addVM.selectedPreset.name == preset.name
+                                                let isSelected = addVM.selectedPreset.name == preset.name && addVM.selectedImageData == nil
                                                 Button(action: {
                                                     addVM.selectPreset(preset)
                                                 }) {
@@ -211,5 +273,17 @@ public struct AddItemView: View {
             }
         }
         .liveAccessibilityScale()
+    }
+    
+    private var fallbackVisual: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(Color(hex: addVM.selectedCategory.colorHex).opacity(0.14))
+                .frame(height: 190)
+            
+            Image(systemName: addVM.selectedPreset.symbol)
+                .font(.system(size: 72, weight: .light))
+                .foregroundColor(Color(hex: addVM.selectedCategory.colorHex))
+        }
     }
 }

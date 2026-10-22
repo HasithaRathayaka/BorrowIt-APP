@@ -14,6 +14,27 @@ public struct TestImagePreset: Identifiable, Hashable {
     public var suggestedPrice: Double
     public var suggestedDeposit: Double
     public var description: String
+    public var imageURL: String?
+    
+    public init(
+        name: String,
+        category: ItemCategory,
+        symbol: String,
+        suggestedTitle: String,
+        suggestedPrice: Double,
+        suggestedDeposit: Double,
+        description: String,
+        imageURL: String? = nil
+    ) {
+        self.name = name
+        self.category = category
+        self.symbol = symbol
+        self.suggestedTitle = suggestedTitle
+        self.suggestedPrice = suggestedPrice
+        self.suggestedDeposit = suggestedDeposit
+        self.description = description
+        self.imageURL = imageURL
+    }
     
     public static let presets: [TestImagePreset] = [
         TestImagePreset(
@@ -23,7 +44,8 @@ public struct TestImagePreset: Identifiable, Hashable {
             suggestedTitle: "DeWalt 20V Max Cordless Drill",
             suggestedPrice: 1500.0,
             suggestedDeposit: 5000.0,
-            description: "Cordless brushless hammer drill with dual battery packs and charger."
+            description: "Cordless brushless hammer drill with dual battery packs and charger.",
+            imageURL: "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=800&q=80"
         ),
         TestImagePreset(
             name: "Backpacking Tent",
@@ -32,7 +54,8 @@ public struct TestImagePreset: Identifiable, Hashable {
             suggestedTitle: "2-Person Lightweight Trail Tent",
             suggestedPrice: 2500.0,
             suggestedDeposit: 8000.0,
-            description: "3-season waterproof camping tent with rainfly and aluminum stakes."
+            description: "3-season waterproof camping tent with rainfly and aluminum stakes.",
+            imageURL: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&q=80"
         ),
         TestImagePreset(
             name: "Artisan Stand Mixer",
@@ -41,7 +64,8 @@ public struct TestImagePreset: Identifiable, Hashable {
             suggestedTitle: "KitchenAid 5-Qt Artisan Stand Mixer",
             suggestedPrice: 2000.0,
             suggestedDeposit: 12000.0,
-            description: "Tilt-head stand mixer with stainless bowl and dough hook."
+            description: "Tilt-head stand mixer with stainless bowl and dough hook.",
+            imageURL: "https://images.unsplash.com/photo-1594385208974-2e75f8d7bb48?auto=format&fit=crop&w=800&q=80"
         ),
         TestImagePreset(
             name: "Circular Saw",
@@ -50,7 +74,8 @@ public struct TestImagePreset: Identifiable, Hashable {
             suggestedTitle: "Bosch 7-1/4\" Circular Saw",
             suggestedPrice: 2800.0,
             suggestedDeposit: 9000.0,
-            description: "Precision 15-amp circular saw with laser guide."
+            description: "Precision 15-amp circular saw with laser guide.",
+            imageURL: "https://images.unsplash.com/photo-1581147036324-c17ac41dfa6c?auto=format&fit=crop&w=800&q=80"
         ),
         TestImagePreset(
             name: "Telescoping Pruner",
@@ -59,7 +84,8 @@ public struct TestImagePreset: Identifiable, Hashable {
             suggestedTitle: "Fiskars Telescoping Tree Pruner",
             suggestedPrice: 1200.0,
             suggestedDeposit: 4000.0,
-            description: "High-reach extendable tree pruner with saw blade."
+            description: "High-reach extendable tree pruner with saw blade.",
+            imageURL: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=800&q=80"
         ),
         TestImagePreset(
             name: "Kayak & Paddle",
@@ -68,7 +94,8 @@ public struct TestImagePreset: Identifiable, Hashable {
             suggestedTitle: "Inflatable Kayak & Paddle Set",
             suggestedPrice: 3500.0,
             suggestedDeposit: 15000.0,
-            description: "Tandem inflatable kayak with high-output pump and dual paddles."
+            description: "Tandem inflatable kayak with high-output pump and dual paddles.",
+            imageURL: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80"
         )
     ]
 }

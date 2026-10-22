@@ -174,7 +174,10 @@ public struct RatingStarRow: View {
             Text(String(format: "%.1f", rating))
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundColor(.primary)
+                .lineLimit(1)
+                .fixedSize()
         }
+        .fixedSize()
         .accessibilityLabel("\(String(format: "%.1f", rating)) stars out of \(maxRating)")
     }
 }

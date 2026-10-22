@@ -229,7 +229,7 @@ public struct HandoffQRView: View {
                 }) {
                     HStack(spacing: 8) {
                         Image(systemName: "camera.viewfinder")
-                        Text("Verify Pickup QR (Vision On-Device)")
+                        Text(lifecycleVM.activeBorrow?.state == .borrowed ? "Verify Return QR (Vision On-Device)" : "Verify Pickup QR (Vision On-Device)")
                     }
                     .font(.system(size: 16, weight: .bold, design: .rounded))
                 }

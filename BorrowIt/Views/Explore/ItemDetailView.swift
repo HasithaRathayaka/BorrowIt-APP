@@ -31,15 +31,18 @@ public struct ItemDetailView: View {
                         }
                         
                         // 2. Title, Rate, Distance, Rating
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(alignment: .top, spacing: 8) {
                                 Text(item.title)
-                                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                                    .font(.system(size: 22, weight: .bold, design: .rounded))
                                     .foregroundColor(.primary)
+                                    .fixedSize(horizontal: false, vertical: true)
                                 Spacer()
                                 Text(item.formattedRate)
-                                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                                    .font(.system(size: 22, weight: .bold, design: .rounded))
                                     .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                    .lineLimit(1)
+                                    .layoutPriority(1)
                             }
                             
                             HStack(spacing: 8) {
@@ -47,29 +50,32 @@ public struct ItemDetailView: View {
                                     Image(systemName: "figure.walk")
                                         .font(.system(size: 13))
                                     Text(item.formattedDistance)
-                                        .font(.system(size: 14, weight: .medium))
+                                        .font(.system(size: 13, weight: .medium))
                                 }
                                 .foregroundColor(.secondary)
+                                .lineLimit(1)
+                                .fixedSize()
                                 
                                 Text("•")
                                     .foregroundColor(.secondary)
                                 
                                 RatingStarRow(rating: item.rating)
                                 
-                                Spacer()
+                                Spacer(minLength: 4)
                                 
                                 HStack(spacing: 4) {
                                     Circle()
                                         .fill(Color.brandEmerald)
                                         .frame(width: 6, height: 6)
                                     Text("Available today")
-                                        .font(.system(size: 12, weight: .semibold))
+                                        .font(.system(size: 11, weight: .semibold))
                                         .foregroundColor(Color.statusEmeraldText)
                                 }
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                                 .background(Color.statusEmeraldBg)
                                 .clipShape(Capsule())
+                                .fixedSize()
                             }
                         }
                         

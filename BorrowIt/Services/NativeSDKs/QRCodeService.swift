@@ -35,8 +35,11 @@ public class QRCodeService: QRServiceProtocol {
     // MARK: - Vision VNDetectBarcodesRequest Decoding (On-Device)
     public func decodeQRCode(from image: CGImage) async throws -> QRPayload {
         return try await withCheckedThrowingContinuation { continuation in
+            var hasResumed = false
             let request = VNDetectBarcodesRequest { request, error in
+                guard !hasResumed else { return }
                 if let error = error {
+                    hasResumed = true
                     continuation.resume(throwing: error)
                     return
                 }
@@ -44,14 +47,17 @@ public class QRCodeService: QRServiceProtocol {
                 guard let observations = request.results as? [VNBarcodeObservation],
                       let qrCode = observations.first(where: { $0.symbology == .qr }),
                       let payloadString = qrCode.payloadStringValue else {
+                    hasResumed = true
                     continuation.resume(throwing: BorrowStateError.invalidTokenSignature)
                     return
                 }
                 
                 do {
                     let decodedPayload = try QRPayload.from(jsonString: payloadString)
+                    hasResumed = true
                     continuation.resume(returning: decodedPayload)
                 } catch {
+                    hasResumed = true
                     continuation.resume(throwing: error)
                 }
             }
@@ -63,7 +69,10 @@ public class QRCodeService: QRServiceProtocol {
             do {
                 try handler.perform([request])
             } catch {
-                continuation.resume(throwing: error)
+                if !hasResumed {
+                    hasResumed = true
+                    continuation.resume(throwing: error)
+                }
             }
         }
     }
