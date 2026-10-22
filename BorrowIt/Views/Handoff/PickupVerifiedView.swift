@@ -100,7 +100,7 @@ public struct PickupVerifiedView: View {
                             Text("REFUNDABLE HOLD")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(.secondary)
-                            Text("$\(Int(borrow.depositHoldAmount)) active")
+                            Text("Rs. \(Int(borrow.depositHoldAmount)) active")
                                 .font(.system(size: 14, weight: .bold, design: .rounded))
                                 .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
                         }

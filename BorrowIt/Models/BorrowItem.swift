@@ -155,6 +155,7 @@ public struct BorrowItem: Identifiable, Codable, Hashable {
     public var coordinate: Coordinate
     public var lender: LenderProfile
     public var systemImageName: String
+    public var imageURL: String?
     public var coreMLConfidence: Double
     public var coreMLTag: String
     public var terms: LendingTerms
@@ -177,6 +178,7 @@ public struct BorrowItem: Identifiable, Codable, Hashable {
         coordinate: Coordinate,
         lender: LenderProfile,
         systemImageName: String,
+        imageURL: String? = nil,
         coreMLConfidence: Double = 0.94,
         coreMLTag: String? = nil,
         terms: LendingTerms? = nil,
@@ -198,6 +200,7 @@ public struct BorrowItem: Identifiable, Codable, Hashable {
         self.coordinate = coordinate
         self.lender = lender
         self.systemImageName = systemImageName
+        self.imageURL = imageURL
         self.coreMLConfidence = coreMLConfidence
         self.coreMLTag = coreMLTag ?? category.rawValue
         self.terms = terms ?? LendingTerms(depositHold: depositHold, pricePerDay: dailyRate)
@@ -213,7 +216,7 @@ public struct BorrowItem: Identifiable, Codable, Hashable {
     }
     
     public var formattedRate: String {
-        "$\(Int(dailyRate))/day"
+        "Rs. \(Int(dailyRate))/day"
     }
 }
 
@@ -225,8 +228,8 @@ public extension BorrowItem {
         title: "DeWalt 20V Cordless Drill",
         description: "Compact brushless hammer drill with two 20V MAX 2.0Ah batteries, rapid charger, and 30-piece drill/driver bit set. Perfect for hanging shelves, assemble furniture, and light masonry. Clean and fully charged.",
         category: .powerTools,
-        dailyRate: 8.0,
-        depositHold: 40.0,
+        dailyRate: 1500.0,
+        depositHold: 5000.0,
         distanceMeters: 120.0,
         rating: 4.9,
         isAvailable: true,
@@ -237,6 +240,7 @@ public extension BorrowItem {
         coordinate: Coordinate(latitude: 37.7758, longitude: -122.4188),
         lender: .maya,
         systemImageName: "bolt.fill",
+        imageURL: "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=800&q=80",
         coreMLConfidence: 0.96,
         coreMLTag: "Power Tools"
     )
@@ -246,8 +250,8 @@ public extension BorrowItem {
         title: "2-Person Lightweight Trail Tent",
         description: "Waterproof 3-season backpacking tent with aluminum poles, vestibule, ground tarp, and carrying sack. Packs down under 4 lbs. Great for weekend trail trips or coastal camping.",
         category: .camping,
-        dailyRate: 12.0,
-        depositHold: 50.0,
+        dailyRate: 2500.0,
+        depositHold: 8000.0,
         distanceMeters: 310.0,
         rating: 4.8,
         isAvailable: true,
@@ -258,6 +262,7 @@ public extension BorrowItem {
         coordinate: Coordinate(latitude: 37.7765, longitude: -122.4215),
         lender: .jon,
         systemImageName: "tent.fill",
+        imageURL: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&q=80",
         coreMLConfidence: 0.92,
         coreMLTag: "Camping"
     )
@@ -267,8 +272,8 @@ public extension BorrowItem {
         title: "Folding Camp Chairs (Pair)",
         description: "Two durable, high-back folding camping chairs with cup holders, insulated armrests, and shoulder carry bags. Ideal for backyard movie nights, park picnics, or beach sunsets.",
         category: .camping,
-        dailyRate: 5.0,
-        depositHold: 20.0,
+        dailyRate: 1000.0,
+        depositHold: 3000.0,
         distanceMeters: 320.0,
         rating: 4.7,
         isAvailable: true,
@@ -279,6 +284,7 @@ public extension BorrowItem {
         coordinate: Coordinate(latitude: 37.7766, longitude: -122.4218),
         lender: .jon,
         systemImageName: "chair.lounge.fill",
+        imageURL: "https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=800&q=80",
         coreMLConfidence: 0.89,
         coreMLTag: "Camping"
     )
@@ -288,8 +294,8 @@ public extension BorrowItem {
         title: "Bosch 7-1/4\" Circular Saw",
         description: "Heavy-duty 15-amp circular saw with laser guide line, carbide-tipped 24T wood blade, and dust chute. Ready for 2x4 framing, plywood cuts, and deck repair.",
         category: .powerTools,
-        dailyRate: 14.0,
-        depositHold: 60.0,
+        dailyRate: 2800.0,
+        depositHold: 9000.0,
         distanceMeters: 440.0,
         rating: 5.0,
         isAvailable: true,
@@ -300,6 +306,7 @@ public extension BorrowItem {
         coordinate: Coordinate(latitude: 37.7732, longitude: -122.4162),
         lender: .ari,
         systemImageName: "gearshape.2.fill",
+        imageURL: "https://images.unsplash.com/photo-1581147036324-c17ac41dfa6c?auto=format&fit=crop&w=800&q=80",
         coreMLConfidence: 0.95,
         coreMLTag: "Power Tools"
     )
@@ -309,8 +316,8 @@ public extension BorrowItem {
         title: "KitchenAid 5-Qt Artisan Stand Mixer",
         description: "Classic tilt-head stand mixer in Empire Red. Includes stainless steel bowl, flat beater, dough hook, wire whisk, and pouring shield. Perfect for weekend bread baking or holiday cookies.",
         category: .kitchen,
-        dailyRate: 10.0,
-        depositHold: 75.0,
+        dailyRate: 2000.0,
+        depositHold: 12000.0,
         distanceMeters: 150.0,
         rating: 4.9,
         isAvailable: true,
@@ -321,6 +328,7 @@ public extension BorrowItem {
         coordinate: Coordinate(latitude: 37.7755, longitude: -122.4182),
         lender: .maya,
         systemImageName: "fork.knife",
+        imageURL: "https://images.unsplash.com/photo-1594385208974-2e75f8d7bb48?auto=format&fit=crop&w=800&q=80",
         coreMLConfidence: 0.97,
         coreMLTag: "Kitchen"
     )
@@ -330,8 +338,8 @@ public extension BorrowItem {
         title: "Inflatable Kayak & Paddle Set",
         description: "Heavy-duty 1-person tandem-capable inflatable kayak with dual paddles, high-output hand pump, and adult life vest. Fits neatly in trunk.",
         category: .sports,
-        dailyRate: 18.0,
-        depositHold: 80.0,
+        dailyRate: 3500.0,
+        depositHold: 15000.0,
         distanceMeters: 480.0,
         rating: 4.9,
         isAvailable: true,
@@ -342,6 +350,7 @@ public extension BorrowItem {
         coordinate: Coordinate(latitude: 37.7782, longitude: -122.4222),
         lender: .sam,
         systemImageName: "figure.open.water.swim",
+        imageURL: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80",
         coreMLConfidence: 0.91,
         coreMLTag: "Sports"
     )
@@ -351,8 +360,8 @@ public extension BorrowItem {
         title: "Fiskars Telescoping Tree Pruner & Shears",
         description: "Extendable tree pruner up to 14 ft with sharp hardened bypass blade and 12-inch wood saw. Cut high branches easily without a ladder.",
         category: .garden,
-        dailyRate: 6.0,
-        depositHold: 20.0,
+        dailyRate: 1200.0,
+        depositHold: 4000.0,
         distanceMeters: 210.0,
         rating: 4.7,
         isAvailable: true,
@@ -363,6 +372,7 @@ public extension BorrowItem {
         coordinate: Coordinate(latitude: 37.7741, longitude: -122.4208),
         lender: .ari,
         systemImageName: "leaf.fill",
+        imageURL: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=800&q=80",
         coreMLConfidence: 0.93,
         coreMLTag: "Garden"
     )
@@ -372,8 +382,8 @@ public extension BorrowItem {
         title: "Stanley 65-Piece Home Tool Set",
         description: "Complete mechanics and homeowner ratchet set: standard & metric sockets, hex keys, precision screwdrivers, tape measure, and hammer in a blow-mold case.",
         category: .handTools,
-        dailyRate: 5.0,
-        depositHold: 25.0,
+        dailyRate: 1000.0,
+        depositHold: 3500.0,
         distanceMeters: 330.0,
         rating: 4.8,
         isAvailable: true,
@@ -384,6 +394,7 @@ public extension BorrowItem {
         coordinate: Coordinate(latitude: 37.7768, longitude: -122.4219),
         lender: .jon,
         systemImageName: "wrench.and.screwdriver.fill",
+        imageURL: "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&w=800&q=80",
         coreMLConfidence: 0.94,
         coreMLTag: "Hand Tools"
     )

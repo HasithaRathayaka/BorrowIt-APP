@@ -49,7 +49,7 @@ public struct UserProfile: Identifiable, Codable, Hashable {
         totalBorrows: Int = 18,
         totalLends: Int = 11,
         wasteAvoidedKg: Double = 42.0,
-        totalMoneySaved: Double = 312.0,
+        totalMoneySaved: Double = 45000.0,
         monthlySavings: [MonthlySaving] = Self.defaultMonthlySavings
     ) {
         self.id = id
@@ -71,12 +71,12 @@ public struct UserProfile: Identifiable, Codable, Hashable {
     }
     
     public static let defaultMonthlySavings: [MonthlySaving] = [
-        MonthlySaving(month: "May", amountSaved: 35.0, isCurrentMonth: false),
-        MonthlySaving(month: "Jun", amountSaved: 48.0, isCurrentMonth: false),
-        MonthlySaving(month: "Jul", amountSaved: 62.0, isCurrentMonth: false),
-        MonthlySaving(month: "Aug", amountSaved: 55.0, isCurrentMonth: false),
-        MonthlySaving(month: "Sep", amountSaved: 72.0, isCurrentMonth: false),
-        MonthlySaving(month: "Oct", amountSaved: 40.0, isCurrentMonth: true)
+        MonthlySaving(month: "May", amountSaved: 5000.0, isCurrentMonth: false),
+        MonthlySaving(month: "Jun", amountSaved: 7500.0, isCurrentMonth: false),
+        MonthlySaving(month: "Jul", amountSaved: 9500.0, isCurrentMonth: false),
+        MonthlySaving(month: "Aug", amountSaved: 8000.0, isCurrentMonth: false),
+        MonthlySaving(month: "Sep", amountSaved: 11000.0, isCurrentMonth: false),
+        MonthlySaving(month: "Oct", amountSaved: 6000.0, isCurrentMonth: true)
     ]
     
     public static let currentUser = UserProfile()

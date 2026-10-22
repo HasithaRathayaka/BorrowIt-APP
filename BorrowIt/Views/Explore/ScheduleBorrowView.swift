@@ -128,11 +128,11 @@ public struct ScheduleBorrowView: View {
                             // 4. Cost Breakdown Line
                             VStack(spacing: 10) {
                                 HStack {
-                                    Text("\(numberOfDays) days @ $\(Int(item.dailyRate))/day")
+                                    Text("\(numberOfDays) days @ Rs. \(Int(item.dailyRate))/day")
                                         .font(.system(size: 14))
                                         .foregroundColor(.secondary)
                                     Spacer()
-                                    Text("$\(Int(rentalTotal))")
+                                    Text("Rs. \(Int(rentalTotal))")
                                         .font(.system(size: 14, weight: .semibold))
                                         .foregroundColor(.primary)
                                 }
@@ -142,7 +142,7 @@ public struct ScheduleBorrowView: View {
                                         .font(.system(size: 14))
                                         .foregroundColor(.secondary)
                                     Spacer()
-                                    Text("$\(Int(item.depositHold))")
+                                    Text("Rs. \(Int(item.depositHold))")
                                         .font(.system(size: 14, weight: .semibold))
                                         .foregroundColor(.primary)
                                 }
@@ -154,7 +154,7 @@ public struct ScheduleBorrowView: View {
                                         .font(.system(size: 16, weight: .bold, design: .rounded))
                                         .foregroundColor(.primary)
                                     Spacer()
-                                    Text("$\(Int(rentalTotal)) + $\(Int(item.depositHold)) hold")
+                                    Text("Rs. \(Int(rentalTotal)) + Rs. \(Int(item.depositHold)) hold")
                                         .font(.system(size: 15, weight: .bold, design: .rounded))
                                         .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
                                 }

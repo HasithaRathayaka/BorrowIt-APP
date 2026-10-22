@@ -57,7 +57,7 @@ public struct SettingsView: View {
                                         Text(authVM.currentUser.email)
                                             .font(.system(size: 13))
                                             .foregroundColor(.secondary)
-                                        Text("Cedar Grove · Trust Score 94/100")
+                                        Text("\(authVM.currentUser.neighborhood) · Trust Score \(authVM.currentUser.trustScore)/100")
                                             .font(.system(size: 11, weight: .semibold))
                                             .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
                                     }
@@ -251,6 +251,28 @@ public struct SettingsView: View {
                             }
                             .padding(18)
                             .squircleCard()
+                            .padding(.horizontal, 20)
+                            
+                            // 4. Account Actions
+                            VStack(spacing: 12) {
+                                Button(action: {
+                                    authVM.signOut()
+                                }) {
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                                            .font(.system(size: 16, weight: .semibold))
+                                        Text("Log Out")
+                                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                                        Spacer()
+                                    }
+                                    .foregroundColor(.red)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .padding(.horizontal, 16)
+                                    .background(Color.red.opacity(0.1))
+                                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                }
+                            }
                             .padding(.horizontal, 20)
                         }
                         .padding(.bottom, 30)

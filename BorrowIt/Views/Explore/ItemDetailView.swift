@@ -23,15 +23,7 @@ public struct ItemDetailView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         // 1. Hero Image Box
                         ZStack(alignment: .bottomLeading) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                    .fill(Color(hex: item.category.colorHex).opacity(0.12))
-                                    .frame(height: 240)
-                                
-                                Image(systemName: item.systemImageName)
-                                    .font(.system(size: 88, weight: .light))
-                                    .foregroundColor(Color(hex: item.category.colorHex))
-                            }
+                            ItemPhotoView(item: item, height: 250, cornerRadius: 24)
                             
                             // Bottom-left Core ML Badge
                             CoreMLBadge(tag: item.coreMLTag, confidence: item.coreMLConfidence)
@@ -138,7 +130,7 @@ public struct ItemDetailView: View {
                                 Image(systemName: "shield.lefthalf.filled.badge.checkmark")
                                     .font(.system(size: 20))
                                     .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                                Text("$\(Int(item.depositHold)) hold")
+                                Text("Rs. \(Int(item.depositHold)) hold")
                                     .font(.system(size: 15, weight: .bold, design: .rounded))
                                     .foregroundColor(.primary)
                                 Text("Released on return")
@@ -187,7 +179,7 @@ public struct ItemDetailView: View {
                         HStack {
                             Text("Request to Borrow")
                             Spacer()
-                            Text("$\(Int(item.dailyRate))/day")
+                            Text("Rs. \(Int(item.dailyRate))/day")
                                 .opacity(0.85)
                         }
                     }
@@ -208,7 +200,7 @@ public struct ItemDetailView: View {
                     ShareLink(
                         item: "Borrow '\(item.title)' from \(item.lender.name) on BorrowIt!",
                         subject: Text("BorrowIt: \(item.title)"),
-                        message: Text("Check out this \(item.title) nearby in Cedar Grove for $\(Int(item.dailyRate))/day on BorrowIt.")
+                        message: Text("Check out this \(item.title) nearby in Cedar Grove for Rs. \(Int(item.dailyRate))/day on BorrowIt.")
                     ) {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 16, weight: .medium))

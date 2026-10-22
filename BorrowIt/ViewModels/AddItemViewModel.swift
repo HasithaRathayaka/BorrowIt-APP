@@ -7,8 +7,8 @@ public class AddItemViewModel: ObservableObject {
     @Published public var title: String = "DeWalt 20V Cordless Drill"
     @Published public var itemDescription: String = "Brushless hammer drill with 2 batteries, charger, and 30-piece bit set."
     @Published public var selectedCategory: ItemCategory = .powerTools
-    @Published public var dailyRate: Double = 8.0
-    @Published public var depositHold: Double = 40.0
+    @Published public var dailyRate: Double = 1500.0
+    @Published public var depositHold: Double = 5000.0
     @Published public var isAvailableNow: Bool = true
     @Published public var pickupAddressSharedAfterApproval: Bool = true
     @Published public var exactAddress: String = "148 Cedar Grove Lane"

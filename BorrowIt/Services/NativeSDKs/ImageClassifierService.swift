@@ -21,8 +21,8 @@ public struct TestImagePreset: Identifiable, Hashable {
             category: .powerTools,
             symbol: "bolt.fill",
             suggestedTitle: "DeWalt 20V Max Cordless Drill",
-            suggestedPrice: 8.0,
-            suggestedDeposit: 40.0,
+            suggestedPrice: 1500.0,
+            suggestedDeposit: 5000.0,
             description: "Cordless brushless hammer drill with dual battery packs and charger."
         ),
         TestImagePreset(
@@ -30,8 +30,8 @@ public struct TestImagePreset: Identifiable, Hashable {
             category: .camping,
             symbol: "tent.fill",
             suggestedTitle: "2-Person Lightweight Trail Tent",
-            suggestedPrice: 12.0,
-            suggestedDeposit: 50.0,
+            suggestedPrice: 2500.0,
+            suggestedDeposit: 8000.0,
             description: "3-season waterproof camping tent with rainfly and aluminum stakes."
         ),
         TestImagePreset(
@@ -39,8 +39,8 @@ public struct TestImagePreset: Identifiable, Hashable {
             category: .kitchen,
             symbol: "fork.knife",
             suggestedTitle: "KitchenAid 5-Qt Artisan Stand Mixer",
-            suggestedPrice: 10.0,
-            suggestedDeposit: 75.0,
+            suggestedPrice: 2000.0,
+            suggestedDeposit: 12000.0,
             description: "Tilt-head stand mixer with stainless bowl and dough hook."
         ),
         TestImagePreset(
@@ -48,8 +48,8 @@ public struct TestImagePreset: Identifiable, Hashable {
             category: .powerTools,
             symbol: "gearshape.2.fill",
             suggestedTitle: "Bosch 7-1/4\" Circular Saw",
-            suggestedPrice: 14.0,
-            suggestedDeposit: 60.0,
+            suggestedPrice: 2800.0,
+            suggestedDeposit: 9000.0,
             description: "Precision 15-amp circular saw with laser guide."
         ),
         TestImagePreset(
@@ -57,8 +57,8 @@ public struct TestImagePreset: Identifiable, Hashable {
             category: .garden,
             symbol: "leaf.fill",
             suggestedTitle: "Fiskars Telescoping Tree Pruner",
-            suggestedPrice: 6.0,
-            suggestedDeposit: 20.0,
+            suggestedPrice: 1200.0,
+            suggestedDeposit: 4000.0,
             description: "High-reach extendable tree pruner with saw blade."
         ),
         TestImagePreset(
@@ -66,8 +66,8 @@ public struct TestImagePreset: Identifiable, Hashable {
             category: .sports,
             symbol: "figure.open.water.swim",
             suggestedTitle: "Inflatable Kayak & Paddle Set",
-            suggestedPrice: 18.0,
-            suggestedDeposit: 80.0,
+            suggestedPrice: 3500.0,
+            suggestedDeposit: 15000.0,
             description: "Tandem inflatable kayak with high-output pump and dual paddles."
         )
     ]

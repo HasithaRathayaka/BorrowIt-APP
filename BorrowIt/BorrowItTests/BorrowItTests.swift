@@ -65,15 +65,15 @@ struct BorrowItTests {
     // MARK: - Test 3: Price, Duration & Deposit Calculation
     @Test("Borrow price, duration, and refundable deposit calculation")
     func testBorrowCostAndDepositCalculations() {
-        let dailyRate = 8.0
-        let deposit = 40.0
+        let dailyRate = 1500.0
+        let deposit = 5000.0
         let days = 3
         
         let calculation = BorrowTransaction.calculateCost(days: days, rate: dailyRate, deposit: deposit)
         
-        #expect(calculation.rentalCost == 24.0) // 3 * $8 = $24
-        #expect(calculation.depositHold == 40.0) // $40 hold
-        #expect(calculation.grandTotal == 64.0)  // $24 + $40 = $64
+        #expect(calculation.rentalCost == 4500.0) // 3 * Rs. 1500 = Rs. 4500
+        #expect(calculation.depositHold == 5000.0) // Rs. 5000 hold
+        #expect(calculation.grandTotal == 9500.0)  // Rs. 4500 + Rs. 5000 = Rs. 9500
         
         // Verify multi-day calculation on Transaction model
         let start = Date()
@@ -81,8 +81,8 @@ struct BorrowItTests {
         let tx = BorrowTransaction(item: .standMixer, startDate: start, endDate: end)
         
         #expect(tx.totalDays == 5)
-        #expect(tx.totalRentalCost == 50.0) // 5 days * $10/day
-        #expect(tx.depositHoldAmount == 75.0)
+        #expect(tx.totalRentalCost == 10000.0) // 5 days * Rs. 2000/day
+        #expect(tx.depositHoldAmount == 12000.0)
     }
 
     // MARK: - Test 4: Explore Filter Logic (Radius & Categories)

@@ -328,17 +328,9 @@ struct ItemFeedCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 12) {
-                // Visual Hero Box with SF Symbol / Asset & Badges
+                // Visual Hero Box with Real Item Photo & Badges
                 ZStack(alignment: .topTrailing) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color(hex: item.category.colorHex).opacity(0.12))
-                            .frame(height: 160)
-                        
-                        Image(systemName: item.systemImageName)
-                            .font(.system(size: 64, weight: .light))
-                            .foregroundColor(Color(hex: item.category.colorHex))
-                    }
+                    ItemPhotoView(item: item, height: 160, cornerRadius: 16)
                     
                     // Top Bar inside Image: Favorite Heart + Core ML Badge
                     HStack {
@@ -465,15 +457,9 @@ struct FloatingMapItemCard: View {
     
     var body: some View {
         HStack(spacing: 14) {
-            // Mini Icon Box
-            ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color(hex: item.category.colorHex).opacity(0.15))
-                    .frame(width: 58, height: 58)
-                Image(systemName: item.systemImageName)
-                    .font(.system(size: 26))
-                    .foregroundColor(Color(hex: item.category.colorHex))
-            }
+            // Mini Photo Box
+            ItemPhotoView(item: item, height: 58, cornerRadius: 12)
+                .frame(width: 58, height: 58)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.title)

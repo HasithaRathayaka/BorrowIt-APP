@@ -203,3 +203,63 @@ public struct BrandEmeraldButtonStyle: ButtonStyle {
             .animation(settings.reduceMotionEnabled ? nil : .spring(response: 0.25, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
+
+// MARK: - Realistic Item Photo View with AsyncImage & Modern Visuals
+public struct ItemPhotoView: View {
+    public let item: BorrowItem
+    public var height: CGFloat = 160
+    public var cornerRadius: CGFloat = 16
+    
+    public init(item: BorrowItem, height: CGFloat = 160, cornerRadius: CGFloat = 16) {
+        self.item = item
+        self.height = height
+        self.cornerRadius = cornerRadius
+    }
+    
+    public var body: some View {
+        ZStack {
+            if let urlString = item.imageURL, let url = URL(string: urlString) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: height)
+                            .frame(maxWidth: .infinity)
+                            .clipped()
+                    case .failure:
+                        fallbackVisual
+                    case .empty:
+                        ZStack {
+                            Color(hex: item.category.colorHex).opacity(0.12)
+                            ProgressView()
+                                .tint(Color(hex: item.category.colorHex))
+                        }
+                        .frame(height: height)
+                    @unknown default:
+                        fallbackVisual
+                    }
+                }
+            } else {
+                fallbackVisual
+            }
+        }
+        .frame(height: height)
+        .frame(maxWidth: .infinity)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+    }
+    
+    private var fallbackVisual: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(Color(hex: item.category.colorHex).opacity(0.14))
+                .frame(height: height)
+            
+            Image(systemName: item.systemImageName)
+                .font(.system(size: height * 0.35, weight: .light))
+                .foregroundColor(Color(hex: item.category.colorHex))
+        }
+    }
+}
+

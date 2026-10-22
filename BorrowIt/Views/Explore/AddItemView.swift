@@ -91,10 +91,10 @@ public struct AddItemView: View {
                                 
                                 HStack(spacing: 12) {
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text("Price / Day ($)")
+                                        Text("Price / Day (Rs.)")
                                             .font(.system(size: 12, weight: .semibold))
                                             .foregroundColor(.secondary)
-                                        TextField("8", value: $addVM.dailyRate, format: .number)
+                                        TextField("1500", value: $addVM.dailyRate, format: .number)
                                             .font(.system(size: 15, weight: .semibold, design: .rounded))
                                             .keyboardType(.decimalPad)
                                             .padding(10)
@@ -103,10 +103,10 @@ public struct AddItemView: View {
                                     }
                                     
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text("Refundable Deposit ($)")
+                                        Text("Refundable Deposit (Rs.)")
                                             .font(.system(size: 12, weight: .semibold))
                                             .foregroundColor(.secondary)
-                                        TextField("40", value: $addVM.depositHold, format: .number)
+                                        TextField("5000", value: $addVM.depositHold, format: .number)
                                             .font(.system(size: 15, weight: .semibold, design: .rounded))
                                             .keyboardType(.decimalPad)
                                             .padding(10)

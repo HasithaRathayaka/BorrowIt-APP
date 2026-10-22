@@ -61,7 +61,7 @@ public struct RequestSentView: View {
                                     Text(transaction.item.title)
                                         .font(.system(size: 15, weight: .bold, design: .rounded))
                                         .foregroundColor(.primary)
-                                    Text("From \(transaction.lenderName) · $\(Int(transaction.dailyRate))/day")
+                                    Text("From \(transaction.lenderName) · Rs. \(Int(transaction.dailyRate))/day")
                                         .font(.system(size: 12))
                                         .foregroundColor(.secondary)
                                 }

@@ -126,7 +126,7 @@ public struct ProfileStatsView: View {
                                     Text("SAVINGS · SWIFT CHARTS")
                                         .font(.system(size: 11, weight: .bold))
                                         .foregroundColor(.secondary)
-                                    Text("$\(Int(profile.totalMoneySaved)) saved vs. buying")
+                                    Text("Rs. \(Int(profile.totalMoneySaved)) saved vs. buying")
                                         .font(.system(size: 18, weight: .bold, design: .rounded))
                                         .foregroundColor(.primary)
                                 }
@@ -140,7 +140,7 @@ public struct ProfileStatsView: View {
                             Chart(profile.monthlySavings) { item in
                                 BarMark(
                                     x: .value("Month", item.month),
-                                    y: .value("Saved ($)", item.amountSaved)
+                                    y: .value("Saved (Rs.)", item.amountSaved)
                                 )
                                 .foregroundStyle(
                                     item.isCurrentMonth ?
@@ -149,8 +149,8 @@ public struct ProfileStatsView: View {
                                 )
                                 .cornerRadius(6)
                                 .annotation(position: .top, spacing: 4) {
-                                    Text("$\(Int(item.amountSaved))")
-                                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                                    Text("Rs. \(Int(item.amountSaved))")
+                                        .font(.system(size: 9, weight: .bold, design: .rounded))
                                         .foregroundColor(item.isCurrentMonth ? ThemeColors.emerald(highContrast: settings.highContrastEnabled) : .secondary)
                                 }
                             }

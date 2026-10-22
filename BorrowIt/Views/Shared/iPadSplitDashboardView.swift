@@ -88,7 +88,7 @@ public struct iPadSplitDashboardView: View {
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                         Spacer()
-                        Text("$312")
+                        Text("Rs. 45,000")
                             .font(.system(size: 12, weight: .bold, design: .rounded))
                             .foregroundColor(.primary)
                     }
