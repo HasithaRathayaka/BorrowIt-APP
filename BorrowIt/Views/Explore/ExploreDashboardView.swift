@@ -456,12 +456,12 @@ struct FloatingMapItemCard: View {
     @EnvironmentObject var settings: AppSettingsManager
     
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 12) {
             // Mini Photo Box
-            ItemPhotoView(item: item, height: 58, cornerRadius: 12)
-                .frame(width: 58, height: 58)
+            ItemPhotoView(item: item, height: 64, cornerRadius: 14)
+                .frame(width: 64, height: 64)
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(item.title)
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundColor(.primary)
@@ -469,20 +469,31 @@ struct FloatingMapItemCard: View {
                 
                 HStack(spacing: 6) {
                     Text(item.formattedRate)
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                        .lineLimit(1)
+                        .fixedSize()
+                    
                     Text("•")
-                        .foregroundColor(.secondary)
-                    Text(item.formattedDistance)
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                    Text("•")
-                        .foregroundColor(.secondary)
-                    RatingStarRow(rating: item.rating)
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary.opacity(0.6))
+                    
+                    HStack(spacing: 3) {
+                        Image(systemName: "figure.walk")
+                            .font(.system(size: 10))
+                        Text(item.formattedDistance)
+                            .font(.system(size: 12, weight: .medium))
+                    }
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .fixedSize()
                 }
+                
+                RatingStarRow(rating: item.rating)
             }
+            .layoutPriority(1)
             
-            Spacer()
+            Spacer(minLength: 6)
             
             Button(action: onDetailsTap) {
                 Text("View")
@@ -493,6 +504,7 @@ struct FloatingMapItemCard: View {
                     .background(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
                     .clipShape(Capsule())
             }
+            .fixedSize()
         }
         .padding(12)
         .background(Color(uiColor: .systemBackground))

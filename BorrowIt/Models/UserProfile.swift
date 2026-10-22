@@ -33,6 +33,8 @@ public struct UserProfile: Identifiable, Codable, Hashable {
     public var wasteAvoidedKg: Double
     public var totalMoneySaved: Double
     public var monthlySavings: [MonthlySaving]
+    public var avatarImageData: Data?
+    public var avatarImageURL: String?
     
     public init(
         id: UUID = UUID(uuidString: "99999999-9999-9999-9999-999999999999")!,
@@ -50,7 +52,9 @@ public struct UserProfile: Identifiable, Codable, Hashable {
         totalLends: Int = 11,
         wasteAvoidedKg: Double = 42.0,
         totalMoneySaved: Double = 45000.0,
-        monthlySavings: [MonthlySaving] = Self.defaultMonthlySavings
+        monthlySavings: [MonthlySaving] = Self.defaultMonthlySavings,
+        avatarImageData: Data? = nil,
+        avatarImageURL: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -68,6 +72,8 @@ public struct UserProfile: Identifiable, Codable, Hashable {
         self.wasteAvoidedKg = wasteAvoidedKg
         self.totalMoneySaved = totalMoneySaved
         self.monthlySavings = monthlySavings
+        self.avatarImageData = avatarImageData
+        self.avatarImageURL = avatarImageURL
     }
     
     public static let defaultMonthlySavings: [MonthlySaving] = [

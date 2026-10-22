@@ -1,13 +1,22 @@
 import SwiftUI
 import Charts
+import PhotosUI
+import UIKit
 
 // MARK: - Screen 15: User Profile & Swift Charts Stats
 public struct ProfileStatsView: View {
     @EnvironmentObject var settings: AppSettingsManager
+    @EnvironmentObject var authVM: AuthViewModel
+    @State private var selectedPhotoPickerItem: PhotosPickerItem? = nil
+    
     public var profile: UserProfile = .currentUser
     
     public init(profile: UserProfile = .currentUser) {
         self.profile = profile
+    }
+    
+    private var activeProfile: UserProfile {
+        authVM.currentUser.id == profile.id || profile.id == UserProfile.currentUser.id ? authVM.currentUser : profile
     }
     
     public var body: some View {
@@ -18,24 +27,80 @@ public struct ProfileStatsView: View {
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 20) {
-                        // 1. Profile Header Box
-                        VStack(spacing: 12) {
-                            Circle()
-                                .fill(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                                .frame(width: 76, height: 76)
-                                .overlay(
-                                    Text(profile.initials)
-                                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                )
-                                .shadow(color: Color.brandEmerald.opacity(0.2), radius: 10, y: 4)
+                        // 1. Profile Header Box with Photo Picker
+                        VStack(spacing: 10) {
+                            PhotosPicker(selection: $selectedPhotoPickerItem, matching: .images) {
+                                ZStack(alignment: .bottomTrailing) {
+                                    // Main Avatar Circle
+                                    Group {
+                                        if let data = activeProfile.avatarImageData, let uiImage = UIImage(data: data) {
+                                            Image(uiImage: uiImage)
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 84, height: 84)
+                                                .clipShape(Circle())
+                                        } else if let urlStr = activeProfile.avatarImageURL, let url = URL(string: urlStr) {
+                                            AsyncImage(url: url) { phase in
+                                                switch phase {
+                                                case .success(let img):
+                                                    img
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fill)
+                                                        .frame(width: 84, height: 84)
+                                                        .clipShape(Circle())
+                                                default:
+                                                    initialsAvatarView
+                                                }
+                                            }
+                                        } else {
+                                            initialsAvatarView
+                                        }
+                                    }
+                                    .frame(width: 84, height: 84)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(Color.white, lineWidth: 3)
+                                    )
+                                    .shadow(color: Color.brandEmerald.opacity(0.2), radius: 10, y: 4)
+                                    
+                                    // Camera Action Badge
+                                    ZStack {
+                                        Circle()
+                                            .fill(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                            .frame(width: 28, height: 28)
+                                        Image(systemName: "camera.fill")
+                                            .font(.system(size: 13, weight: .semibold))
+                                            .foregroundColor(.white)
+                                    }
+                                    .overlay(
+                                        Circle()
+                                            .stroke(Color(uiColor: .systemGroupedBackground), lineWidth: 2.5)
+                                    )
+                                    .offset(x: 2, y: 2)
+                                    .shadow(color: Color.black.opacity(0.18), radius: 4, y: 2)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .onChange(of: selectedPhotoPickerItem) { newItem in
+                                Task {
+                                    if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                                        await MainActor.run {
+                                            authVM.updateProfilePhoto(data: data)
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            Text("Tap to change photo")
+                                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
                             
                             VStack(spacing: 4) {
-                                Text(profile.name)
+                                Text(activeProfile.name)
                                     .font(.system(size: 22, weight: .bold, design: .rounded))
                                     .foregroundColor(.primary)
                                 
-                                Text("\(profile.neighborhood) · \(profile.memberSince)")
+                                Text("\(activeProfile.neighborhood) · \(activeProfile.memberSince)")
                                     .font(.system(size: 13))
                                     .foregroundColor(.secondary)
                             }
@@ -58,7 +123,7 @@ public struct ProfileStatsView: View {
                                     Image(systemName: "shippingbox.fill")
                                         .foregroundColor(.blue)
                                         .font(.system(size: 11))
-                                    Text("\(profile.totalBorrows) borrows")
+                                    Text("\(activeProfile.totalBorrows) borrows")
                                         .font(.system(size: 11, weight: .semibold, design: .rounded))
                                 }
                                 .padding(.horizontal, 9)
@@ -78,7 +143,7 @@ public struct ProfileStatsView: View {
                                     .foregroundColor(.secondary)
                                 
                                 HStack(alignment: .firstTextBaseline, spacing: 3) {
-                                    Text("\(profile.trustScore)")
+                                    Text("\(activeProfile.trustScore)")
                                         .font(.system(size: 26, weight: .bold, design: .rounded))
                                         .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
                                     Text("/ 100")
@@ -86,7 +151,7 @@ public struct ProfileStatsView: View {
                                         .foregroundColor(.secondary)
                                 }
                                 
-                                Text(profile.trustScoreSubtitle)
+                                Text(activeProfile.trustScoreSubtitle)
                                     .font(.system(size: 11, weight: .medium))
                                     .foregroundColor(.secondary)
                             }
@@ -101,7 +166,7 @@ public struct ProfileStatsView: View {
                                     .foregroundColor(.secondary)
                                 
                                 HStack(spacing: 4) {
-                                    Text(String(format: "%.1f", profile.communityRating))
+                                    Text(String(format: "%.1f", activeProfile.communityRating))
                                         .font(.system(size: 26, weight: .bold, design: .rounded))
                                         .foregroundColor(.primary)
                                     Image(systemName: "star.fill")
@@ -109,7 +174,7 @@ public struct ProfileStatsView: View {
                                         .font(.system(size: 18))
                                 }
                                 
-                                Text("from \(profile.reviewCount) neighbors")
+                                Text("from \(activeProfile.reviewCount) neighbors")
                                     .font(.system(size: 11, weight: .medium))
                                     .foregroundColor(.secondary)
                             }
@@ -126,7 +191,7 @@ public struct ProfileStatsView: View {
                                     Text("SAVINGS · SWIFT CHARTS")
                                         .font(.system(size: 11, weight: .bold))
                                         .foregroundColor(.secondary)
-                                    Text("Rs. \(Int(profile.totalMoneySaved)) saved vs. buying")
+                                    Text("Rs. \(Int(activeProfile.totalMoneySaved)) saved vs. buying")
                                         .font(.system(size: 18, weight: .bold, design: .rounded))
                                         .foregroundColor(.primary)
                                 }
@@ -137,7 +202,7 @@ public struct ProfileStatsView: View {
                             }
                             
                             // Swift Charts BarMark 6-Month Chart
-                            Chart(profile.monthlySavings) { item in
+                            Chart(activeProfile.monthlySavings) { item in
                                 BarMark(
                                     x: .value("Month", item.month),
                                     y: .value("Saved (Rs.)", item.amountSaved)
@@ -176,7 +241,7 @@ public struct ProfileStatsView: View {
                                     .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
                                 
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("\(Int(profile.wasteAvoidedKg)) kg")
+                                    Text("\(Int(activeProfile.wasteAvoidedKg)) kg")
                                         .font(.system(size: 18, weight: .bold, design: .rounded))
                                         .foregroundColor(.primary)
                                     Text("waste avoided")
@@ -195,7 +260,7 @@ public struct ProfileStatsView: View {
                                     .foregroundColor(Color.blue)
                                 
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("\(profile.totalLends)")
+                                    Text("\(activeProfile.totalLends)")
                                         .font(.system(size: 18, weight: .bold, design: .rounded))
                                         .foregroundColor(.primary)
                                     Text("neighbors lent")
@@ -216,5 +281,16 @@ public struct ProfileStatsView: View {
         .navigationTitle("Profile & Stats")
         .navigationBarTitleDisplayMode(.inline)
         .liveAccessibilityScale()
+    }
+    
+    private var initialsAvatarView: some View {
+        Circle()
+            .fill(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+            .frame(width: 84, height: 84)
+            .overlay(
+                Text(activeProfile.initials)
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+            )
     }
 }

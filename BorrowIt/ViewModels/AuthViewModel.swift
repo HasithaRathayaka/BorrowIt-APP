@@ -185,4 +185,15 @@ public class AuthViewModel: ObservableObject {
         self.currentUser = UserProfile.currentUser
         self.isAuthenticated = true
     }
+    
+    // Update Profile Photo
+    public func updateProfilePhoto(data: Data) {
+        var updated = currentUser
+        updated.avatarImageData = data
+        let filename = "avatar_\(currentUser.id.uuidString).jpg"
+        let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+        try? data.write(to: fileURL)
+        updated.avatarImageURL = fileURL.absoluteString
+        self.currentUser = updated
+    }
 }

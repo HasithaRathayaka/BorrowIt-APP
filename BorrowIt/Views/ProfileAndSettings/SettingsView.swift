@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Screen 17: Settings, Accessibility & Viva Demo Toolkit
 public struct SettingsView: View {
@@ -41,14 +42,31 @@ public struct SettingsView: View {
                                 navigateToProfile = true
                             }) {
                                 HStack(spacing: 14) {
-                                    Circle()
-                                        .fill(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                                        .frame(width: 56, height: 56)
-                                        .overlay(
-                                            Text(authVM.currentUser.initials)
-                                                .font(.system(size: 20, weight: .bold, design: .rounded))
-                                                .foregroundColor(.white)
-                                        )
+                                    Group {
+                                        if let data = authVM.currentUser.avatarImageData, let uiImage = UIImage(data: data) {
+                                            Image(uiImage: uiImage)
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 56, height: 56)
+                                                .clipShape(Circle())
+                                        } else if let urlStr = authVM.currentUser.avatarImageURL, let url = URL(string: urlStr) {
+                                            AsyncImage(url: url) { phase in
+                                                switch phase {
+                                                case .success(let img):
+                                                    img
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fill)
+                                                        .frame(width: 56, height: 56)
+                                                        .clipShape(Circle())
+                                                default:
+                                                    defaultInitialsBadge
+                                                }
+                                            }
+                                        } else {
+                                            defaultInitialsBadge
+                                        }
+                                    }
+                                    .shadow(color: Color.brandEmerald.opacity(0.15), radius: 6, y: 3)
                                     
                                     VStack(alignment: .leading, spacing: 3) {
                                         Text(authVM.currentUser.name)
@@ -285,6 +303,17 @@ public struct SettingsView: View {
             }
         }
         .liveAccessibilityScale()
+    }
+    
+    private var defaultInitialsBadge: some View {
+        Circle()
+            .fill(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+            .frame(width: 56, height: 56)
+            .overlay(
+                Text(authVM.currentUser.initials)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+            )
     }
 }
 
