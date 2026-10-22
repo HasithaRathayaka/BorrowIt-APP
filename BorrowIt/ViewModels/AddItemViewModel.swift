@@ -10,6 +10,20 @@ public class AddItemViewModel: ObservableObject {
     @Published public var selectedCategory: ItemCategory = .powerTools
     @Published public var dailyRate: Double = 1500.0
     @Published public var depositHold: Double = 5000.0
+    @Published public var isLendingForFree: Bool = false {
+        didSet {
+            if isLendingForFree {
+                if dailyRate > 0 {
+                    savedRate = dailyRate
+                }
+                dailyRate = 0.0
+            } else {
+                dailyRate = savedRate > 0 ? savedRate : 1500.0
+            }
+        }
+    }
+    private var savedRate: Double = 1500.0
+    
     @Published public var isAvailableNow: Bool = true
     @Published public var pickupAddressSharedAfterApproval: Bool = true
     @Published public var exactAddress: String = "148 Cedar Grove Lane"
@@ -38,6 +52,7 @@ public class AddItemViewModel: ObservableObject {
     public func selectPreset(_ preset: TestImagePreset) {
         self.selectedPreset = preset
         self.title = preset.suggestedTitle
+        self.isLendingForFree = (preset.suggestedPrice <= 0)
         self.dailyRate = preset.suggestedPrice
         self.depositHold = preset.suggestedDeposit
         self.itemDescription = preset.description
@@ -87,7 +102,7 @@ public class AddItemViewModel: ObservableObject {
             title: title,
             description: itemDescription,
             category: selectedCategory,
-            dailyRate: dailyRate,
+            dailyRate: isLendingForFree ? 0.0 : dailyRate,
             depositHold: depositHold,
             distanceMeters: 80.0,
             rating: 5.0,
@@ -110,6 +125,7 @@ public class AddItemViewModel: ObservableObject {
     }
     
     public func resetForm() {
+        isLendingForFree = false
         selectPreset(TestImagePreset.presets[0])
         itemPublishedSuccessfully = false
     }

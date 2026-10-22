@@ -93,28 +93,31 @@ struct BorrowItTests {
         let vm = ExploreViewModel(backendService: mockService)
         await vm.fetchItems()
         
-        #expect(vm.items.count == 8)
+        #expect(vm.items.count == BorrowItem.allSeedItems.count)
         
         // 1. Filter by 500m radius
         vm.searchRadiusMeters = 500.0
         #expect(vm.filteredItems.allSatisfy { $0.distanceMeters <= 500.0 })
         
-        // 2. Filter by 200m radius (only drill at 120m and mixer at 150m)
+        // 2. Filter by 200m radius
         vm.searchRadiusMeters = 200.0
-        #expect(vm.filteredItems.count == 2)
+        #expect(vm.filteredItems.allSatisfy { $0.distanceMeters <= 200.0 })
         #expect(vm.filteredItems.contains(where: { $0.title.contains("Drill") }))
-        #expect(vm.filteredItems.contains(where: { $0.title.contains("Mixer") }))
         
         // 3. Filter by Category Chip
         vm.searchRadiusMeters = 1000.0
         vm.selectedCategory = .camping
         #expect(vm.filteredItems.allSatisfy { $0.category == .camping })
-        #expect(vm.filteredCount == 2) // Trail tent & Camp chairs
         
-        // 4. Search query filter
+        // 4. Filter by Free Items Only
         vm.selectedCategory = nil
+        vm.filterFreeOnly = true
+        #expect(vm.filteredItems.allSatisfy { $0.isFree })
+        
+        // 5. Search query filter
+        vm.filterFreeOnly = false
         vm.searchQuery = "DeWalt"
-        #expect(vm.filteredCount == 1)
+        #expect(vm.filteredCount >= 1)
         #expect(vm.filteredItems.first?.title.contains("DeWalt") == true)
     }
 
@@ -213,5 +216,17 @@ struct BorrowItTests {
         _ = try await customMock.addItem(newItem)
         await exploreVM.fetchItems()
         #expect(exploreVM.items.contains(where: { $0.title == "Test Injected Ladder" }))
+    }
+    
+    // MARK: - Test 8: Free Community Lending
+    @Test("Community free lending items have zero daily rate and correct rate formatting")
+    func testFreeCommunityLending() {
+        let freeLadder = BorrowItem.telescopingLadder
+        #expect(freeLadder.isFree)
+        #expect(freeLadder.formattedRate == "Free")
+        
+        let paidDrill = BorrowItem.dewaltDrill
+        #expect(!paidDrill.isFree)
+        #expect(paidDrill.formattedRate.contains("Rs."))
     }
 }

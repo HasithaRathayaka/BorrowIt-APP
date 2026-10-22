@@ -215,8 +215,16 @@ public struct BorrowItem: Identifiable, Codable, Hashable {
         }
     }
     
+    public var isFree: Bool {
+        dailyRate <= 0
+    }
+    
     public var formattedRate: String {
-        "Rs. \(Int(dailyRate))/day"
+        if isFree {
+            return "Free"
+        } else {
+            return "Rs. \(Int(dailyRate))/day"
+        }
     }
 }
 
@@ -360,10 +368,10 @@ public extension BorrowItem {
         title: "Fiskars Telescoping Tree Pruner & Shears",
         description: "Extendable tree pruner up to 14 ft with sharp hardened bypass blade and 12-inch wood saw. Cut high branches easily without a ladder.",
         category: .garden,
-        dailyRate: 1200.0,
-        depositHold: 4000.0,
+        dailyRate: 0.0, // FREE Community Lend
+        depositHold: 2000.0,
         distanceMeters: 210.0,
-        rating: 4.7,
+        rating: 4.8,
         isAvailable: true,
         isAvailableWeekend: true,
         pickupAddressSharedAfterApproval: true,
@@ -375,6 +383,116 @@ public extension BorrowItem {
         imageURL: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=800&q=80",
         coreMLConfidence: 0.93,
         coreMLTag: "Garden"
+    )
+    
+    static let telescopingLadder = BorrowItem(
+        id: UUID(uuidString: "99999999-1111-2222-3333-444444444444")!,
+        title: "Little Giant 17ft Multi-Position Ladder",
+        description: "Heavy-duty aluminum telescoping ladder. Converts from A-frame step ladder (4-7ft) to 17ft extension ladder. Essential for seasonal gutter cleaning, cathedral ceiling bulbs, and exterior painting. Folds down to 4.5ft to fit in any car trunk.",
+        category: .handTools,
+        dailyRate: 0.0, // FREE Community Lend
+        depositHold: 3000.0,
+        distanceMeters: 90.0,
+        rating: 5.0,
+        isAvailable: true,
+        isAvailableWeekend: true,
+        pickupAddressSharedAfterApproval: true,
+        approximateAddress: "Cedar Grove · 90m away",
+        exactAddress: "142 Cedar Grove Lane",
+        coordinate: Coordinate(latitude: 37.7753, longitude: -122.4190),
+        lender: .maya,
+        systemImageName: "arrow.up.and.down",
+        imageURL: "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=800&q=80",
+        coreMLConfidence: 0.98,
+        coreMLTag: "Hand Tools"
+    )
+    
+    static let pressureWasher = BorrowItem(
+        id: UUID(uuidString: "99999999-2222-3333-4444-555555555555")!,
+        title: "Kärcher 1800-PSI High-Pressure Washer",
+        description: "Electric power washer with 25ft high-pressure hose, turbo nozzle, and detergent tank. Ideal for seasonal driveway cleaning, moss removal on patios, deck rejuvenation, and detailing cars.",
+        category: .powerTools,
+        dailyRate: 1800.0,
+        depositHold: 6000.0,
+        distanceMeters: 260.0,
+        rating: 4.9,
+        isAvailable: true,
+        isAvailableWeekend: true,
+        pickupAddressSharedAfterApproval: true,
+        approximateAddress: "Cedar Grove · 260m away",
+        exactAddress: "185 Pinecrest Way",
+        coordinate: Coordinate(latitude: 37.7761, longitude: -122.4210),
+        lender: .ari,
+        systemImageName: "drop.fill",
+        imageURL: "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=800&q=80",
+        coreMLConfidence: 0.96,
+        coreMLTag: "Power Tools"
+    )
+    
+    static let carpetCleaner = BorrowItem(
+        id: UUID(uuidString: "99999999-3333-4444-5555-666666666666")!,
+        title: "Bissell ProHeat Carpet & Upholstery Cleaner",
+        description: "Deep-cleaning upright carpet shampooer with specialized pet-stain hand tool and 8ft hose. Perfect for deep annual carpet refreshes, sofa stains, and car interior detailing.",
+        category: .powerTools,
+        dailyRate: 2000.0,
+        depositHold: 5000.0,
+        distanceMeters: 170.0,
+        rating: 4.8,
+        isAvailable: true,
+        isAvailableWeekend: true,
+        pickupAddressSharedAfterApproval: true,
+        approximateAddress: "Cedar Grove · 170m away",
+        exactAddress: "155 Cedar Grove Lane",
+        coordinate: Coordinate(latitude: 37.7756, longitude: -122.4184),
+        lender: .sam,
+        systemImageName: "sparkles",
+        imageURL: "https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=800&q=80",
+        coreMLConfidence: 0.94,
+        coreMLTag: "Power Tools"
+    )
+    
+    static let studFinderLevel = BorrowItem(
+        id: UUID(uuidString: "99999999-4444-5555-6666-777777777777")!,
+        title: "Bosch Digital Wall Scanner & Laser Level",
+        description: "Precision digital multi-scanner detects wood studs, metal pipes, and live electrical wiring behind drywall up to 4.75 inches. Includes self-leveling cross-line laser. Avoid drilling into pipes when mounting TVs, mirrors, or heavy shelving.",
+        category: .handTools,
+        dailyRate: 0.0, // FREE Community Lend
+        depositHold: 1500.0,
+        distanceMeters: 110.0,
+        rating: 5.0,
+        isAvailable: true,
+        isAvailableWeekend: true,
+        pickupAddressSharedAfterApproval: true,
+        approximateAddress: "Cedar Grove · 110m away",
+        exactAddress: "145 Cedar Grove Lane",
+        coordinate: Coordinate(latitude: 37.7754, longitude: -122.4189),
+        lender: .jon,
+        systemImageName: "ruler.fill",
+        imageURL: "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=800&q=80",
+        coreMLConfidence: 0.96,
+        coreMLTag: "Hand Tools"
+    )
+    
+    static let eventTableChairs = BorrowItem(
+        id: UUID(uuidString: "99999999-5555-6666-7777-888888888888")!,
+        title: "Lifetime 6ft Folding Banquet Table & Chairs",
+        description: "Heavy-duty 6-foot fold-in-half utility table with 4 contoured folding chairs. Stain-resistant, weather-proof, and lightweight with carry handle. Ideal for birthday parties, family holiday dinners, garage sales, and community cookouts.",
+        category: .camping,
+        dailyRate: 0.0, // FREE Community Lend
+        depositHold: 2500.0,
+        distanceMeters: 310.0,
+        rating: 4.9,
+        isAvailable: true,
+        isAvailableWeekend: true,
+        pickupAddressSharedAfterApproval: true,
+        approximateAddress: "Cedar Grove · 310m away",
+        exactAddress: "225 Pinecrest Way",
+        coordinate: Coordinate(latitude: 37.7764, longitude: -122.4214),
+        lender: .maya,
+        systemImageName: "table.furniture.fill",
+        imageURL: "https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=800&q=80",
+        coreMLConfidence: 0.94,
+        coreMLTag: "Camping"
     )
     
     static let socketSet = BorrowItem(
@@ -400,7 +518,12 @@ public extension BorrowItem {
     )
     
     static let allSeedItems: [BorrowItem] = [
+        telescopingLadder,
         dewaltDrill,
+        pressureWasher,
+        carpetCleaner,
+        studFinderLevel,
+        eventTableChairs,
         trailTent,
         campChairs,
         circularSaw,

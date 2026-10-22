@@ -38,11 +38,27 @@ public struct ItemDetailView: View {
                                     .foregroundColor(.primary)
                                     .fixedSize(horizontal: false, vertical: true)
                                 Spacer()
-                                Text(item.formattedRate)
-                                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                                    .lineLimit(1)
+                                if item.isFree {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "gift.fill")
+                                            .font(.system(size: 12))
+                                        Text("FREE")
+                                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(Color.brandEmerald)
+                                    .clipShape(Capsule())
+                                    .fixedSize()
                                     .layoutPriority(1)
+                                } else {
+                                    Text(item.formattedRate)
+                                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                                        .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                        .lineLimit(1)
+                                        .layoutPriority(1)
+                                }
                             }
                             
                             HStack(spacing: 8) {
@@ -185,7 +201,7 @@ public struct ItemDetailView: View {
                         HStack {
                             Text("Request to Borrow")
                             Spacer()
-                            Text("Rs. \(Int(item.dailyRate))/day")
+                            Text(item.isFree ? "Free to Borrow" : item.formattedRate)
                                 .opacity(0.85)
                         }
                     }

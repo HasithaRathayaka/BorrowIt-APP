@@ -151,24 +151,61 @@ public struct AddItemView: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                                 }
                                 
+                                // Free Community Lending Toggle
+                                Toggle(isOn: $addVM.isLendingForFree) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "gift.fill")
+                                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                            .font(.system(size: 16))
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text("Offer for Free (Community Share)")
+                                                .font(.system(size: 14, weight: .bold, design: .rounded))
+                                                .foregroundColor(.primary)
+                                            Text("Share freely with neighbors at Rs. 0/day")
+                                                .font(.system(size: 11))
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                }
+                                .tint(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                .padding(10)
+                                .background(addVM.isLendingForFree ? Color.statusEmeraldBg : Color(uiColor: .tertiarySystemGroupedBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                
                                 HStack(spacing: 12) {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text("Price / Day (Rs.)")
                                             .font(.system(size: 12, weight: .semibold))
                                             .foregroundColor(.secondary)
-                                        TextField("1500", value: $addVM.dailyRate, format: .number)
-                                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                                            .keyboardType(.decimalPad)
+                                        
+                                        if addVM.isLendingForFree {
+                                            HStack {
+                                                Text("FREE (Rs. 0)")
+                                                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+                                                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                                Spacer()
+                                                Image(systemName: "heart.fill")
+                                                    .foregroundColor(.pink)
+                                                    .font(.system(size: 12))
+                                            }
                                             .padding(10)
-                                            .background(Color(uiColor: .tertiarySystemGroupedBackground))
+                                            .background(Color.statusEmeraldBg)
                                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                        } else {
+                                            TextField("1500", value: $addVM.dailyRate, format: .number)
+                                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                                .keyboardType(.decimalPad)
+                                                .padding(10)
+                                                .background(Color(uiColor: .tertiarySystemGroupedBackground))
+                                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                        }
                                     }
                                     
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text("Refundable Deposit (Rs.)")
                                             .font(.system(size: 12, weight: .semibold))
                                             .foregroundColor(.secondary)
-                                        TextField("5000", value: $addVM.depositHold, format: .number)
+                                        TextField("3000", value: $addVM.depositHold, format: .number)
                                             .font(.system(size: 15, weight: .semibold, design: .rounded))
                                             .keyboardType(.decimalPad)
                                             .padding(10)

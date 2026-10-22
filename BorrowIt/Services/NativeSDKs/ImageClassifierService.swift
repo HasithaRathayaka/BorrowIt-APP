@@ -38,6 +38,26 @@ public struct TestImagePreset: Identifiable, Hashable {
     
     public static let presets: [TestImagePreset] = [
         TestImagePreset(
+            name: "Extension Ladder",
+            category: .handTools,
+            symbol: "arrow.up.and.down",
+            suggestedTitle: "Little Giant 17ft Multi-Position Ladder",
+            suggestedPrice: 0.0, // FREE Community Lend
+            suggestedDeposit: 3000.0,
+            description: "17ft aluminum telescoping ladder for seasonal gutter cleaning, painting, and high roof access.",
+            imageURL: "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=800&q=80"
+        ),
+        TestImagePreset(
+            name: "Pressure Washer",
+            category: .powerTools,
+            symbol: "drop.fill",
+            suggestedTitle: "Kärcher 1800-PSI High-Pressure Washer",
+            suggestedPrice: 1800.0,
+            suggestedDeposit: 6000.0,
+            description: "Electric power washer for seasonal driveway, patio, and car deep cleans.",
+            imageURL: "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=800&q=80"
+        ),
+        TestImagePreset(
             name: "Cordless Drill",
             category: .powerTools,
             symbol: "bolt.fill",
@@ -145,21 +165,22 @@ public class ImageClassifierService: ClassifierProtocol {
         // Power Tools
         if l.contains("drill") || l.contains("saw") || l.contains("sander") ||
             l.contains("grinder") || l.contains("power_drill") || l.contains("rotary") ||
-            l.contains("generator") || l.contains("dremel") {
+            l.contains("generator") || l.contains("dremel") || l.contains("washer") || l.contains("cleaner") {
             return .powerTools
         }
         
         // Hand Tools
         if l.contains("hammer") || l.contains("wrench") || l.contains("screwdriver") ||
             l.contains("pliers") || l.contains("socket") || l.contains("hardware") ||
-            l.contains("toolkit") || l.contains("measuring") {
+            l.contains("toolkit") || l.contains("measuring") || l.contains("ladder") ||
+            l.contains("level") || l.contains("scanner") {
             return .handTools
         }
         
         // Camping
         if l.contains("tent") || l.contains("backpack") || l.contains("sleeping") ||
             l.contains("lantern") || l.contains("stove") || l.contains("cooler") ||
-            l.contains("camping") || l.contains("tarp") {
+            l.contains("camping") || l.contains("tarp") || l.contains("table") || l.contains("chair") {
             return .camping
         }
         

@@ -189,9 +189,19 @@ public struct ExploreDashboardView: View {
                 CategoryChip(
                     title: "All nearby",
                     icon: "sparkles",
-                    isSelected: exploreVM.selectedCategory == nil
+                    isSelected: exploreVM.selectedCategory == nil && !exploreVM.filterFreeOnly
                 ) {
                     exploreVM.selectedCategory = nil
+                    exploreVM.filterFreeOnly = false
+                }
+                
+                // "Free to Borrow" chip
+                CategoryChip(
+                    title: "Free Items",
+                    icon: "gift.fill",
+                    isSelected: exploreVM.filterFreeOnly
+                ) {
+                    exploreVM.filterFreeOnly.toggle()
                 }
                 
                 // Specific categories
@@ -362,9 +372,23 @@ struct ItemFeedCard: View {
                         
                         Spacer()
                         
-                        Text(item.formattedRate)
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
-                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                        if item.isFree {
+                            HStack(spacing: 4) {
+                                Image(systemName: "gift.fill")
+                                    .font(.system(size: 11))
+                                Text("FREE")
+                                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 3)
+                            .background(Color.brandEmerald)
+                            .clipShape(Capsule())
+                        } else {
+                            Text(item.formattedRate)
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                        }
                     }
                     
                     HStack(spacing: 8) {
@@ -468,11 +492,26 @@ struct FloatingMapItemCard: View {
                     .lineLimit(1)
                 
                 HStack(spacing: 6) {
-                    Text(item.formattedRate)
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                        .lineLimit(1)
+                    if item.isFree {
+                        HStack(spacing: 4) {
+                            Image(systemName: "gift.fill")
+                                .font(.system(size: 10))
+                            Text("FREE")
+                                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 2)
+                        .background(Color.brandEmerald)
+                        .clipShape(Capsule())
                         .fixedSize()
+                    } else {
+                        Text(item.formattedRate)
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                            .lineLimit(1)
+                            .fixedSize()
+                    }
                     
                     Text("•")
                         .font(.system(size: 11))

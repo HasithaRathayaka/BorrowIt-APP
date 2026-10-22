@@ -106,8 +106,8 @@ public struct FilterSheetView: View {
                             .padding(18)
                             .squircleCard()
                             
-                            // 3. Availability Toggle Card
-                            VStack(alignment: .leading, spacing: 12) {
+                            // 3. Availability & Community Sharing Toggles
+                            VStack(alignment: .leading, spacing: 14) {
                                 Toggle(isOn: $exploreVM.filterWeekendOnly) {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("Available This Weekend")
@@ -116,6 +116,25 @@ public struct FilterSheetView: View {
                                         Text("Fri, Oct 2 – Sun, Oct 4")
                                             .font(.system(size: 12))
                                             .foregroundColor(.secondary)
+                                    }
+                                }
+                                .tint(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                
+                                Divider()
+                                
+                                Toggle(isOn: $exploreVM.filterFreeOnly) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "gift.fill")
+                                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                            .font(.system(size: 16))
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text("Free to Borrow Only")
+                                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                                .foregroundColor(.primary)
+                                            Text("Items neighbors are sharing at Rs. 0/day")
+                                                .font(.system(size: 12))
+                                                .foregroundColor(.secondary)
+                                        }
                                     }
                                 }
                                 .tint(ThemeColors.emerald(highContrast: settings.highContrastEnabled))

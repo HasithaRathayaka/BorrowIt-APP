@@ -128,13 +128,19 @@ public struct ScheduleBorrowView: View {
                             // 4. Cost Breakdown Line
                             VStack(spacing: 10) {
                                 HStack {
-                                    Text("\(numberOfDays) days @ Rs. \(Int(item.dailyRate))/day")
+                                    Text(item.isFree ? "\(numberOfDays) days @ Community Share" : "\(numberOfDays) days @ Rs. \(Int(item.dailyRate))/day")
                                         .font(.system(size: 14))
                                         .foregroundColor(.secondary)
                                     Spacer()
-                                    Text("Rs. \(Int(rentalTotal))")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundColor(.primary)
+                                    if item.isFree {
+                                        Text("FREE (Rs. 0)")
+                                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                    } else {
+                                        Text("Rs. \(Int(rentalTotal))")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(.primary)
+                                    }
                                 }
                                 
                                 HStack {
@@ -154,9 +160,15 @@ public struct ScheduleBorrowView: View {
                                         .font(.system(size: 16, weight: .bold, design: .rounded))
                                         .foregroundColor(.primary)
                                     Spacer()
-                                    Text("Rs. \(Int(rentalTotal)) + Rs. \(Int(item.depositHold)) hold")
-                                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                                        .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                    if item.isFree {
+                                        Text(item.depositHold > 0 ? "Rs. \(Int(item.depositHold)) hold only" : "Rs. 0 (Completely Free)")
+                                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                    } else {
+                                        Text("Rs. \(Int(rentalTotal)) + Rs. \(Int(item.depositHold)) hold")
+                                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                    }
                                 }
                             }
                             .padding(18)

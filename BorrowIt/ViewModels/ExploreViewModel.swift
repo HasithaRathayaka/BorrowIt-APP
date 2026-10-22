@@ -9,6 +9,7 @@ public class ExploreViewModel: ObservableObject {
     @Published public var selectedCategory: ItemCategory? = nil // nil means "All nearby"
     @Published public var searchRadiusMeters: Double = AppConfig.defaultSearchRadiusMeters
     @Published public var filterWeekendOnly: Bool = false
+    @Published public var filterFreeOnly: Bool = false
     @Published public var selectedFilterCategories: Set<ItemCategory> = []
     
     @Published public var isFeedMode: Bool = true // true = Feed List, false = Map Mode
@@ -48,7 +49,10 @@ public class ExploreViewModel: ObservableObject {
             // Weekend filter match
             let matchesWeekend = !filterWeekendOnly || item.isAvailableWeekend
             
-            return matchesSearch && matchesChip && matchesSheetCategories && matchesRadius && matchesWeekend
+            // Free items filter match
+            let matchesFree = !filterFreeOnly || item.isFree
+            
+            return matchesSearch && matchesChip && matchesSheetCategories && matchesRadius && matchesWeekend && matchesFree
         }
     }
     
@@ -85,6 +89,7 @@ public class ExploreViewModel: ObservableObject {
         selectedCategory = nil
         searchRadiusMeters = AppConfig.defaultSearchRadiusMeters
         filterWeekendOnly = false
+        filterFreeOnly = false
         selectedFilterCategories.removeAll()
     }
     

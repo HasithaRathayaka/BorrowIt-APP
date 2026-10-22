@@ -220,32 +220,53 @@ public struct ItemPhotoView: View {
     }
     
     public var body: some View {
-        ZStack {
-            if let urlString = item.imageURL, let url = URL(string: urlString) {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
+        ZStack(alignment: .topLeading) {
+            Group {
+                if let urlString = item.imageURL, let url = URL(string: urlString) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(height: height)
+                                .frame(maxWidth: .infinity)
+                                .clipped()
+                        case .failure:
+                            fallbackVisual
+                        case .empty:
+                            ZStack {
+                                Color(hex: item.category.colorHex).opacity(0.12)
+                                ProgressView()
+                                    .tint(Color(hex: item.category.colorHex))
+                            }
                             .frame(height: height)
-                            .frame(maxWidth: .infinity)
-                            .clipped()
-                    case .failure:
-                        fallbackVisual
-                    case .empty:
-                        ZStack {
-                            Color(hex: item.category.colorHex).opacity(0.12)
-                            ProgressView()
-                                .tint(Color(hex: item.category.colorHex))
+                        @unknown default:
+                            fallbackVisual
                         }
-                        .frame(height: height)
-                    @unknown default:
-                        fallbackVisual
                     }
+                } else {
+                    fallbackVisual
                 }
-            } else {
-                fallbackVisual
+            }
+            .frame(height: height)
+            .frame(maxWidth: .infinity)
+            
+            // Community Free Lend Badge on Photo
+            if item.isFree && height > 80 {
+                HStack(spacing: 4) {
+                    Image(systemName: "gift.fill")
+                        .font(.system(size: 10))
+                    Text("FREE")
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.brandEmerald)
+                .clipShape(Capsule())
+                .shadow(color: Color.black.opacity(0.25), radius: 4, y: 2)
+                .padding(10)
             }
         }
         .frame(height: height)
