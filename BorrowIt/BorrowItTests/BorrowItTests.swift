@@ -229,4 +229,25 @@ struct BorrowItTests {
         #expect(!paidDrill.isFree)
         #expect(paidDrill.formattedRate.contains("Rs."))
     }
+    
+    // MARK: - Test 9: Explore Mode Reset to Feed
+    @Test("ExploreViewModel resets cleanly to Feed mode from Map mode and clears preview/detail")
+    @MainActor
+    func testResetToFeed() {
+        let vm = ExploreViewModel(backendService: MockBackendService())
+        vm.isFeedMode = false
+        vm.selectedItemForMapPreview = BorrowItem.dewaltDrill
+        vm.selectedItemForDetail = BorrowItem.dewaltDrill
+        
+        #expect(!vm.isFeedMode)
+        #expect(vm.selectedItemForMapPreview != nil)
+        #expect(vm.selectedItemForDetail != nil)
+        
+        vm.resetToFeed()
+        
+        #expect(vm.isFeedMode)
+        #expect(vm.selectedItemForMapPreview == nil)
+        #expect(vm.selectedItemForDetail == nil)
+    }
 }
+

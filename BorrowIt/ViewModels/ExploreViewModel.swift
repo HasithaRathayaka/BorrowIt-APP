@@ -96,4 +96,13 @@ public class ExploreViewModel: ObservableObject {
     public func expandRadiusTo1000m() {
         searchRadiusMeters = 1000.0
     }
+    
+    // MARK: - Navigation & Mode Reset
+    /// Directly switches to Feed mode and dismisses any active map pin preview card or pushed detail view.
+    public func resetToFeed() {
+        isFeedMode = true
+        selectedItemForMapPreview = nil
+        selectedItemForDetail = nil
+    }
 }
+

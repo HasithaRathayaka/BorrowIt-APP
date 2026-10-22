@@ -4,6 +4,7 @@ import SwiftUI
 public struct WelcomeOnboardingView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var settings: AppSettingsManager
+    @EnvironmentObject var exploreVM: ExploreViewModel
     
     // Auth Mode: 0 = Log In, 1 = Sign Up
     @State private var authMode: Int = 0
@@ -102,6 +103,7 @@ public struct WelcomeOnboardingView: View {
             // Prominent Face ID / Biometric Button
             Button(action: {
                 Task {
+                    exploreVM.resetToFeed()
                     _ = await authVM.signInWithFaceID()
                 }
             }) {
@@ -182,6 +184,7 @@ public struct WelcomeOnboardingView: View {
             // Log In CTA Button
             Button(action: {
                 Task {
+                    exploreVM.resetToFeed()
                     _ = await authVM.signInWithEmail(email: loginEmail, password: loginPassword)
                 }
             }) {
@@ -203,6 +206,7 @@ public struct WelcomeOnboardingView: View {
             // Sign in with Apple Button
             Button(action: {
                 Task {
+                    exploreVM.resetToFeed()
                     await authVM.signInWithApple()
                 }
             }) {
@@ -222,8 +226,10 @@ public struct WelcomeOnboardingView: View {
             
             // Quick Demo Sign In
             Button(action: {
+                exploreVM.resetToFeed()
                 authVM.signInAsAlexMorgan()
             }) {
+
                 Text("Quick Demo: Sign in as Alex Morgan (Cedar Grove)")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
@@ -333,6 +339,7 @@ public struct WelcomeOnboardingView: View {
             // Create Account CTA Button
             Button(action: {
                 Task {
+                    exploreVM.resetToFeed()
                     _ = await authVM.signUp(
                         name: signUpName,
                         email: signUpEmail,

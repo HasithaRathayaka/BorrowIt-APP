@@ -48,6 +48,13 @@ public struct iPadSplitDashboardView: View {
             // 3. Detail Column: Inspector Layout (Item Details + Live Chat & Handoff Card)
             detailColumn
         }
+        .onChange(of: selectedSection) { oldValue, newValue in
+            if newValue == .explore {
+                withAnimation(settings.reduceMotionEnabled ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
+                    exploreVM.resetToFeed()
+                }
+            }
+        }
         .liveAccessibilityScale()
     }
     

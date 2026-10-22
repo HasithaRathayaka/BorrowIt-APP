@@ -32,11 +32,43 @@ public struct ContentView: View {
                 reasonPrompt: "Welcome back — Sign in securely to see what your neighbors are sharing"
             )
         }
+        .onChange(of: authVM.isAuthenticated) { oldValue, newValue in
+            if newValue {
+                // Once logged in, guarantee landing directly on Explore Dashboard in Feed mode
+                selectedTab = 0
+                withAnimation(settings.reduceMotionEnabled ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
+                    exploreVM.resetToFeed()
+                }
+            }
+        }
+        .onAppear {
+            if authVM.isAuthenticated {
+                selectedTab = 0
+                exploreVM.resetToFeed()
+            }
+        }
     }
     
     // MARK: - iPhone 5-Tab Navigation Architecture
+    // Intercepts tab taps: whenever the user taps the Explore tab button below (tag 0),
+    // even if already on Explore or currently in Map mode, directly resets to Feed mode.
+    private var tabSelectionBinding: Binding<Int> {
+        Binding(
+            get: { selectedTab },
+            set: { newTab in
+                if newTab == 0 {
+                    // Pressed the Explore button below -> directly return to Feed
+                    withAnimation(settings.reduceMotionEnabled ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
+                        exploreVM.resetToFeed()
+                    }
+                }
+                selectedTab = newTab
+            }
+        )
+    }
+    
     private var iphoneTabView: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: tabSelectionBinding) {
             // 1. Explore Tab
             ExploreDashboardView()
                 .tabItem {
