@@ -50,7 +50,7 @@ public class SupabaseService: BackendServiceProtocol {
             do {
                 let (data, response) = try await session.data(for: request)
                 if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                    let decoded = try JSONDecoder().decode([BorrowItem].self, data: data)
+                    let decoded = try JSONDecoder().decode([BorrowItem].self, from: data)
                     if !decoded.isEmpty {
                         self.localItems = decoded
                         return decoded

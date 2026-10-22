@@ -52,7 +52,7 @@ public struct QRPayload: Codable, Hashable {
         }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(QRPayload.self, data: data)
+        return try decoder.decode(QRPayload.self, from: data)
     }
     
     // Check if token was generated within validity window (default 300s / 5 minutes)

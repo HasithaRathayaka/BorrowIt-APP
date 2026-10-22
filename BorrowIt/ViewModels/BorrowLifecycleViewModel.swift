@@ -41,7 +41,7 @@ public class BorrowLifecycleViewModel: ObservableObject {
         qrService: QRServiceProtocol = QRCodeService.shared,
         geofenceService: GeofenceServiceProtocol = LocationGeofenceService.shared,
         notificationService: NotificationServiceProtocol = NotificationService.shared,
-        liveActivityManager: LiveActivityManager = .shared,
+        liveActivityManager: LiveActivityManager? = nil,
         calendarService: CalendarServiceProtocol = CalendarEventService.shared
     ) {
         self.backendService = backendService
@@ -49,7 +49,7 @@ public class BorrowLifecycleViewModel: ObservableObject {
         self.qrService = qrService
         self.geofenceService = geofenceService
         self.notificationService = notificationService
-        self.liveActivityManager = liveActivityManager
+        self.liveActivityManager = liveActivityManager ?? LiveActivityManager.shared
         self.calendarService = calendarService
         
         Task {
