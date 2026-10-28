@@ -17,6 +17,10 @@ public class SupabaseService: BackendServiceProtocol {
     private let apiKey: String
     private let isLiveConfigured: Bool
     
+    // Auth Session State
+    public private(set) var currentAccessToken: String? = nil
+    public private(set) var currentUserId: UUID? = nil
+    
     public init(
         baseURL: URL = AppConfig.supabaseURL,
         apiKey: String = AppConfig.supabaseAnonKey,
@@ -37,33 +41,276 @@ public class SupabaseService: BackendServiceProtocol {
         self.localProfile = UserProfile.currentUser
     }
     
+    // MARK: - HTTP Helpers
+    private func makeRequest(endpoint: String, method: String = "GET", body: Data? = nil) -> URLRequest? {
+        guard let url = URL(string: "\(baseURL.absoluteString)\(endpoint)") else { return nil }
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        let token = currentAccessToken ?? apiKey
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue(apiKey, forHTTPHeaderField: "apikey")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = body
+        return request
+    }
+    
+    private var jsonDecoder: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let str = try container.decode(String.self)
+            let isoFormatter = ISO8601DateFormatter()
+            isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = isoFormatter.date(from: str) { return date }
+            isoFormatter.formatOptions = [.withInternetDateTime]
+            if let date = isoFormatter.date(from: str) { return date }
+            let standard = DateFormatter()
+            standard.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+            if let date = standard.date(from: str) { return date }
+            return Date()
+        }
+        return decoder
+    }
+    
+    private var jsonEncoder: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
+    }
+    
+    // MARK: - Supabase Cloud Authentication (GoTrue REST)
+    
+    /// Sign Up new user with Email, Password & Metadata on Supabase Auth
+    public func signUp(
+        email: String,
+        password: String,
+        name: String,
+        neighborhood: String,
+        initials: String
+    ) async throws -> UserProfile {
+        if !isLiveConfigured {
+            // Local fallback simulation if credentials are dummy
+            let user = UserProfile(
+                id: UUID(),
+                name: name,
+                email: email,
+                initials: initials,
+                neighborhood: neighborhood
+            )
+            self.localProfile = user
+            return user
+        }
+        
+        guard let url = URL(string: "\(baseURL.absoluteString)/auth/v1/signup") else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(apiKey, forHTTPHeaderField: "apikey")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let payload: [String: Any] = [
+            "email": email,
+            "password": password,
+            "data": [
+                "name": name,
+                "neighborhood": neighborhood,
+                "initials": initials
+            ]
+        ]
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        
+        if httpResponse.statusCode == 200 || httpResponse.statusCode == 201 {
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                // Read Access Token if auto-confirm is on
+                if let token = json["access_token"] as? String {
+                    self.currentAccessToken = token
+                }
+                
+                var userId = UUID()
+                if let userDict = json["user"] as? [String: Any],
+                   let idStr = userDict["id"] as? String,
+                   let parsedId = UUID(uuidString: idStr) {
+                    userId = parsedId
+                } else if let idStr = json["id"] as? String, let parsedId = UUID(uuidString: idStr) {
+                    userId = parsedId
+                }
+                self.currentUserId = userId
+                
+                let profile = UserProfile(
+                    id: userId,
+                    name: name,
+                    email: email,
+                    initials: initials,
+                    neighborhood: neighborhood,
+                    memberSince: "Neighbor since 2026",
+                    isIdVerified: true,
+                    trustScore: 95,
+                    trustScoreSubtitle: "Verified Member",
+                    communityRating: 5.0,
+                    reviewCount: 0,
+                    totalBorrows: 0,
+                    totalLends: 0,
+                    wasteAvoidedKg: 0.0,
+                    totalMoneySaved: 0.0
+                )
+                self.localProfile = profile
+                
+                // Save profile to Supabase public.profiles table
+                Task {
+                    try? await self.updateUserProfile(profile)
+                }
+                return profile
+            }
+        }
+        
+        // Handle error message from Supabase Auth
+        if let errJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            let msg = (errJson["msg"] as? String) ?? (errJson["error_description"] as? String) ?? (errJson["message"] as? String) ?? "Sign up failed"
+            throw NSError(domain: "SupabaseAuth", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: msg])
+        }
+        throw URLError(.cannotParseResponse)
+    }
+    
+    /// Sign In with Email & Password on Supabase Auth
+    public func signIn(email: String, password: String) async throws -> UserProfile {
+        if !isLiveConfigured {
+            // Local fallback simulation if credentials are dummy
+            if !localProfile.email.lowercased().contains(email.lowercased()) {
+                let name = email.components(separatedBy: "@").first?.capitalized ?? "Neighbor"
+                self.localProfile = UserProfile(
+                    id: UUID(),
+                    name: name,
+                    email: email,
+                    initials: String(name.prefix(2)).uppercased(),
+                    neighborhood: "Colombo, Sri Lanka"
+                )
+            }
+            return localProfile
+        }
+        
+        guard let url = URL(string: "\(baseURL.absoluteString)/auth/v1/token?grant_type=password") else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(apiKey, forHTTPHeaderField: "apikey")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let payload: [String: String] = [
+            "email": email,
+            "password": password
+        ]
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        
+        if httpResponse.statusCode == 200 {
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let token = json["access_token"] as? String,
+               let userDict = json["user"] as? [String: Any] {
+                
+                self.currentAccessToken = token
+                let userIdStr = userDict["id"] as? String ?? ""
+                let userId = UUID(uuidString: userIdStr) ?? UUID()
+                self.currentUserId = userId
+                
+                let metadata = userDict["user_metadata"] as? [String: Any]
+                let name = (metadata?["name"] as? String) ?? email.components(separatedBy: "@").first?.capitalized ?? "Neighbor"
+                let neighborhood = (metadata?["neighborhood"] as? String) ?? "Cedar Grove"
+                let initials = (metadata?["initials"] as? String) ?? String(name.prefix(2)).uppercased()
+                
+                let profile = UserProfile(
+                    id: userId,
+                    name: name,
+                    email: email,
+                    initials: initials,
+                    neighborhood: neighborhood,
+                    memberSince: "Neighbor since 2026",
+                    isIdVerified: true,
+                    trustScore: 94,
+                    trustScoreSubtitle: "Verified Member",
+                    communityRating: 5.0
+                )
+                self.localProfile = profile
+                
+                // Also fetch cloud profile if available
+                if let cloudProfile = try? await self.fetchUserProfile() {
+                    self.localProfile = cloudProfile
+                    return cloudProfile
+                }
+                return profile
+            }
+        }
+        
+        if let errJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            let msg = (errJson["error_description"] as? String) ?? (errJson["msg"] as? String) ?? (errJson["message"] as? String) ?? "Invalid credentials"
+            throw NSError(domain: "SupabaseAuth", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: msg])
+        }
+        throw URLError(.userAuthenticationRequired)
+    }
+    
+    /// Sign out from Supabase Auth
+    public func signOut() async {
+        if isLiveConfigured, let token = currentAccessToken {
+            if var request = makeRequest(endpoint: "/auth/v1/logout", method: "POST") {
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                _ = try? await session.data(for: request)
+            }
+        }
+        self.currentAccessToken = nil
+        self.currentUserId = nil
+    }
+    
     // MARK: - Items REST / Seed
     public func fetchItems() async throws -> [BorrowItem] {
         if isLiveConfigured {
-            guard let url = URL(string: "\(baseURL.absoluteString)/rest/v1/items?select=*") else {
-                return localItems
-            }
-            var request = URLRequest(url: url)
-            request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-            request.addValue(apiKey, forHTTPHeaderField: "apikey")
-            
-            do {
-                let (data, response) = try await session.data(for: request)
-                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                    let decoded = try JSONDecoder().decode([BorrowItem].self, from: data)
-                    if !decoded.isEmpty {
-                        self.localItems = decoded
-                        return decoded
+            if let request = makeRequest(endpoint: "/rest/v1/items?select=*") {
+                do {
+                    let (data, response) = try await session.data(for: request)
+                    if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                        let decoded = try jsonDecoder.decode([BorrowItem].self, from: data)
+                        if !decoded.isEmpty {
+                            self.localItems = decoded
+                            return decoded
+                        } else {
+                            // Cloud items table is empty: auto-seed Cedar Grove items into Supabase
+                            Task {
+                                for item in BorrowItem.allSeedItems {
+                                    _ = try? await self.addItem(item)
+                                }
+                            }
+                        }
                     }
+                } catch {
+                    print("Supabase live fetch failed, using local seed dataset: \(error)")
                 }
-            } catch {
-                print("Supabase live fetch failed, using local seed dataset: \(error)")
             }
         }
         return localItems
     }
     
     public func fetchItem(id: UUID) async throws -> BorrowItem? {
+        if isLiveConfigured {
+            if let request = makeRequest(endpoint: "/rest/v1/items?id=eq.\(id.uuidString)&select=*") {
+                if let (data, response) = try? await session.data(for: request),
+                   let http = response as? HTTPURLResponse, http.statusCode == 200 {
+                    if let items = try? jsonDecoder.decode([BorrowItem].self, from: data), let first = items.first {
+                        return first
+                    }
+                }
+            }
+        }
         return localItems.first(where: { $0.id == id })
     }
     
@@ -71,29 +318,45 @@ public class SupabaseService: BackendServiceProtocol {
         localItems.insert(item, at: 0)
         
         if isLiveConfigured {
-            guard let url = URL(string: "\(baseURL.absoluteString)/rest/v1/items") else { return item }
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-            request.addValue(apiKey, forHTTPHeaderField: "apikey")
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try? JSONEncoder().encode(item)
-            _ = try? await session.data(for: request)
+            if let body = try? jsonEncoder.encode(item),
+               var request = makeRequest(endpoint: "/rest/v1/items", method: "POST", body: body) {
+                request.addValue("return=representation", forHTTPHeaderField: "Prefer")
+                _ = try? await session.data(for: request)
+            }
         }
-        
         return item
     }
     
     public func toggleFavorite(itemId: UUID) async throws -> Bool {
         if let idx = localItems.firstIndex(where: { $0.id == itemId }) {
             localItems[idx].isFavorite.toggle()
-            return localItems[idx].isFavorite
+            let newVal = localItems[idx].isFavorite
+            
+            if isLiveConfigured {
+                let payload = ["isFavorite": newVal]
+                if let body = try? JSONSerialization.data(withJSONObject: payload),
+                   let request = makeRequest(endpoint: "/rest/v1/items?id=eq.\(itemId.uuidString)", method: "PATCH", body: body) {
+                    _ = try? await session.data(for: request)
+                }
+            }
+            return newVal
         }
         return false
     }
     
     // MARK: - Borrows Lifecycle REST / Seed
     public func fetchBorrows() async throws -> [BorrowTransaction] {
+        if isLiveConfigured {
+            if let request = makeRequest(endpoint: "/rest/v1/borrows?select=*&order=createdAt.desc") {
+                if let (data, response) = try? await session.data(for: request),
+                   let http = response as? HTTPURLResponse, http.statusCode == 200 {
+                    if let decoded = try? jsonDecoder.decode([BorrowTransaction].self, from: data), !decoded.isEmpty {
+                        self.localBorrows = decoded
+                        return decoded
+                    }
+                }
+            }
+        }
         return localBorrows
     }
     
@@ -127,6 +390,15 @@ public class SupabaseService: BackendServiceProtocol {
         )
         localMessages[conv.id] = [initialMsg]
         
+        if isLiveConfigured {
+            if let body = try? jsonEncoder.encode(transaction),
+               var request = makeRequest(endpoint: "/rest/v1/borrows", method: "POST", body: body) {
+                request.addValue("return=representation", forHTTPHeaderField: "Prefer")
+                _ = try? await session.data(for: request)
+            }
+            _ = try? await sendMessage(initialMsg)
+        }
+        
         return transaction
     }
     
@@ -136,11 +408,21 @@ public class SupabaseService: BackendServiceProtocol {
         }
         try localBorrows[index].transition(to: state)
         
-        // If approved or returned, update user stats
         if state == .returned {
             localProfile.totalBorrows += 1
             localProfile.wasteAvoidedKg += 3.5
             localProfile.totalMoneySaved += localBorrows[index].item.dailyRate * Double(localBorrows[index].totalDays)
+        }
+        
+        if isLiveConfigured {
+            let payload: [String: Any] = [
+                "state": state.rawValue,
+                "returnedAt": state == .returned ? ISO8601DateFormatter().string(from: Date()) : NSNull()
+            ]
+            if let body = try? JSONSerialization.data(withJSONObject: payload),
+               let request = makeRequest(endpoint: "/rest/v1/borrows?id=eq.\(id.uuidString)", method: "PATCH", body: body) {
+                _ = try? await session.data(for: request)
+            }
         }
         
         return localBorrows[index]
@@ -150,15 +432,48 @@ public class SupabaseService: BackendServiceProtocol {
         if let index = localBorrows.firstIndex(where: { $0.id == borrowId }) {
             localBorrows[index].reviewRating = rating
             localBorrows[index].reviewComment = comment
+            
+            if isLiveConfigured {
+                let payload: [String: Any] = [
+                    "reviewRating": rating,
+                    "reviewComment": comment
+                ]
+                if let body = try? JSONSerialization.data(withJSONObject: payload),
+                   let request = makeRequest(endpoint: "/rest/v1/borrows?id=eq.\(borrowId.uuidString)", method: "PATCH", body: body) {
+                    _ = try? await session.data(for: request)
+                }
+            }
         }
     }
     
     // MARK: - Realtime Chat REST / Seed
     public func fetchConversations() async throws -> [ChatConversation] {
+        if isLiveConfigured {
+            if let request = makeRequest(endpoint: "/rest/v1/conversations?select=*&order=lastMessageTime.desc") {
+                if let (data, response) = try? await session.data(for: request),
+                   let http = response as? HTTPURLResponse, http.statusCode == 200 {
+                    if let decoded = try? jsonDecoder.decode([ChatConversation].self, from: data), !decoded.isEmpty {
+                        self.localConversations = decoded
+                        return decoded
+                    }
+                }
+            }
+        }
         return localConversations
     }
     
     public func fetchMessages(conversationId: UUID) async throws -> [ChatMessage] {
+        if isLiveConfigured {
+            if let request = makeRequest(endpoint: "/rest/v1/messages?conversationId=eq.\(conversationId.uuidString)&select=*&order=timestamp.asc") {
+                if let (data, response) = try? await session.data(for: request),
+                   let http = response as? HTTPURLResponse, http.statusCode == 200 {
+                    if let decoded = try? jsonDecoder.decode([ChatMessage].self, from: data) {
+                        self.localMessages[conversationId] = decoded
+                        return decoded
+                    }
+                }
+            }
+        }
         return localMessages[conversationId] ?? []
     }
     
@@ -167,10 +482,17 @@ public class SupabaseService: BackendServiceProtocol {
         list.append(message)
         localMessages[message.conversationId] = list
         
-        // Update conversation preview
         if let idx = localConversations.firstIndex(where: { $0.id == message.conversationId }) {
             localConversations[idx].lastMessage = message.content
             localConversations[idx].lastMessageTime = message.timestamp
+        }
+        
+        if isLiveConfigured {
+            if let body = try? jsonEncoder.encode(message),
+               var request = makeRequest(endpoint: "/rest/v1/messages", method: "POST", body: body) {
+                request.addValue("return=representation", forHTTPHeaderField: "Prefer")
+                _ = try? await session.data(for: request)
+            }
         }
         
         return message
@@ -178,11 +500,30 @@ public class SupabaseService: BackendServiceProtocol {
     
     // MARK: - User Profile & Stats
     public func fetchUserProfile() async throws -> UserProfile {
+        if isLiveConfigured, let userId = currentUserId {
+            if let request = makeRequest(endpoint: "/rest/v1/profiles?id=eq.\(userId.uuidString)&select=*") {
+                if let (data, response) = try? await session.data(for: request),
+                   let http = response as? HTTPURLResponse, http.statusCode == 200 {
+                    if let profiles = try? jsonDecoder.decode([UserProfile].self, from: data), let first = profiles.first {
+                        self.localProfile = first
+                        return first
+                    }
+                }
+            }
+        }
         return localProfile
     }
     
     public func updateUserProfile(_ profile: UserProfile) async throws {
         self.localProfile = profile
+        
+        if isLiveConfigured {
+            if let body = try? jsonEncoder.encode(profile),
+               var request = makeRequest(endpoint: "/rest/v1/profiles", method: "POST", body: body) {
+                request.addValue("resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
+                _ = try? await session.data(for: request)
+            }
+        }
     }
     
     private func formattedDate(_ date: Date) -> String {

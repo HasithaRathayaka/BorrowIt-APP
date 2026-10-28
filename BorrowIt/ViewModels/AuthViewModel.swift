@@ -43,10 +43,10 @@ public class AuthViewModel: ObservableObject {
     public func signInWithEmail(email: String, password: String = "password") async -> Bool {
         isAuthenticating = true
         authErrorMessage = nil
-        try? await Task.sleep(nanoseconds: 350_000_000)
-        isAuthenticating = false
+        defer { isAuthenticating = false }
         
-        guard !email.trimmingCharacters(in: .whitespaces).isEmpty else {
+        let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
+        guard !trimmedEmail.isEmpty else {
             authErrorMessage = "Please enter your email address."
             return false
         }
@@ -55,32 +55,45 @@ public class AuthViewModel: ObservableObject {
             return false
         }
         
-        // If email matches current user, keep profile; otherwise create profile for this email
-        if !currentUser.email.lowercased().contains(email.lowercased()) {
-            let nameFromEmail = email.components(separatedBy: "@").first?.capitalized ?? "Neighbor"
-            self.currentUser = UserProfile(
-                id: UUID(),
-                name: nameFromEmail,
-                email: email,
-                initials: String(nameFromEmail.prefix(2)).uppercased(),
-                neighborhood: "Colombo, Sri Lanka",
-                memberSince: "Neighbor since 2026",
-                isIdVerified: true,
-                trustScore: 92,
-                trustScoreSubtitle: "Verified Member",
-                communityRating: 5.0,
-                reviewCount: 1,
-                totalBorrows: 0,
-                totalLends: 0,
-                wasteAvoidedKg: 0.0,
-                totalMoneySaved: 0.0,
-                monthlySavings: [
-                    MonthlySaving(month: "Current", amountSaved: 0.0, isCurrentMonth: true)
-                ]
-            )
+        if AppConfig.isSupabaseConfigured {
+            do {
+                let userProfile = try await SupabaseService.shared.signIn(email: trimmedEmail, password: password)
+                self.currentUser = userProfile
+                self.isAuthenticated = true
+                return true
+            } catch {
+                self.authErrorMessage = error.localizedDescription
+                return false
+            }
+        } else {
+            // Local fallback simulation when Supabase anon key is dummy
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            if !currentUser.email.lowercased().contains(trimmedEmail.lowercased()) {
+                let nameFromEmail = trimmedEmail.components(separatedBy: "@").first?.capitalized ?? "Neighbor"
+                self.currentUser = UserProfile(
+                    id: UUID(),
+                    name: nameFromEmail,
+                    email: trimmedEmail,
+                    initials: String(nameFromEmail.prefix(2)).uppercased(),
+                    neighborhood: "Colombo, Sri Lanka",
+                    memberSince: "Neighbor since 2026",
+                    isIdVerified: true,
+                    trustScore: 92,
+                    trustScoreSubtitle: "Verified Member",
+                    communityRating: 5.0,
+                    reviewCount: 1,
+                    totalBorrows: 0,
+                    totalLends: 0,
+                    wasteAvoidedKg: 0.0,
+                    totalMoneySaved: 0.0,
+                    monthlySavings: [
+                        MonthlySaving(month: "Current", amountSaved: 0.0, isCurrentMonth: true)
+                    ]
+                )
+            }
+            self.isAuthenticated = true
+            return true
         }
-        self.isAuthenticated = true
-        return true
     }
     
     // MARK: - Create Account / Sign Up
@@ -94,20 +107,21 @@ public class AuthViewModel: ObservableObject {
     ) async -> Bool {
         isAuthenticating = true
         authErrorMessage = nil
+        defer { isAuthenticating = false }
         
-        guard !name.trimmingCharacters(in: .whitespaces).isEmpty else {
+        let trimmedName = name.trimmingCharacters(in: .whitespaces)
+        let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
+        
+        guard !trimmedName.isEmpty else {
             authErrorMessage = "Please enter your full name."
-            isAuthenticating = false
             return false
         }
-        guard email.contains("@") && email.contains(".") else {
+        guard trimmedEmail.contains("@") && trimmedEmail.contains(".") else {
             authErrorMessage = "Please enter a valid email address."
-            isAuthenticating = false
             return false
         }
         guard password.count >= 4 else {
             authErrorMessage = "Password must be at least 4 characters."
-            isAuthenticating = false
             return false
         }
         
@@ -117,10 +131,8 @@ public class AuthViewModel: ObservableObject {
             self.faceIDEnabledForAccount = bioSuccess
         }
         
-        try? await Task.sleep(nanoseconds: 350_000_000)
-        
         // Generate clean initials
-        let parts = name.split(separator: " ")
+        let parts = trimmedName.split(separator: " ")
         let initials: String
         if parts.count >= 2 {
             initials = "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
@@ -130,31 +142,50 @@ public class AuthViewModel: ObservableObject {
             initials = "U"
         }
         
-        let newUser = UserProfile(
-            id: UUID(),
-            name: name.trimmingCharacters(in: .whitespaces),
-            email: email.trimmingCharacters(in: .whitespaces).lowercased(),
-            initials: initials,
-            neighborhood: neighborhood.isEmpty ? "Colombo, Sri Lanka" : neighborhood,
-            memberSince: "Neighbor since 2026",
-            isIdVerified: true,
-            trustScore: 95,
-            trustScoreSubtitle: "New neighbor · ID verified",
-            communityRating: 5.0,
-            reviewCount: 0,
-            totalBorrows: 0,
-            totalLends: 0,
-            wasteAvoidedKg: 0.0,
-            totalMoneySaved: 0.0,
-            monthlySavings: [
-                MonthlySaving(month: "Current", amountSaved: 0.0, isCurrentMonth: true)
-            ]
-        )
-        
-        self.currentUser = newUser
-        self.isAuthenticated = true
-        self.isAuthenticating = false
-        return true
+        if AppConfig.isSupabaseConfigured {
+            do {
+                let userProfile = try await SupabaseService.shared.signUp(
+                    email: trimmedEmail,
+                    password: password,
+                    name: trimmedName,
+                    neighborhood: neighborhood.isEmpty ? "Cedar Grove" : neighborhood,
+                    initials: initials
+                )
+                self.currentUser = userProfile
+                self.isAuthenticated = true
+                return true
+            } catch {
+                self.authErrorMessage = error.localizedDescription
+                return false
+            }
+        } else {
+            // Local fallback simulation
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            let newUser = UserProfile(
+                id: UUID(),
+                name: trimmedName,
+                email: trimmedEmail.lowercased(),
+                initials: initials,
+                neighborhood: neighborhood.isEmpty ? "Colombo, Sri Lanka" : neighborhood,
+                memberSince: "Neighbor since 2026",
+                isIdVerified: true,
+                trustScore: 95,
+                trustScoreSubtitle: "New neighbor · ID verified",
+                communityRating: 5.0,
+                reviewCount: 0,
+                totalBorrows: 0,
+                totalLends: 0,
+                wasteAvoidedKg: 0.0,
+                totalMoneySaved: 0.0,
+                monthlySavings: [
+                    MonthlySaving(month: "Current", amountSaved: 0.0, isCurrentMonth: true)
+                ]
+            )
+            
+            self.currentUser = newUser
+            self.isAuthenticated = true
+            return true
+        }
     }
     
     public func signInWithApple() async {
@@ -176,6 +207,9 @@ public class AuthViewModel: ObservableObject {
     }
     
     public func signOut() {
+        Task {
+            await SupabaseService.shared.signOut()
+        }
         self.isAuthenticated = false
         self.authErrorMessage = nil
     }

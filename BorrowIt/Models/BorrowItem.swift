@@ -207,6 +207,65 @@ public struct BorrowItem: Identifiable, Codable, Hashable {
         self.isFavorite = isFavorite
     }
     
+    // MARK: - Resilient Codable Implementation for Cloud Database
+    private enum CodingKeys: String, CodingKey {
+        case id, title, description, category, dailyRate, depositHold, distanceMeters, rating
+        case isAvailable, isAvailableWeekend, pickupAddressSharedAfterApproval, approximateAddress
+        case exactAddress, coordinate, lender, systemImageName, imageURL, coreMLConfidence
+        case coreMLTag, terms, isFavorite
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        description = try container.decode(String.self, forKey: .description)
+        category = try container.decode(ItemCategory.self, forKey: .category)
+        dailyRate = try container.decode(Double.self, forKey: .dailyRate)
+        depositHold = try container.decode(Double.self, forKey: .depositHold)
+        distanceMeters = try container.decode(Double.self, forKey: .distanceMeters)
+        rating = try container.decode(Double.self, forKey: .rating)
+        isAvailable = try container.decode(Bool.self, forKey: .isAvailable)
+        isAvailableWeekend = try container.decode(Bool.self, forKey: .isAvailableWeekend)
+        pickupAddressSharedAfterApproval = try container.decodeIfPresent(Bool.self, forKey: .pickupAddressSharedAfterApproval) ?? true
+        approximateAddress = try container.decodeIfPresent(String.self, forKey: .approximateAddress) ?? ""
+        exactAddress = try container.decodeIfPresent(String.self, forKey: .exactAddress) ?? ""
+        coordinate = try container.decode(Coordinate.self, forKey: .coordinate)
+        lender = try container.decode(LenderProfile.self, forKey: .lender)
+        systemImageName = try container.decodeIfPresent(String.self, forKey: .systemImageName) ?? "bolt.fill"
+        imageURL = try container.decodeIfPresent(String.self, forKey: .imageURL)
+        coreMLConfidence = try container.decodeIfPresent(Double.self, forKey: .coreMLConfidence) ?? 0.94
+        coreMLTag = try container.decodeIfPresent(String.self, forKey: .coreMLTag) ?? category.rawValue
+        let decodedTerms = try container.decodeIfPresent(LendingTerms.self, forKey: .terms)
+        terms = decodedTerms ?? LendingTerms(depositHold: depositHold, pricePerDay: dailyRate)
+        isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(description, forKey: .description)
+        try container.encode(category, forKey: .category)
+        try container.encode(dailyRate, forKey: .dailyRate)
+        try container.encode(depositHold, forKey: .depositHold)
+        try container.encode(distanceMeters, forKey: .distanceMeters)
+        try container.encode(rating, forKey: .rating)
+        try container.encode(isAvailable, forKey: .isAvailable)
+        try container.encode(isAvailableWeekend, forKey: .isAvailableWeekend)
+        try container.encode(pickupAddressSharedAfterApproval, forKey: .pickupAddressSharedAfterApproval)
+        try container.encode(approximateAddress, forKey: .approximateAddress)
+        try container.encode(exactAddress, forKey: .exactAddress)
+        try container.encode(coordinate, forKey: .coordinate)
+        try container.encode(lender, forKey: .lender)
+        try container.encode(systemImageName, forKey: .systemImageName)
+        try container.encode(imageURL, forKey: .imageURL)
+        try container.encode(coreMLConfidence, forKey: .coreMLConfidence)
+        try container.encode(coreMLTag, forKey: .coreMLTag)
+        try container.encode(terms, forKey: .terms)
+        try container.encode(isFavorite, forKey: .isFavorite)
+    }
+    
     public var formattedDistance: String {
         if distanceMeters < 1000 {
             return "\(Int(distanceMeters))m away"
