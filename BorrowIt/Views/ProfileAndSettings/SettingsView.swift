@@ -217,59 +217,7 @@ public struct SettingsView: View {
                             .padding(14)
                             .squircleCard()
                             .padding(.horizontal, 20)
-                            
-                            // 4. Viva & Grader Demo Toolkit Panel
-                            VStack(alignment: .leading, spacing: 14) {
-                                HStack {
-                                    Image(systemName: "wrench.and.screwdriver.fill")
-                                        .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                                    Text("VIVA & GRADER DEMO TOOLKIT")
-                                        .font(.system(size: 11, weight: .bold))
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                VStack(spacing: 8) {
-                                    DemoToolkitButton(
-                                        title: "Lock App with Face ID",
-                                        icon: "faceid"
-                                    ) {
-                                        settings.lockAppWithFaceID()
-                                    }
-                                    
-                                    DemoToolkitButton(
-                                        title: "Simulate 50m Geofence Entry",
-                                        icon: "location.circle.fill"
-                                    ) {
-                                        lifecycleVM.advanceToHandoff()
-                                        settings.showDemoToast("Simulated 50m geofence arrival triggered!")
-                                    }
-                                    
-                                    DemoToolkitButton(
-                                        title: "Send Test Push Notification",
-                                        icon: "bell.badge.fill"
-                                    ) {
-                                        NotificationService.shared.notifyGeofenceEntered(itemTitle: "DeWalt Drill", lenderName: "Maya R.")
-                                        settings.showDemoToast("Local push alert fired to Notification Center!")
-                                    }
-                                    
-                                    DemoToolkitButton(
-                                        title: settings.simulateEmptyState ? "Restore Explore Feed" : "Simulate Empty State (Screen 16)",
-                                        icon: "location.slash.fill"
-                                    ) {
-                                        settings.toggleSimulateEmptyState()
-                                    }
-                                    
-                                    DemoToolkitButton(
-                                        title: "Reset Demo Data & Defaults",
-                                        icon: "arrow.counterclockwise"
-                                    ) {
-                                        settings.resetDemoData()
-                                    }
-                                }
-                            }
-                            .padding(18)
-                            .squircleCard()
-                            .padding(.horizontal, 20)
+
                             
                             // 4. Account Actions
                             VStack(spacing: 12) {
