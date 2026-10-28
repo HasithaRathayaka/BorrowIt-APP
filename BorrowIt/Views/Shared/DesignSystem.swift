@@ -219,10 +219,57 @@ public struct ItemPhotoView: View {
         self.cornerRadius = cornerRadius
     }
     
+    private var effectiveImageURL: URL? {
+        if let urlString = item.imageURL, !urlString.trimmingCharacters(in: .whitespaces).isEmpty, let url = URL(string: urlString) {
+            return url
+        }
+        return defaultPhotoURL(for: item)
+    }
+    
+    private func defaultPhotoURL(for item: BorrowItem) -> URL? {
+        let titleLower = item.title.lowercased()
+        if titleLower.contains("drill") {
+            return URL(string: "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=800&q=80")
+        } else if titleLower.contains("tent") {
+            return URL(string: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&q=80")
+        } else if titleLower.contains("chair") {
+            return URL(string: "https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=800&q=80")
+        } else if titleLower.contains("saw") {
+            return URL(string: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?auto=format&fit=crop&w=800&q=80")
+        } else if titleLower.contains("mixer") {
+            return URL(string: "https://images.unsplash.com/photo-1594385208974-2e75f8d7bb48?auto=format&fit=crop&w=800&q=80")
+        } else if titleLower.contains("kayak") {
+            return URL(string: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80")
+        } else if titleLower.contains("shears") || titleLower.contains("pruner") {
+            return URL(string: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=800&q=80")
+        } else if titleLower.contains("ladder") {
+            return URL(string: "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=800&q=80")
+        } else if titleLower.contains("washer") {
+            return URL(string: "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=800&q=80")
+        } else if titleLower.contains("cleaner") {
+            return URL(string: "https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=800&q=80")
+        }
+        
+        switch item.category {
+        case .powerTools:
+            return URL(string: "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=800&q=80")
+        case .handTools:
+            return URL(string: "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=800&q=80")
+        case .camping:
+            return URL(string: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&q=80")
+        case .kitchen:
+            return URL(string: "https://images.unsplash.com/photo-1594385208974-2e75f8d7bb48?auto=format&fit=crop&w=800&q=80")
+        case .garden:
+            return URL(string: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=800&q=80")
+        case .sports:
+            return URL(string: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80")
+        }
+    }
+    
     public var body: some View {
         ZStack(alignment: .topLeading) {
             Group {
-                if let urlString = item.imageURL, let url = URL(string: urlString) {
+                if let url = effectiveImageURL {
                     AsyncImage(url: url) { phase in
                         switch phase {
                         case .success(let image):
@@ -232,6 +279,17 @@ public struct ItemPhotoView: View {
                                 .frame(height: height)
                                 .frame(maxWidth: .infinity)
                                 .clipped()
+                                .overlay(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            Color.black.opacity(0.35),
+                                            Color.clear,
+                                            Color.black.opacity(0.1)
+                                        ]),
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
                         case .failure:
                             fallbackVisual
                         case .empty:
