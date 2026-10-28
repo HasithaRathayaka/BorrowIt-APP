@@ -10,8 +10,8 @@ public struct WelcomeOnboardingView: View {
     @State private var authMode: Int = 0
     
     // Log In Form
-    @State private var loginEmail: String = "alex@icloud.com"
-    @State private var loginPassword: String = "borrowit2026"
+    @State private var loginEmail: String = ""
+    @State private var loginPassword: String = ""
     
     // Sign Up Form
     @State private var signUpName: String = ""
@@ -223,18 +223,7 @@ public struct WelcomeOnboardingView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .padding(.horizontal, 24)
-            
-            // Quick Demo Sign In
-            Button(action: {
-                exploreVM.resetToFeed()
-                authVM.signInAsAlexMorgan()
-            }) {
 
-                Text("Quick Demo: Sign in as Alex Morgan (Cedar Grove)")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                    .padding(.vertical, 4)
-            }
         }
     }
     
