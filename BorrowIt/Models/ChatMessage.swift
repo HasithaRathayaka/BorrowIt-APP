@@ -44,13 +44,14 @@ public enum ConversationStatus: String, Codable, CaseIterable {
     case accepted = "Accepted"
     case complete = "Complete"
     case actionNeeded = "Action needed"
+    case pending = "Inquiry"
     
     public var pillColorHex: String {
         switch self {
         case .pickupToday: return "#10B981" // Emerald
         case .accepted: return "#3B82F6"    // Blue
         case .complete: return "#64748B"    // Slate
-        case .actionNeeded: return "#F59E0B" // Amber
+        case .actionNeeded, .pending: return "#F59E0B" // Amber
         }
     }
     
@@ -59,7 +60,7 @@ public enum ConversationStatus: String, Codable, CaseIterable {
         case .pickupToday: return "#D1FAE5"
         case .accepted: return "#DBEAFE"
         case .complete: return "#F1F5F9"
-        case .actionNeeded: return "#FEF3C7"
+        case .actionNeeded, .pending: return "#FEF3C7"
         }
     }
 }
