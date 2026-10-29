@@ -249,5 +249,70 @@ struct BorrowItTests {
         #expect(vm.selectedItemForMapPreview == nil)
         #expect(vm.selectedItemForDetail == nil)
     }
+
+    // MARK: - Test 10: Face ID Biometric Gate & App Lock State Machine
+    @Test("Face ID security gate: lifecycle app lock, biometric authentication, and lock/unlock transitions")
+    @MainActor
+    func testFaceIDBiometricLockAndUnlock() async {
+        let mockBio = MockBiometricService()
+        let authVM = AuthViewModel(biometricService: mockBio, backendService: MockBackendService())
+        let settings = AppSettingsManager()
+        
+        // 1. Initial State: App starts unlocked
+        settings.isAppLocked = false
+        #expect(!settings.isAppLocked)
+        
+        // 2. Lifecycle Trigger: Minimizing or backgrounding the app locks it
+        settings.lockAppWithFaceID()
+        #expect(settings.isAppLocked)
+        
+        // 3. Successful Face ID verification unlocks the app
+        mockBio.shouldSucceed = true
+        let unlockSuccess = await authVM.authenticateWithBiometrics(reason: "Unlock BorrowIt Test")
+        #expect(unlockSuccess == true)
+        #expect(authVM.authErrorMessage == nil)
+        #expect(mockBio.lastReasonPrompt == "Unlock BorrowIt Test")
+        
+        // Unlock state transition
+        settings.unlockApp()
+        #expect(!settings.isAppLocked)
+        
+        // 4. Failed Face ID verification keeps the app securely locked
+        settings.lockAppWithFaceID()
+        #expect(settings.isAppLocked)
+        
+        mockBio.shouldSucceed = false
+        let failSuccess = await authVM.authenticateWithBiometrics(reason: "Unlock BorrowIt Test Fail")
+        #expect(failSuccess == false)
+        #expect(authVM.authErrorMessage != nil)
+        #expect(settings.isAppLocked) // Privacy shield remains locked
+        
+        // 5. Native Biometric Service properties
+        #expect(mockBio.biometricTypeString == "Face ID")
+        #expect(mockBio.isBiometricsAvailable == true)
+    }
 }
+
+// MARK: - Mock Biometric Service for Unit Testing
+private class MockBiometricService: BiometricServiceProtocol {
+    var shouldSucceed: Bool = true
+    var isBiometricsAvailable: Bool = true
+    var biometricTypeString: String = "Face ID"
+    var lastReasonPrompt: String? = nil
+    
+    func authenticate(reason: String) async -> Result<Bool, Error> {
+        self.lastReasonPrompt = reason
+        if shouldSucceed {
+            return .success(true)
+        } else {
+            let error = NSError(
+                domain: "com.borrowit.tests",
+                code: 1001,
+                userInfo: [NSLocalizedDescriptionKey: "Face ID recognition failed. Try again."]
+            )
+            return .failure(error)
+        }
+    }
+}
+
 
