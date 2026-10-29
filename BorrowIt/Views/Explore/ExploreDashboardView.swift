@@ -281,9 +281,9 @@ public struct ExploreDashboardView: View {
     }
     
     // Calculates a 64-point circle perimeter for high-visibility boundary line rendering
-    private func circleCoordinates(center: CLLocationCoordinate2D, radiusMeters: Double, points: Int = 64) -> [CLLocationCoordinate2D] {
+    private func circleCoordinates(center: CLLocationCoordinate2D, radius: Double, points: Int = 64) -> [CLLocationCoordinate2D] {
         let earthRadius = 6378137.0
-        let dLat = radiusMeters / earthRadius
+        let dLat = radius / earthRadius
         let dLon = dLat / cos(center.latitude * .pi / 180.0)
         
         var coords: [CLLocationCoordinate2D] = []
