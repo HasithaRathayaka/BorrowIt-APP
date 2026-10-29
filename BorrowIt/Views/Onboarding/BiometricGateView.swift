@@ -75,7 +75,7 @@ public struct BiometricGateView: View {
                                 } else {
                                     Image(systemName: "faceid")
                                 }
-                                Text("Authenticate with Face ID")
+                                Text(isProcessing ? "Verifying Face ID..." : "Authenticate with Face ID")
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                             }
                             .foregroundColor(.white)
@@ -88,17 +88,25 @@ public struct BiometricGateView: View {
                         .accessibilityLabel("Authenticate with Face ID button")
                         
                         Button(action: {
-                            onCancel?()
-                            settings.unlockApp()
+                            withAnimation(settings.reduceMotionEnabled ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
+                                settings.unlockApp()
+                            }
+                            onAuthenticated?()
                         }) {
-                            Text("Simulator Passcode Bypass")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(.secondary)
-                                .padding(.vertical, 6)
+                            HStack(spacing: 6) {
+                                Image(systemName: "key.fill")
+                                    .font(.system(size: 13))
+                                Text("Passcode Bypass / Quick Unlock")
+                                    .font(.system(size: 14, weight: .medium))
+                            }
+                            .foregroundColor(.secondary)
+                            .padding(.vertical, 6)
                         }
                         
                         Button(action: {
-                            settings.unlockApp()
+                            withAnimation {
+                                settings.unlockApp()
+                            }
                             authVM.signOut()
                         }) {
                             Text("Log Out / Switch Account")
@@ -117,22 +125,29 @@ public struct BiometricGateView: View {
             }
         }
         .onAppear {
-            // Automatically prompt Face ID on view appearance
-            triggerAuthentication()
+            // Delay 0.3s to allow modal transition to complete before presenting LocalAuthentication
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                triggerAuthentication()
+            }
         }
     }
     
     private func triggerAuthentication() {
+        guard !isProcessing else { return }
         isProcessing = true
         errorMessage = nil
         Task {
             let success = await authVM.authenticateWithBiometrics(reason: reasonPrompt)
-            isProcessing = false
-            if success {
-                settings.unlockApp()
-                onAuthenticated?()
-            } else {
-                errorMessage = "Authentication failed. Tap button or use bypass."
+            await MainActor.run {
+                isProcessing = false
+                if success {
+                    withAnimation(settings.reduceMotionEnabled ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
+                        settings.unlockApp()
+                    }
+                    onAuthenticated?()
+                } else {
+                    errorMessage = "Authentication failed. Tap button or use bypass."
+                }
             }
         }
     }
