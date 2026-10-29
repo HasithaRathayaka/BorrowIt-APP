@@ -63,8 +63,8 @@ public class BorrowLifecycleViewModel: ObservableObject {
         do {
             let list = try await backendService.fetchBorrows()
             self.borrows = list
-            // Prefer the active/borrowed item, or handoff, or approved
-            self.activeBorrow = list.first(where: { $0.state == .borrowed || $0.state == .handoff || $0.state == .approved }) ?? list.first
+            // Only set activeBorrow if there is a transaction actually accepted or in handoff
+            self.activeBorrow = list.first(where: { $0.state == .handoff || $0.state == .approved || $0.state == .borrowed })
             if let active = activeBorrow {
                 regenerateRotatingQRPayload(for: active)
             }
@@ -153,7 +153,7 @@ public class BorrowLifecycleViewModel: ObservableObject {
             tx = created
         }
         self.borrows.insert(tx, at: 0)
-        self.activeBorrow = tx
+        // tx is pending lender approval - handoff pass unlocks only after acceptance
         
         notificationService.notifyBorrowRequested(itemTitle: item.title, lenderName: item.lender.name)
         return tx
@@ -167,6 +167,8 @@ public class BorrowLifecycleViewModel: ObservableObject {
             do {
                 let updated = try await backendService.updateBorrowState(id: id, state: .approved)
                 updateLocalBorrow(updated)
+                self.activeBorrow = updated
+                regenerateRotatingQRPayload(for: updated)
                 notificationService.notifyLenderApproved(itemTitle: updated.item.title, lenderName: updated.lenderName)
                 
                 // Start geofence monitoring

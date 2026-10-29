@@ -117,7 +117,7 @@ public struct BorrowTransaction: Identifiable, Codable, Hashable {
         id: UUID = UUID(),
         item: BorrowItem,
         borrowerId: UUID = UUID(uuidString: "99999999-9999-9999-9999-999999999999")!,
-        borrowerName: String = "Alex Morgan",
+        borrowerName: String = "You",
         lenderId: UUID? = nil,
         lenderName: String? = nil,
         startDate: Date = Date(),
@@ -205,19 +205,18 @@ public extension BorrowTransaction {
         id: UUID(uuidString: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")!,
         item: .dewaltDrill,
         borrowerId: UUID(uuidString: "99999999-9999-9999-9999-999999999999")!,
-        borrowerName: "Alex Morgan",
+        borrowerName: "You",
         startDate: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!,
         endDate: Calendar.current.date(byAdding: .hour, value: 4, to: Date())!,
-        state: .borrowed,
-        handoffToken: "DW20-9842",
-        pickedUpAt: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!
+        state: .pending,
+        handoffToken: "DW20-9842"
     )
     
     static let pendingTentBorrow = BorrowTransaction(
         id: UUID(uuidString: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")!,
         item: .trailTent,
         borrowerId: UUID(uuidString: "99999999-9999-9999-9999-999999999999")!,
-        borrowerName: "Alex Morgan",
+        borrowerName: "You",
         startDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())!,
         endDate: Calendar.current.date(byAdding: .day, value: 5, to: Date())!,
         state: .pending
@@ -227,7 +226,7 @@ public extension BorrowTransaction {
         id: UUID(uuidString: "cccccccc-cccc-cccc-cccc-cccccccccccc")!,
         item: .campChairs,
         borrowerId: UUID(uuidString: "99999999-9999-9999-9999-999999999999")!,
-        borrowerName: "Alex Morgan",
+        borrowerName: "You",
         startDate: Calendar.current.date(byAdding: .day, value: -5, to: Date())!,
         endDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
         state: .returned,

@@ -38,9 +38,9 @@ public struct UserProfile: Identifiable, Codable, Hashable, Sendable {
     
     public init(
         id: UUID = UUID(uuidString: "99999999-9999-9999-9999-999999999999")!,
-        name: String = "Alex Morgan",
-        email: String = "alex@icloud.com",
-        initials: String = "AM",
+        name: String = "You",
+        email: String = "neighbor@borrowit.app",
+        initials: String = "ME",
         neighborhood: String = "Cedar Grove",
         memberSince: String = "Neighbor since 2025",
         isIdVerified: Bool = true,

@@ -178,7 +178,7 @@ public extension ChatMessage {
         ChatMessage(
             conversationId: ChatConversation.convMaya.id,
             senderId: BorrowTransaction.activeDrillBorrow.borrowerId,
-            senderName: "Alex Morgan",
+            senderName: "You",
             isFromCurrentUser: true,
             content: "Hi Maya! Requested your DeWalt drill for Saturday afternoon to mount some floating shelves.",
             timestamp: Calendar.current.date(byAdding: .minute, value: -45, to: Date())!
@@ -188,13 +188,13 @@ public extension ChatMessage {
             senderId: LenderProfile.maya.id,
             senderName: "Maya R.",
             isFromCurrentUser: false,
-            content: "Hi Alex! That sounds good. I approved your request. I'll have it ready for pickup around 2 PM.",
+            content: "Hi! That sounds good. I approved your request. I'll have it ready for pickup around 2 PM.",
             timestamp: Calendar.current.date(byAdding: .minute, value: -30, to: Date())!
         ),
         ChatMessage(
             conversationId: ChatConversation.convMaya.id,
             senderId: BorrowTransaction.activeDrillBorrow.borrowerId,
-            senderName: "Alex Morgan",
+            senderName: "You",
             isFromCurrentUser: true,
             content: "Awesome, heading over now with my QR handoff pass!",
             timestamp: Calendar.current.date(byAdding: .minute, value: -18, to: Date())!
