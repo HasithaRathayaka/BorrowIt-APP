@@ -15,7 +15,9 @@ public struct ContentView: View {
     
     public var body: some View {
         Group {
-            if !authVM.isAuthenticated {
+            if !settings.hasCompletedOnboardingWalkthrough {
+                AppIntroWalkthroughView()
+            } else if !authVM.isAuthenticated {
                 WelcomeOnboardingView()
             } else {
                 if horizontalSizeClass == .regular {

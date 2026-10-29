@@ -11,6 +11,7 @@ public class AppSettingsManager: ObservableObject {
     @AppStorage("settings_dynamic_type_scale") public var dynamicTypeScale: Double = 1.0
     @AppStorage("settings_reduce_motion") public var reduceMotionEnabled: Bool = false
     @AppStorage("settings_high_contrast") public var highContrastEnabled: Bool = false
+    @AppStorage("has_completed_onboarding_walkthrough") public var hasCompletedOnboardingWalkthrough: Bool = false
     
     // Live UI Security & Viva Demo State
     @Published public var isAppLocked: Bool = false

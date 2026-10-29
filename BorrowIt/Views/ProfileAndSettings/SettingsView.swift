@@ -222,6 +222,30 @@ public struct SettingsView: View {
                             // 4. Account Actions
                             VStack(spacing: 12) {
                                 Button(action: {
+                                    withAnimation {
+                                        settings.hasCompletedOnboardingWalkthrough = false
+                                    }
+                                }) {
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "sparkles.rectangle.stack.fill")
+                                            .font(.system(size: 16, weight: .semibold))
+                                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                        Text("Replay App Intro Tour")
+                                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .padding(.horizontal, 16)
+                                    .background(Color(uiColor: .secondarySystemGroupedBackground))
+                                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                }
+                                
+                                Button(action: {
                                     authVM.signOut()
                                 }) {
                                     HStack(spacing: 10) {
