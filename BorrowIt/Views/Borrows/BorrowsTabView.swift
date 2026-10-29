@@ -30,6 +30,10 @@ public struct BorrowsTabView: View {
         exploreVM.myListedItems(for: authVM.currentUser)
     }
     
+    private var pendingBorrows: [BorrowTransaction] {
+        lifecycleVM.borrows.filter { $0.state == .pending }
+    }
+    
     public var body: some View {
         NavigationStack {
             ZStack {
@@ -115,10 +119,44 @@ public struct BorrowsTabView: View {
             .padding(.horizontal, 20)
             .padding(.top, 4)
             
-            // Active Borrow Card
-            if let active = lifecycleVM.activeBorrow, active.state != .returned {
-                activeBorrowCard(active)
+            // 1. Pending Requests Section (Awaiting Lender Approval)
+            if !pendingBorrows.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.orange)
+                        Text("PENDING REQUESTS (\(pendingBorrows.count))")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
                     .padding(.horizontal, 20)
+                    
+                    ForEach(pendingBorrows) { borrow in
+                        pendingBorrowCard(borrow)
+                            .padding(.horizontal, 20)
+                    }
+                }
+            }
+            
+            // 2. Active Borrow & Handoff Card
+            if let active = lifecycleVM.activeBorrow, active.state != .returned && active.state != .pending {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "bolt.badge.checkmark.fill")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                        Text("ACTIVE HANDOFF & PICKUP")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    
+                    activeBorrowCard(active)
+                        .padding(.horizontal, 20)
+                }
             }
             
             // 3. Pixel-Accurate Live Activity Card (ActivityKit Dynamic Island & Lock Screen Preview)
@@ -408,6 +446,93 @@ public struct BorrowsTabView: View {
                             .foregroundColor(.red.opacity(0.8))
                     }
                 }
+            }
+        }
+        .padding(14)
+        .squircleCard()
+    }
+    
+    // MARK: - Pending Borrow Card (Awaiting Lender Approval)
+    private func pendingBorrowCard(_ borrow: BorrowTransaction) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 12) {
+                // Item Photo Thumbnail or Fallback Icon
+                ItemPhotoView(item: borrow.item, height: 68, cornerRadius: 14)
+                    .frame(width: 68, height: 68)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .shadow(color: Color.black.opacity(0.06), radius: 4, y: 2)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(borrow.item.title)
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+                    
+                    Text("Requested from \(borrow.lenderName) · \(borrow.totalDays) \(borrow.totalDays == 1 ? "day" : "days")")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                    
+                    HStack(spacing: 6) {
+                        Text(borrow.item.isFree ? "Free Community Lend" : "Rs. \(Int(borrow.item.dailyRate * Double(borrow.totalDays))) total")
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .foregroundColor(borrow.item.isFree ? ThemeColors.emerald(highContrast: settings.highContrastEnabled) : .primary)
+                        
+                        Text("·")
+                            .foregroundColor(.secondary)
+                        
+                        Text("Awaiting Approval")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.orange)
+                    }
+                }
+                
+                Spacer()
+                
+                BorrowStatusPill(state: .pending)
+            }
+            
+            Divider()
+            
+            // Bottom Action Strip
+            HStack(spacing: 10) {
+                HStack(spacing: 6) {
+                    ProgressView()
+                        .tint(.orange)
+                        .scaleEffect(0.75)
+                    Text("Lender will review")
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                // Demo Simulator Approval Button (Face ID gated)
+                Button(action: {
+                    Task {
+                        _ = await lifecycleVM.approveBorrow(id: borrow.id)
+                    }
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                        Text("Approve (Demo)")
+                    }
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.softMintTint)
+                    .clipShape(Capsule())
+                }
+                
+                // Cancel Request Button
+                Button(action: {
+                    lifecycleVM.cancelBorrowRequest(id: borrow.id)
+                }) {
+                    Image(systemName: "xmark.circle")
+                        .font(.system(size: 16))
+                        .foregroundColor(.secondary)
+                }
+                .accessibilityLabel("Cancel borrow request")
             }
         }
         .padding(14)

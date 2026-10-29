@@ -208,7 +208,7 @@ public extension BorrowTransaction {
         borrowerName: "You",
         startDate: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!,
         endDate: Calendar.current.date(byAdding: .hour, value: 4, to: Date())!,
-        state: .pending,
+        state: .handoff,
         handoffToken: "DW20-9842"
     )
     

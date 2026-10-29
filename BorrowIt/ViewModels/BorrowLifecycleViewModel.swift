@@ -347,6 +347,15 @@ public class BorrowLifecycleViewModel: ObservableObject {
         }
     }
     
+    public func cancelBorrowRequest(id: UUID) {
+        withAnimation {
+            borrows.removeAll(where: { $0.id == id })
+            if activeBorrow?.id == id {
+                activeBorrow = borrows.first(where: { $0.state == .handoff || $0.state == .approved || $0.state == .borrowed })
+            }
+        }
+    }
+    
     private func updateLocalBorrow(_ updated: BorrowTransaction) {
         if let idx = borrows.firstIndex(where: { $0.id == updated.id }) {
             borrows[idx] = updated
