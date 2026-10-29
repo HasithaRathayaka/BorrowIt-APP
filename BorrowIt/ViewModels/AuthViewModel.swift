@@ -334,10 +334,15 @@ public class AuthViewModel: ObservableObject {
         let result = await biometricService.authenticate(reason: reason)
         switch result {
         case .success(let success):
+            self.authErrorMessage = nil
             return success
         case .failure(let error):
             let nsError = error as NSError
             if nsError.domain == LAErrorDomain && (nsError.code == LAError.userCancel.rawValue || nsError.code == LAError.appCancel.rawValue) {
+                self.authErrorMessage = "Face ID canceled. Tap button to unlock."
+                return false
+            } else if nsError.domain == LAErrorDomain && nsError.code == LAError.biometryNotEnrolled.rawValue {
+                self.authErrorMessage = "Face ID not enrolled. In Simulator menu, select Features → Face ID → Enrolled."
                 return false
             }
             self.authErrorMessage = error.localizedDescription

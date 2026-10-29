@@ -15,28 +15,31 @@ public struct ContentView: View {
     public init() {}
     
     public var body: some View {
-        Group {
-            if !settings.hasCompletedOnboardingWalkthrough {
-                AppIntroWalkthroughView()
-            } else if !authVM.isAuthenticated {
-                WelcomeOnboardingView()
-            } else {
-                if horizontalSizeClass == .regular {
-                    // iPadOS Adaptive NavigationSplitView
-                    iPadSplitDashboardView()
+        ZStack {
+            Group {
+                if !settings.hasCompletedOnboardingWalkthrough {
+                    AppIntroWalkthroughView()
+                } else if !authVM.isAuthenticated {
+                    WelcomeOnboardingView()
                 } else {
-                    // iPhone 5-Tab TabView
-                    iphoneTabView
+                    if horizontalSizeClass == .regular {
+                        // iPadOS Adaptive NavigationSplitView
+                        iPadSplitDashboardView()
+                    } else {
+                        // iPhone 5-Tab TabView
+                        iphoneTabView
+                    }
                 }
             }
-        }
-        .fullScreenCover(isPresented: Binding(
-            get: { authVM.isAuthenticated && settings.isAppLocked },
-            set: { settings.isAppLocked = $0 }
-        )) {
-            BiometricGateView(
-                reasonPrompt: "Welcome back, \(authVM.currentUser.name) — Unlock with Face ID to continue"
-            )
+            
+            // Native Full-Screen Privacy & Face ID Security Shield (Banking App Style)
+            if authVM.isAuthenticated && settings.faceIDLockEnabled && settings.isAppLocked {
+                BiometricGateView(
+                    reasonPrompt: "Welcome back, \(authVM.currentUser.name) — Unlock with Face ID to continue"
+                )
+                .transition(.opacity)
+                .zIndex(999)
+            }
         }
         .alert("Within 50m of Handoff Point!", isPresented: $lifecycleVM.isGeofenceAlertPresented) {
             Button("Open Handoff Pass") {

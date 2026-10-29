@@ -8,13 +8,9 @@ public class BiometricAuthService: BiometricServiceProtocol {
     public init() {}
     
     public var isBiometricsAvailable: Bool {
-        #if targetEnvironment(simulator)
-        return true
-        #else
         let context = LAContext()
         var error: NSError?
         return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) || context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error)
-        #endif
     }
     
     public var biometricTypeString: String {
@@ -32,45 +28,19 @@ public class BiometricAuthService: BiometricServiceProtocol {
         return "Face ID"
     }
     
+    /// Native Apple LocalAuthentication evaluation (Standard Apple Face ID with Passcode fallback)
     public func authenticate(reason: String) async -> Result<Bool, Error> {
         let context = LAContext()
         context.localizedCancelTitle = "Cancel"
         
-        #if targetEnvironment(simulator)
         var authError: NSError?
-        // If developer has enrolled Face ID in simulator menu (Features -> Face ID -> Enrolled),
-        // attempt genuine evaluation so they can demonstrate the real Apple Face ID UI if desired.
-        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authError) {
+        // Primary policy: Face ID first with native Passcode fallback
+        let policy: LAPolicy = .deviceOwnerAuthentication
+        
+        if context.canEvaluatePolicy(policy, error: &authError) {
             do {
                 let success = try await context.evaluatePolicy(
-                    .deviceOwnerAuthenticationWithBiometrics,
-                    localizedReason: reason
-                )
-                return .success(success)
-            } catch {
-                let nsErr = error as NSError
-                // Respect user clicking "Cancel"
-                if nsErr.code == LAError.userCancel.rawValue || nsErr.code == LAError.appCancel.rawValue {
-                    return .failure(error)
-                }
-                // If simulator failed because "Matching Face" wasn't selected in time from menu,
-                // seamlessly succeed after brief delay so developer/reviewer isn't locked out
-                try? await Task.sleep(nanoseconds: 300_000_000)
-                return .success(true)
-            }
-        } else {
-            // Face ID not enrolled in Simulator menu bar:
-            // Simulate realistic 0.5s biometric scan and succeed
-            try? await Task.sleep(nanoseconds: 500_000_000)
-            return .success(true)
-        }
-        #else
-        var authError: NSError?
-        // On physical devices: prefer biometrics with seamless device passcode fallback
-        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &authError) {
-            do {
-                let success = try await context.evaluatePolicy(
-                    .deviceOwnerAuthentication,
+                    policy,
                     localizedReason: reason
                 )
                 return .success(success)
@@ -81,10 +51,9 @@ public class BiometricAuthService: BiometricServiceProtocol {
             let err = authError ?? NSError(
                 domain: LAErrorDomain,
                 code: LAError.biometryNotEnrolled.rawValue,
-                userInfo: [NSLocalizedDescriptionKey: "Face ID and Passcode are not configured on this device."]
+                userInfo: [NSLocalizedDescriptionKey: "Face ID is not enrolled. In Simulator top menu bar, select Features → Face ID → Enrolled."]
             )
             return .failure(err)
         }
-        #endif
     }
 }
