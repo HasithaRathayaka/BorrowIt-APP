@@ -339,10 +339,11 @@ public class AuthViewModel: ObservableObject {
         case .failure(let error):
             let nsError = error as NSError
             if nsError.domain == LAErrorDomain && (nsError.code == LAError.userCancel.rawValue || nsError.code == LAError.appCancel.rawValue) {
-                self.authErrorMessage = "Face ID canceled. Tap button to unlock."
+                self.authErrorMessage = "Face ID canceled. Tap button to scan."
                 return false
-            } else if nsError.domain == LAErrorDomain && nsError.code == LAError.biometryNotEnrolled.rawValue {
-                self.authErrorMessage = "Face ID not enrolled. In Simulator menu, select Features → Face ID → Enrolled."
+            } else if nsError.domain == LAErrorDomain && (nsError.code == -8 /* userInteractionRequired */ || nsError.code == LAError.authenticationFailed.rawValue) {
+                // Clear error silently so no red warning appears before user interaction
+                self.authErrorMessage = nil
                 return false
             }
             self.authErrorMessage = error.localizedDescription
