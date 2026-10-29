@@ -38,17 +38,43 @@ public class AddItemViewModel: ObservableObject {
     @Published public var itemPublishedSuccessfully: Bool = false
     @Published public var isPublishing: Bool = false
     
+    public let editingItem: BorrowItem?
+    public var isEditing: Bool { editingItem != nil }
+    
     private let classifier: ClassifierProtocol
     private let backendService: BackendServiceProtocol
     
     public init(
+        editingItem: BorrowItem? = nil,
         classifier: ClassifierProtocol = ImageClassifierService.shared,
         backendService: BackendServiceProtocol = SupabaseService.shared
     ) {
+        self.editingItem = editingItem
         self.classifier = classifier
         self.backendService = backendService
-        if let firstPreset = TestImagePreset.presets.first {
-            selectPreset(firstPreset)
+        
+        if let item = editingItem {
+            self.title = item.title
+            self.itemDescription = item.description
+            self.selectedCategory = item.category
+            self.dailyRate = item.dailyRate
+            self.savedRate = item.dailyRate > 0 ? item.dailyRate : 1500.0
+            self.depositHold = item.depositHold
+            self.isLendingForFree = (item.dailyRate <= 0)
+            self.isAvailableNow = item.isAvailable
+            self.exactAddress = item.exactAddress
+            self.pickupAddressSharedAfterApproval = item.pickupAddressSharedAfterApproval
+            self.selectedImageURL = item.imageURL
+            self.selectedImageData = nil
+            self.coreMLTag = item.coreMLTag.isEmpty ? item.category.rawValue : item.coreMLTag
+            self.coreMLConfidence = item.coreMLConfidence > 0 ? item.coreMLConfidence : 0.95
+            if let matchingPreset = TestImagePreset.presets.first(where: { $0.suggestedCategory == item.category }) {
+                self.selectedPreset = matchingPreset
+            }
+        } else {
+            if let firstPreset = TestImagePreset.presets.first {
+                selectPreset(firstPreset)
+            }
         }
     }
     
@@ -144,55 +170,82 @@ public class AddItemViewModel: ObservableObject {
         self.isPublishing = true
         defer { self.isPublishing = false }
         
-        // Fetch current active user profile so item has authentic lender info
-        let currentUser = (try? await backendService.fetchUserProfile()) ?? UserProfile.currentUser
-        
-        let newItem = BorrowItem(
-            title: title.trimmingCharacters(in: .whitespacesAndNewlines),
-            description: itemDescription.trimmingCharacters(in: .whitespacesAndNewlines),
-            category: selectedCategory,
-            dailyRate: isLendingForFree ? 0.0 : dailyRate,
-            depositHold: depositHold,
-            distanceMeters: 80.0,
-            rating: 5.0,
-            isAvailable: isAvailableNow,
-            isAvailableWeekend: true,
-            pickupAddressSharedAfterApproval: pickupAddressSharedAfterApproval,
-            approximateAddress: "Cedar Grove · 80m away",
-            exactAddress: exactAddress,
-            coordinate: Coordinate(latitude: 37.7752, longitude: -122.4190),
-            lender: LenderProfile(
-                id: currentUser.id,
-                name: currentUser.name,
-                initials: currentUser.initials,
-                rating: currentUser.communityRating,
-                reviewCount: currentUser.reviewCount,
-                joinedYear: 2026,
-                totalLends: currentUser.totalLends,
-                avatarColorHex: "#10B981"
-            ),
-            systemImageName: selectedPreset.symbol,
-            imageURL: selectedImageURL,
-            coreMLConfidence: coreMLConfidence,
-            coreMLTag: coreMLTag
-        )
-        
-        do {
-            let savedItem = try await backendService.addItem(newItem)
+        if let existing = editingItem {
+            // Update existing listing details
+            var updatedItem = existing
+            updatedItem.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+            updatedItem.description = itemDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+            updatedItem.category = selectedCategory
+            updatedItem.dailyRate = isLendingForFree ? 0.0 : dailyRate
+            updatedItem.depositHold = depositHold
+            updatedItem.isAvailable = isAvailableNow
+            updatedItem.exactAddress = exactAddress
+            updatedItem.pickupAddressSharedAfterApproval = pickupAddressSharedAfterApproval
+            updatedItem.imageURL = selectedImageURL
+            updatedItem.coreMLConfidence = coreMLConfidence
+            updatedItem.coreMLTag = coreMLTag
             
-            // Increment total lends count on the user profile and persist to Supabase
-            var updatedProfile = currentUser
-            updatedProfile.totalLends += 1
-            Task {
-                try? await self.backendService.updateUserProfile(updatedProfile)
+            do {
+                let saved = try await backendService.updateItem(updatedItem)
+                self.itemPublishedSuccessfully = true
+                return saved
+            } catch {
+                print("AddItemViewModel: Error updating item in backend: \(error)")
+                let saved = (try? await backendService.addItem(updatedItem)) ?? updatedItem
+                self.itemPublishedSuccessfully = true
+                return saved
             }
+        } else {
+            // Creating new listing
+            let currentUser = (try? await backendService.fetchUserProfile()) ?? UserProfile.currentUser
             
-            self.itemPublishedSuccessfully = true
-            return savedItem
-        } catch {
-            print("AddItemViewModel: Error recording item to backend: \(error)")
-            self.itemPublishedSuccessfully = true
-            return newItem
+            let newItem = BorrowItem(
+                title: title.trimmingCharacters(in: .whitespacesAndNewlines),
+                description: itemDescription.trimmingCharacters(in: .whitespacesAndNewlines),
+                category: selectedCategory,
+                dailyRate: isLendingForFree ? 0.0 : dailyRate,
+                depositHold: depositHold,
+                distanceMeters: 80.0,
+                rating: 5.0,
+                isAvailable: isAvailableNow,
+                isAvailableWeekend: true,
+                pickupAddressSharedAfterApproval: pickupAddressSharedAfterApproval,
+                approximateAddress: "Cedar Grove · 80m away",
+                exactAddress: exactAddress,
+                coordinate: Coordinate(latitude: 37.7752, longitude: -122.4190),
+                lender: LenderProfile(
+                    id: currentUser.id,
+                    name: currentUser.name,
+                    initials: currentUser.initials,
+                    rating: currentUser.communityRating,
+                    reviewCount: currentUser.reviewCount,
+                    joinedYear: 2026,
+                    totalLends: currentUser.totalLends,
+                    avatarColorHex: "#10B981"
+                ),
+                systemImageName: selectedPreset.symbol,
+                imageURL: selectedImageURL,
+                coreMLConfidence: coreMLConfidence,
+                coreMLTag: coreMLTag
+            )
+            
+            do {
+                let savedItem = try await backendService.addItem(newItem)
+                
+                // Increment total lends count on the user profile and persist to Supabase
+                var updatedProfile = currentUser
+                updatedProfile.totalLends += 1
+                Task {
+                    try? await self.backendService.updateUserProfile(updatedProfile)
+                }
+                
+                self.itemPublishedSuccessfully = true
+                return savedItem
+            } catch {
+                print("AddItemViewModel: Error recording item to backend: \(error)")
+                self.itemPublishedSuccessfully = true
+                return newItem
+            }
         }
     }
     

@@ -5,14 +5,16 @@ import PhotosUI
 @MainActor
 public struct AddItemView: View {
     @Environment(\.dismiss) var dismiss
-    @StateObject private var addVM = AddItemViewModel()
+    @StateObject private var addVM: AddItemViewModel
     @EnvironmentObject var exploreVM: ExploreViewModel
     @EnvironmentObject var settings: AppSettingsManager
     
     @State private var selectedPhotoPickerItem: PhotosPickerItem? = nil
     @State private var customUrlText: String = ""
     
-    public init() {}
+    public init(editingItem: BorrowItem? = nil) {
+        _addVM = StateObject(wrappedValue: AddItemViewModel(editingItem: editingItem))
+    }
     
     public var body: some View {
         NavigationStack {
@@ -101,7 +103,7 @@ public struct AddItemView: View {
                                 
                                 // Test Preset Strip (for Graders running on Simulator)
                                 VStack(alignment: .leading, spacing: 6) {
-                                    Text("QUICK SAMPLE PHOTOS & CORE ML PRESETS")
+                                    Text(addVM.isEditing ? "REPLACE PHOTO WITH PRESET (OPTIONAL)" : "QUICK SAMPLE PHOTOS & CORE ML PRESETS")
                                         .font(.system(size: 11, weight: .bold))
                                         .foregroundColor(.secondary)
                                     
@@ -283,9 +285,12 @@ public struct AddItemView: View {
                     VStack {
                         Button(action: {
                             Task {
-                                let newItem = await addVM.publishItem()
+                                let resultItem = await addVM.publishItem()
+                                exploreVM.updateItem(resultItem)
                                 await exploreVM.fetchItems()
-                                exploreVM.selectedItemForDetail = newItem
+                                if !addVM.isEditing {
+                                    exploreVM.selectedItemForDetail = resultItem
+                                }
                                 dismiss()
                             }
                         }) {
@@ -293,11 +298,11 @@ public struct AddItemView: View {
                                 HStack(spacing: 8) {
                                     ProgressView()
                                         .tint(.white)
-                                    Text("Recording to Database...")
+                                    Text(addVM.isEditing ? "Saving Changes..." : "Recording to Database...")
                                         .font(.system(size: 16, weight: .bold, design: .rounded))
                                 }
                             } else {
-                                Text("Publish Item")
+                                Text(addVM.isEditing ? "Save Changes" : "Publish Item")
                                     .font(.system(size: 16, weight: .bold, design: .rounded))
                             }
                         }
@@ -310,7 +315,7 @@ public struct AddItemView: View {
                     .background(Color(uiColor: .systemGroupedBackground))
                 }
             }
-            .navigationTitle("Add an Item")
+            .navigationTitle(addVM.isEditing ? "Edit Item" : "Add an Item")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

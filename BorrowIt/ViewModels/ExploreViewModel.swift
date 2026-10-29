@@ -110,8 +110,16 @@ public class ExploreViewModel: ObservableObject {
             if let idx = items.firstIndex(where: { $0.id == item.id }) {
                 items[idx].isAvailable.toggle()
                 let updated = items[idx]
-                _ = try? await backendService.addItem(updated)
+                _ = try? await backendService.updateItem(updated)
             }
+        }
+    }
+    
+    public func updateItem(_ item: BorrowItem) {
+        if let idx = items.firstIndex(where: { $0.id == item.id }) {
+            items[idx] = item
+        } else {
+            items.insert(item, at: 0)
         }
     }
     

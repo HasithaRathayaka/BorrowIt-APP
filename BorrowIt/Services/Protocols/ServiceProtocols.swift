@@ -7,6 +7,7 @@ public protocol BackendServiceProtocol {
     func fetchItems() async throws -> [BorrowItem]
     func fetchItem(id: UUID) async throws -> BorrowItem?
     func addItem(_ item: BorrowItem) async throws -> BorrowItem
+    func updateItem(_ item: BorrowItem) async throws -> BorrowItem
     func deleteItem(id: UUID) async throws
     func toggleFavorite(itemId: UUID) async throws -> Bool
     

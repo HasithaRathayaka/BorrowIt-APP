@@ -339,9 +339,10 @@ public class SupabaseService: BackendServiceProtocol {
         if isLiveConfigured {
             do {
                 let body = try jsonEncoder.encode(item)
-                guard var request = makeRequest(endpoint: "/rest/v1/items", method: "POST", body: body) else {
+                guard var request = makeRequest(endpoint: "/rest/v1/items?on_conflict=id", method: "POST", body: body) else {
                     return item
                 }
+                request.addValue("resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
                 request.addValue("return=representation", forHTTPHeaderField: "Prefer")
                 
                 let (data, response) = try await session.data(for: request)
@@ -361,6 +362,41 @@ public class SupabaseService: BackendServiceProtocol {
                 }
             } catch {
                 print("Supabase addItem request failed: \(error)")
+            }
+        }
+        return item
+    }
+    
+    public func updateItem(_ item: BorrowItem) async throws -> BorrowItem {
+        if let idx = localItems.firstIndex(where: { $0.id == item.id }) {
+            localItems[idx] = item
+        }
+        
+        if isLiveConfigured {
+            do {
+                let body = try jsonEncoder.encode(item)
+                // PostgREST PATCH updates the specific item row matching id
+                if var request = makeRequest(endpoint: "/rest/v1/items?id=eq.\(item.id.uuidString)", method: "PATCH", body: body) {
+                    request.addValue("return=representation", forHTTPHeaderField: "Prefer")
+                    let (data, response) = try await session.data(for: request)
+                    if let httpResponse = response as? HTTPURLResponse {
+                        if httpResponse.statusCode == 200 || httpResponse.statusCode == 204 {
+                            if let decodedList = try? jsonDecoder.decode([BorrowItem].self, from: data), let saved = decodedList.first {
+                                if let idx = localItems.firstIndex(where: { $0.id == item.id }) {
+                                    localItems[idx] = saved
+                                }
+                                print("Item updated in Supabase database: \(saved.id)")
+                                return saved
+                            }
+                        } else {
+                            let errStr = String(data: data, encoding: .utf8) ?? "HTTP \(httpResponse.statusCode)"
+                            print("Supabase updateItem PATCH error (\(httpResponse.statusCode)): \(errStr). Falling back to upsert...")
+                            return try await addItem(item)
+                        }
+                    }
+                }
+            } catch {
+                print("Supabase updateItem request failed: \(error)")
             }
         }
         return item
@@ -657,7 +693,19 @@ public class MockBackendService: BackendServiceProtocol {
     public func fetchItems() async throws -> [BorrowItem] { items }
     public func fetchItem(id: UUID) async throws -> BorrowItem? { items.first(where: { $0.id == id }) }
     public func addItem(_ item: BorrowItem) async throws -> BorrowItem {
-        items.append(item)
+        if let idx = items.firstIndex(where: { $0.id == item.id }) {
+            items[idx] = item
+        } else {
+            items.append(item)
+        }
+        return item
+    }
+    public func updateItem(_ item: BorrowItem) async throws -> BorrowItem {
+        if let idx = items.firstIndex(where: { $0.id == item.id }) {
+            items[idx] = item
+        } else {
+            items.append(item)
+        }
         return item
     }
     public func deleteItem(id: UUID) async throws {

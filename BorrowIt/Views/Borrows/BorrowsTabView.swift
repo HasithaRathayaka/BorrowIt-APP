@@ -12,6 +12,7 @@ public struct BorrowsTabView: View {
     @State private var selectedSegment: Int = 0 // 0 = Borrowing, 1 = My Listings
     @State private var isAddItemPresented: Bool = false
     @State private var selectedItemForDetail: BorrowItem? = nil
+    @State private var itemToEdit: BorrowItem? = nil
     @State private var itemToDelete: BorrowItem? = nil
     @State private var showDeleteAlert: Bool = false
     
@@ -82,6 +83,9 @@ public struct BorrowsTabView: View {
             }
             .sheet(isPresented: $isAddItemPresented) {
                 AddItemView()
+            }
+            .sheet(item: $itemToEdit) { item in
+                AddItemView(editingItem: item)
             }
             .navigationDestination(item: $selectedItemForDetail) { item in
                 ItemDetailView(item: item)
@@ -359,6 +363,23 @@ public struct BorrowsTabView: View {
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
                         .background(Color.softMintTint)
+                        .clipShape(Capsule())
+                    }
+                    
+                    // Edit Button
+                    Button(action: {
+                        itemToEdit = item
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 11, weight: .semibold))
+                            Text("Edit")
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        }
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color(uiColor: .tertiarySystemFill))
                         .clipShape(Capsule())
                     }
                     
