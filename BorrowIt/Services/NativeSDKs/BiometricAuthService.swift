@@ -33,7 +33,7 @@ public class BiometricAuthService: BiometricServiceProtocol {
         context.localizedCancelTitle = "Cancel"
         
         var authError: NSError?
-        // Check if device supports biometrics
+        // 1. Evaluate genuine biometrics (Face ID / Touch ID)
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authError) {
             do {
                 let success = try await context.evaluatePolicy(
@@ -44,17 +44,25 @@ public class BiometricAuthService: BiometricServiceProtocol {
             } catch {
                 return .failure(error)
             }
+        } else if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &authError) {
+            // 2. Passcode fallback if biometrics not enrolled
+            do {
+                let success = try await context.evaluatePolicy(
+                    .deviceOwnerAuthentication,
+                    localizedReason: reason
+                )
+                return .success(success)
+            } catch {
+                return .failure(error)
+            }
         } else {
-            // Simulator or hardware without biometrics:
-            // Allow graceful simulated authentication bypass so graders can test all flows without hardware friction
-            #if targetEnvironment(simulator) || DEBUG
-            print("[BiometricAuthService] Simulator / Debug mode: Authenticated via simulated Face ID pass.")
-            // Simulate brief 300ms verification delay
-            try? await Task.sleep(nanoseconds: 300_000_000)
-            return .success(true)
-            #else
-            return .failure(authError ?? NSError(domain: "BorrowItAuth", code: -1, userInfo: [NSLocalizedDescriptionKey: "Biometrics unavailable on this device"]))
-            #endif
+            // 3. Neither biometrics nor passcode enrolled
+            let err = authError ?? NSError(
+                domain: LAErrorDomain,
+                code: LAError.biometryNotEnrolled.rawValue,
+                userInfo: [NSLocalizedDescriptionKey: "Face ID is not enrolled. Enable in Simulator menu: Features > Face ID > Enrolled."]
+            )
+            return .failure(err)
         }
     }
 }

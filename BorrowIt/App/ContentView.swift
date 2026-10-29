@@ -47,6 +47,9 @@ public struct ContentView: View {
             if authVM.isAuthenticated {
                 selectedTab = 0
                 exploreVM.resetToFeed()
+                if settings.faceIDLockEnabled {
+                    settings.lockAppWithFaceID()
+                }
             }
         }
     }

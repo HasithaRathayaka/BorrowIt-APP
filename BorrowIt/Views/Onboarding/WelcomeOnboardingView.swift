@@ -1,7 +1,9 @@
 import SwiftUI
+import AuthenticationServices
 
 // MARK: - Screen 1: Welcome, Sign In & Sign Up with Face ID
 public struct WelcomeOnboardingView: View {
+    @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var settings: AppSettingsManager
     @EnvironmentObject var exploreVM: ExploreViewModel
@@ -95,16 +97,25 @@ public struct WelcomeOnboardingView: View {
             }
         }
         .liveAccessibilityScale()
+        .sheet(isPresented: $authVM.showFaceIDEnrollmentGuidance) {
+            faceIDEnrollmentSheet
+        }
+        .sheet(isPresented: $authVM.showAppleSignInSandboxPrompt) {
+            appleSandboxSheet
+        }
     }
     
     // MARK: - Log In Section
     private var loginSection: some View {
         VStack(spacing: 16) {
-            // Prominent Face ID / Biometric Button
+            // Prominent Face ID / Biometric Button with Remembered Account support
+            let remembered = authVM.loadSavedUser()
             Button(action: {
                 Task {
-                    exploreVM.resetToFeed()
-                    _ = await authVM.signInWithFaceID()
+                    let success = await authVM.signInWithFaceID()
+                    if success {
+                        exploreVM.resetToFeed()
+                    }
                 }
             }) {
                 HStack(spacing: 14) {
@@ -118,12 +129,21 @@ public struct WelcomeOnboardingView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Sign in with Face ID")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(.primary)
-                        Text("One-tap secure biometric login")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
+                        if let user = remembered {
+                            Text("Sign in as \(user.name)")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundColor(.primary)
+                            Text("One-tap biometric unlock · \(user.neighborhood)")
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("Sign in with Face ID")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundColor(.primary)
+                            Text("One-tap secure biometric login")
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                        }
                     }
                     
                     Spacer()
@@ -203,27 +223,25 @@ public struct WelcomeOnboardingView: View {
             }
             .padding(.horizontal, 24)
             
-            // Sign in with Apple Button
-            Button(action: {
-                Task {
-                    exploreVM.resetToFeed()
-                    await authVM.signInWithApple()
+            // Official Native Apple Sign In Button (AuthenticationServices)
+            SignInWithAppleButton(
+                .signIn,
+                onRequest: { request in
+                    request.requestedScopes = [.fullName, .email]
+                },
+                onCompletion: { result in
+                    Task {
+                        await authVM.handleAppleSignInResult(result)
+                        if authVM.isAuthenticated {
+                            exploreVM.resetToFeed()
+                        }
+                    }
                 }
-            }) {
-                HStack(spacing: 8) {
-                    Image(systemName: "applelogo")
-                        .font(.system(size: 18, weight: .semibold))
-                    Text("Sign in with Apple")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                }
-                .foregroundColor(Color(uiColor: .systemBackground))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.primary)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            }
+            )
+            .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+            .frame(height: 50)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .padding(.horizontal, 24)
-
         }
     }
     
@@ -355,6 +373,176 @@ public struct WelcomeOnboardingView: View {
             .padding(.horizontal, 24)
             .padding(.top, 4)
         }
+    }
+    
+    // MARK: - Face ID Simulator / Enrollment Guidance Sheet
+    private var faceIDEnrollmentSheet: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                ZStack {
+                    Circle()
+                        .fill(Color.softMintTint)
+                        .frame(width: 80, height: 80)
+                    Image(systemName: "faceid")
+                        .font(.system(size: 42))
+                        .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                }
+                .padding(.top, 20)
+                
+                VStack(spacing: 8) {
+                    Text("Face ID Biometric Login")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                    
+                    let targetUser = authVM.loadSavedUser() ?? authVM.currentUser
+                    Text("Ready to authenticate as **\(targetUser.name)**")
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                }
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("SIMULATOR TESTING GUIDE")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.secondary)
+                    
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack(alignment: .top, spacing: 10) {
+                            Text("1.")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                            Text("In the Mac menu bar at the top, select **Features → Face ID → Enrolled**.")
+                                .font(.system(size: 13))
+                        }
+                        HStack(alignment: .top, spacing: 10) {
+                            Text("2.")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                            Text("Tap **Sign in with Face ID** again to see Apple's native Face ID popup.")
+                                .font(.system(size: 13))
+                        }
+                        HStack(alignment: .top, spacing: 10) {
+                            Text("3.")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                            Text("Trigger **Features → Face ID → Matching Face** to simulate a real face match.")
+                                .font(.system(size: 13))
+                        }
+                    }
+                    .padding(14)
+                    .background(Color(uiColor: .secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .padding(.horizontal, 20)
+                
+                Spacer()
+                
+                VStack(spacing: 12) {
+                    Button(action: {
+                        authVM.continueWithBiometricSandboxProfile()
+                        exploreVM.resetToFeed()
+                    }) {
+                        Text("Simulate Face ID Pass (One-Tap)")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+                    
+                    Button("Cancel") {
+                        authVM.showFaceIDEnrollmentGuidance = false
+                    }
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+            }
+            .navigationTitle("Face ID Setup")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .presentationDetents([.medium, .large])
+    }
+    
+    // MARK: - Apple Sign In Simulator Sandbox Sheet
+    private var appleSandboxSheet: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                ZStack {
+                    Circle()
+                        .fill(Color.primary.opacity(0.08))
+                        .frame(width: 80, height: 80)
+                    Image(systemName: "applelogo")
+                        .font(.system(size: 38))
+                        .foregroundColor(.primary)
+                }
+                .padding(.top, 20)
+                
+                VStack(spacing: 8) {
+                    Text("Sign in with Apple")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                    Text("On real devices, iOS presents the native Apple ID popup. On Xcode Simulator without an active iCloud account, continue with your verified profile below:")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
+                }
+                
+                VStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("FULL NAME")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.secondary)
+                        TextField("Name", text: $authVM.pendingAppleName)
+                            .padding(12)
+                            .background(Color(uiColor: .secondarySystemGroupedBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("EMAIL (SHARE OR HIDE)")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.secondary)
+                        TextField("Email", text: $authVM.pendingAppleEmail)
+                            .padding(12)
+                            .background(Color(uiColor: .secondarySystemGroupedBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
+                }
+                .padding(.horizontal, 20)
+                
+                Spacer()
+                
+                VStack(spacing: 12) {
+                    Button(action: {
+                        authVM.continueWithAppleSandboxProfile(
+                            name: authVM.pendingAppleName,
+                            email: authVM.pendingAppleEmail
+                        )
+                        exploreVM.resetToFeed()
+                    }) {
+                        Text("Continue as Apple Verified Neighbor")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(uiColor: .systemBackground))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(Color.primary)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+                    
+                    Button("Cancel") {
+                        authVM.showAppleSignInSandboxPrompt = false
+                    }
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+            }
+            .navigationTitle("Apple ID Verification")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .presentationDetents([.medium, .large])
     }
 }
 
