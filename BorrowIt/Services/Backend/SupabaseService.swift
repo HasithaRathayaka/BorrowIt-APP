@@ -288,18 +288,23 @@ public class SupabaseService: BackendServiceProtocol {
                     let (data, response) = try await session.data(for: request)
                     if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                         let decoded = try jsonDecoder.decode([BorrowItem].self, from: data)
-                        if !decoded.isEmpty {
+                        // Filter out any legacy non-Sri Lankan items (e.g. old San Francisco coordinates)
+                        let colomboItems = decoded.filter { item in
+                            item.coordinate.latitude >= 5.0 && item.coordinate.latitude <= 10.0 &&
+                            item.coordinate.longitude >= 79.0 && item.coordinate.longitude <= 82.0
+                        }
+                        if !colomboItems.isEmpty {
                             // Merge cloud items with any local items not yet in cloud
-                            var merged = decoded
+                            var merged = colomboItems
                             for localItem in self.localItems {
                                 if !merged.contains(where: { $0.id == localItem.id }) {
-                                    merged.insert(localItem, at: 0)
+                                    merged.append(localItem)
                                 }
                             }
                             self.localItems = merged
                             return merged
                         } else {
-                            // Cloud items table is empty: auto-seed Cedar Grove items into Supabase
+                            // Cloud items table has no Colombo items yet: auto-seed Colombo items into Supabase
                             Task {
                                 for item in BorrowItem.allSeedItems {
                                     _ = try? await self.addItem(item)

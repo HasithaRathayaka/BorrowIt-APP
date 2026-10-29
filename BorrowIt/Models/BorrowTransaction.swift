@@ -233,7 +233,7 @@ public extension BorrowTransaction {
         pickedUpAt: Calendar.current.date(byAdding: .day, value: -5, to: Date())!,
         returnedAt: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
         reviewRating: 5,
-        reviewComment: "Jon was super responsive and the chairs were spotless. Saved us Rs. 5,000 from buying new ones for the weekend!"
+        reviewComment: "Dilshan was super responsive and the chairs were spotless. Saved us Rs. 5,000 from buying new ones for our weekend trip!"
     )
     
     static let allSeedTransactions: [BorrowTransaction] = [
