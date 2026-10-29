@@ -154,6 +154,58 @@ public struct HandoffQRView: View {
                 .shadow(color: Color.black.opacity(0.2), radius: 20, y: 8)
                 .padding(.horizontal, 20)
                 
+                // Core Location 50m Geofencing Card
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        HStack(spacing: 6) {
+                            Image(systemName: "location.fill.viewfinder")
+                                .foregroundColor(lifecycleVM.isWithin50mOfHandoff ? Color.brandEmerald : Color.orange)
+                            Text("CORE LOCATION GEOFENCE (50M)")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        // Status badge (Within 50m vs Approaching)
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(lifecycleVM.isWithin50mOfHandoff ? Color.brandEmerald : Color.orange)
+                                .frame(width: 6, height: 6)
+                            Text(lifecycleVM.isWithin50mOfHandoff ? "Within 50m zone" : "Monitoring (<50m)")
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                                .foregroundColor(lifecycleVM.isWithin50mOfHandoff ? Color.statusEmeraldText : Color.orange)
+                        }
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 4)
+                        .background(lifecycleVM.isWithin50mOfHandoff ? Color.statusEmeraldBg : Color.orange.opacity(0.15))
+                        .clipShape(Capsule())
+                    }
+                    
+                    Text("Agreed Handoff Location: \(lifecycleVM.activeBorrow?.item.locationName ?? "Cedar Grove") (\(Int(lifecycleVM.handoffDistanceMeters))m away)")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.primary)
+                    
+                    // Viva / Simulator trigger button
+                    Button(action: {
+                        lifecycleVM.advanceToHandoff()
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "location.circle.fill")
+                            Text("Simulate Entering 50m Zone (Geofence Trigger)")
+                        }
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundColor(Color.brandEmerald)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.brandEmerald.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    }
+                }
+                .padding(14)
+                .squircleCard()
+                .padding(.horizontal, 20)
+                
                 // Offline Privacy Security Banner
                 HStack(spacing: 12) {
                     Image(systemName: "wifi.slash")

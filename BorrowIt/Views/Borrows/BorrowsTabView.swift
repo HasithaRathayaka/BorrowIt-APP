@@ -497,20 +497,68 @@ public struct BorrowsTabView: View {
                 .foregroundColor(.secondary)
             }
             
-            // Return Action Button
-            Button(action: {
-                lifecycleVM.advanceToReturned()
-            }) {
-                HStack {
-                    Image(systemName: "arrow.counterclockwise.circle.fill")
-                    Text("Start Return Handoff")
+            // State-Specific Action Button
+            switch borrow.state {
+            case .pending:
+                Button(action: {
+                    lifecycleVM.advanceToApproved()
+                }) {
+                    HStack {
+                        Image(systemName: "faceid")
+                        Text("Approve Request (Biometric Gate)")
+                    }
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color.blue)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            case .approved:
+                Button(action: {
+                    lifecycleVM.advanceToHandoff()
+                }) {
+                    HStack {
+                        Image(systemName: "location.fill.viewfinder")
+                        Text("Enter 50m Zone (Simulate Geofence)")
+                    }
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+            case .handoff:
+                NavigationLink(destination: HandoffQRView()) {
+                    HStack {
+                        Image(systemName: "qrcode")
+                        Text("Open Rotating Handoff Pass")
+                    }
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+            case .borrowed:
+                Button(action: {
+                    lifecycleVM.advanceToReturned()
+                }) {
+                    HStack {
+                        Image(systemName: "arrow.counterclockwise.circle.fill")
+                        Text("Start Return Handoff")
+                    }
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+            case .returned, .cancelled:
+                EmptyView()
             }
         }
         .padding(18)

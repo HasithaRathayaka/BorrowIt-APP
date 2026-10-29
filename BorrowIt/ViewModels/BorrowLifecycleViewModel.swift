@@ -297,7 +297,30 @@ public class BorrowLifecycleViewModel: ObservableObject {
         }
     }
     
+    public var isWithin50mOfHandoff: Bool {
+        guard let active = activeBorrow else { return false }
+        if active.state == .handoff || active.state == .borrowed {
+            return true
+        }
+        return LocationGeofenceService.shared.isWithin50mOfActiveHandoff
+    }
+    
+    public var handoffDistanceMeters: Double {
+        guard let active = activeBorrow else { return 42.0 }
+        let dist = LocationGeofenceService.shared.checkDistanceTo(coordinate: active.item.coordinate)
+        return dist > 0 ? dist : 42.0
+    }
+
     public func advanceToHandoff() {
+        if activeBorrow == nil {
+            activeBorrow = borrows.first ?? BorrowTransaction.activeDrillBorrow
+        }
+        if var active = activeBorrow {
+            if active.state != .approved && active.state != .handoff {
+                active.state = .approved
+                updateLocalBorrow(active)
+            }
+        }
         geofenceService.simulateGeofenceArrival()
         handleGeofenceArrival()
     }

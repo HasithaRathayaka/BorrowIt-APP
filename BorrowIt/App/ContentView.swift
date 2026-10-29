@@ -34,6 +34,14 @@ public struct ContentView: View {
                 reasonPrompt: "Welcome back — Sign in securely to see what your neighbors are sharing"
             )
         }
+        .alert("Within 50m of Handoff Point!", isPresented: $lifecycleVM.isGeofenceAlertPresented) {
+            Button("Open Handoff Pass") {
+                selectedTab = 2
+            }
+            Button("Dismiss", role: .cancel) {}
+        } message: {
+            Text("Core Location Geofence Triggered: You are within 50 metres of the agreed handoff spot for '\(lifecycleVM.activeBorrow?.item.title ?? "your item")'. Your rotating QR pass is now active!")
+        }
         .onChange(of: authVM.isAuthenticated) { oldValue, newValue in
             if newValue {
                 // Once logged in, guarantee landing directly on Explore Dashboard in Feed mode
