@@ -145,7 +145,7 @@ public struct BorrowTransaction: Identifiable, Codable, Hashable {
         self.totalDays = days
         self.dailyRate = item.dailyRate
         self.totalRentalCost = Double(days) * item.dailyRate
-        self.depositHoldAmount = item.depositHold
+        self.depositHoldAmount = item.isFree ? 0.0 : item.depositHold
         self.state = state
         self.handoffToken = handoffToken
         self.handoffTokenExpiresAt = handoffTokenExpiresAt
@@ -234,7 +234,7 @@ public extension BorrowTransaction {
         pickedUpAt: Calendar.current.date(byAdding: .day, value: -5, to: Date())!,
         returnedAt: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
         reviewRating: 5,
-        reviewComment: "Jon was super responsive and the chairs were spotless. Saved us $60 from buying new ones for the weekend!"
+        reviewComment: "Jon was super responsive and the chairs were spotless. Saved us Rs. 5,000 from buying new ones for the weekend!"
     )
     
     static let allSeedTransactions: [BorrowTransaction] = [

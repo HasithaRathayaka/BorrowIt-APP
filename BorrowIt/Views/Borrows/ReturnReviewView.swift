@@ -38,17 +38,33 @@ public struct ReturnReviewView: View {
                         .font(.system(size: 26, weight: .bold, design: .rounded))
                         .foregroundColor(.primary)
                     
-                    Text("Maya verified the DeWalt Drill is back in great shape. Your $40 refundable deposit hold has been released.")
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 28)
-                        .lineSpacing(3)
+                    if let active = lifecycleVM.activeBorrow, active.depositHoldAmount > 0 {
+                        Text("\(active.lenderName) verified '\(active.item.title)' is back in great shape. Your Rs. \(Int(active.depositHoldAmount)) refundable deposit hold has been released.")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 28)
+                            .lineSpacing(3)
+                    } else if let active = lifecycleVM.activeBorrow {
+                        Text("\(active.lenderName) verified '\(active.item.title)' is back in great shape. Thank you for participating in community sharing!")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 28)
+                            .lineSpacing(3)
+                    } else {
+                        Text("Your item is back in great shape. Thank you for borrowing responsibly!")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 28)
+                            .lineSpacing(3)
+                    }
                 }
                 
                 // 5-Star Interactive Rating Card
                 VStack(spacing: 16) {
-                    Text("How was Maya R.?")
+                    Text("How was \(lifecycleVM.activeBorrow?.lenderName ?? "your lender")?")
                         .font(.system(size: 17, weight: .bold, design: .rounded))
                         .foregroundColor(.primary)
                     

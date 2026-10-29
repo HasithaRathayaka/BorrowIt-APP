@@ -148,9 +148,15 @@ public struct ScheduleBorrowView: View {
                                         .font(.system(size: 14))
                                         .foregroundColor(.secondary)
                                     Spacer()
-                                    Text("Rs. \(Int(item.depositHold))")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundColor(.primary)
+                                    if item.isFree || item.depositHold <= 0 {
+                                        Text("FREE (No hold required)")
+                                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                    } else {
+                                        Text("Rs. \(Int(item.depositHold))")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(.primary)
+                                    }
                                 }
                                 
                                 Divider()
@@ -160,8 +166,12 @@ public struct ScheduleBorrowView: View {
                                         .font(.system(size: 16, weight: .bold, design: .rounded))
                                         .foregroundColor(.primary)
                                     Spacer()
-                                    if item.isFree {
-                                        Text(item.depositHold > 0 ? "Rs. \(Int(item.depositHold)) hold only" : "Rs. 0 (Completely Free)")
+                                    if item.isFree || (rentalTotal <= 0 && item.depositHold <= 0) {
+                                        Text("FREE (Rs. 0)")
+                                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                    } else if item.isFree {
+                                        Text("Rs. \(Int(item.depositHold)) hold only")
                                             .font(.system(size: 15, weight: .bold, design: .rounded))
                                             .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
                                     } else {

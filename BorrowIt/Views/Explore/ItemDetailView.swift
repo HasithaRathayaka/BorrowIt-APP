@@ -146,10 +146,10 @@ public struct ItemDetailView: View {
                                 Image(systemName: "shield.lefthalf.filled.badge.checkmark")
                                     .font(.system(size: 20))
                                     .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                                Text("Rs. \(Int(item.depositHold)) hold")
+                                Text(item.isFree || item.depositHold <= 0 ? "No hold" : "Rs. \(Int(item.depositHold)) hold")
                                     .font(.system(size: 15, weight: .bold, design: .rounded))
                                     .foregroundColor(.primary)
-                                Text("Released on return")
+                                Text(item.isFree || item.depositHold <= 0 ? "Free Community Lend" : "Released on return")
                                     .font(.system(size: 12))
                                     .foregroundColor(.secondary)
                             }

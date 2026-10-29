@@ -319,9 +319,15 @@ public struct BorrowsTabView: View {
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundColor(item.isFree ? ThemeColors.emerald(highContrast: settings.highContrastEnabled) : .primary)
                         
-                        Text("·  Rs. \(Int(item.depositHold)) hold")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
+                        if !item.isFree && item.depositHold > 0 {
+                            Text("·  Rs. \(Int(item.depositHold)) hold")
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("·  No deposit")
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
                 
@@ -451,12 +457,18 @@ public struct BorrowsTabView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Return to Maya by 5:00 PM")
+                    Text("Return to \(borrow.item.lender.name) by 5:00 PM")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundColor(.primary)
-                    Text("2 hours remaining · $40 deposit hold active")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
+                    if borrow.item.isFree || borrow.depositHoldAmount <= 0 {
+                        Text("2 hours remaining · No deposit hold (Free Community Lend)")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("2 hours remaining · Rs. \(Int(borrow.depositHoldAmount)) deposit hold active")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                    }
                 }
                 
                 Spacer()

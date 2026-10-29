@@ -208,12 +208,28 @@ public struct AddItemView: View {
                                         Text("Refundable Deposit (Rs.)")
                                             .font(.system(size: 12, weight: .semibold))
                                             .foregroundColor(.secondary)
-                                        TextField("3000", value: $addVM.depositHold, format: .number)
-                                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                                            .keyboardType(.decimalPad)
+                                        
+                                        if addVM.isLendingForFree {
+                                            HStack {
+                                                Text("NO HOLD (Rs. 0)")
+                                                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+                                                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                                Spacer()
+                                                Image(systemName: "hand.thumbsup.fill")
+                                                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                                    .font(.system(size: 12))
+                                            }
                                             .padding(10)
-                                            .background(Color(uiColor: .tertiarySystemGroupedBackground))
+                                            .background(Color.statusEmeraldBg)
                                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                        } else {
+                                            TextField("3000", value: $addVM.depositHold, format: .number)
+                                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                                .keyboardType(.decimalPad)
+                                                .padding(10)
+                                                .background(Color(uiColor: .tertiarySystemGroupedBackground))
+                                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                        }
                                     }
                                 }
                                 

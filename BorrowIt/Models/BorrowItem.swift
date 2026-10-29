@@ -189,7 +189,7 @@ public struct BorrowItem: Identifiable, Codable, Hashable {
         self.description = description
         self.category = category
         self.dailyRate = dailyRate
-        self.depositHold = depositHold
+        self.depositHold = dailyRate <= 0 ? 0.0 : depositHold
         self.distanceMeters = distanceMeters
         self.rating = rating
         self.isAvailable = isAvailable
@@ -283,6 +283,14 @@ public struct BorrowItem: Identifiable, Codable, Hashable {
             return "Free"
         } else {
             return "Rs. \(Int(dailyRate))/day"
+        }
+    }
+    
+    public var formattedDeposit: String {
+        if isFree || depositHold <= 0 {
+            return "No deposit"
+        } else {
+            return "Rs. \(Int(depositHold)) hold"
         }
     }
 }
@@ -428,7 +436,7 @@ public extension BorrowItem {
         description: "Extendable tree pruner up to 14 ft with sharp hardened bypass blade and 12-inch wood saw. Cut high branches easily without a ladder.",
         category: .garden,
         dailyRate: 0.0, // FREE Community Lend
-        depositHold: 2000.0,
+        depositHold: 0.0, // Free items require no deposit hold
         distanceMeters: 210.0,
         rating: 4.8,
         isAvailable: true,
@@ -450,7 +458,7 @@ public extension BorrowItem {
         description: "Heavy-duty aluminum telescoping ladder. Converts from A-frame step ladder (4-7ft) to 17ft extension ladder. Essential for seasonal gutter cleaning, cathedral ceiling bulbs, and exterior painting. Folds down to 4.5ft to fit in any car trunk.",
         category: .handTools,
         dailyRate: 0.0, // FREE Community Lend
-        depositHold: 3000.0,
+        depositHold: 0.0, // Free items require no deposit hold
         distanceMeters: 90.0,
         rating: 5.0,
         isAvailable: true,

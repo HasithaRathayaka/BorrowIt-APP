@@ -17,12 +17,18 @@ public class AddItemViewModel: ObservableObject {
                     savedRate = dailyRate
                 }
                 dailyRate = 0.0
+                if depositHold > 0 {
+                    savedDeposit = depositHold
+                }
+                depositHold = 0.0
             } else {
                 dailyRate = savedRate > 0 ? savedRate : 1500.0
+                depositHold = savedDeposit > 0 ? savedDeposit : 3000.0
             }
         }
     }
     private var savedRate: Double = 1500.0
+    private var savedDeposit: Double = 3000.0
     
     @Published public var isAvailableNow: Bool = true
     @Published public var pickupAddressSharedAfterApproval: Bool = true
@@ -177,7 +183,7 @@ public class AddItemViewModel: ObservableObject {
             updatedItem.description = itemDescription.trimmingCharacters(in: .whitespacesAndNewlines)
             updatedItem.category = selectedCategory
             updatedItem.dailyRate = isLendingForFree ? 0.0 : dailyRate
-            updatedItem.depositHold = depositHold
+            updatedItem.depositHold = isLendingForFree ? 0.0 : depositHold
             updatedItem.isAvailable = isAvailableNow
             updatedItem.exactAddress = exactAddress
             updatedItem.pickupAddressSharedAfterApproval = pickupAddressSharedAfterApproval
@@ -204,7 +210,7 @@ public class AddItemViewModel: ObservableObject {
                 description: itemDescription.trimmingCharacters(in: .whitespacesAndNewlines),
                 category: selectedCategory,
                 dailyRate: isLendingForFree ? 0.0 : dailyRate,
-                depositHold: depositHold,
+                depositHold: isLendingForFree ? 0.0 : depositHold,
                 distanceMeters: 80.0,
                 rating: 5.0,
                 isAvailable: isAvailableNow,
