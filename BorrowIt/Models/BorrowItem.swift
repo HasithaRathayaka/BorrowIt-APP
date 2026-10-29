@@ -293,6 +293,16 @@ public struct BorrowItem: Identifiable, Codable, Hashable {
             return "Rs. \(Int(depositHold)) hold"
         }
     }
+    
+    public var locationName: String {
+        if !exactAddress.isEmpty {
+            return exactAddress
+        } else if !approximateAddress.isEmpty {
+            return approximateAddress
+        } else {
+            return "Cedar Grove"
+        }
+    }
 }
 
 // MARK: - Rich Seed Dataset (Cedar Grove Neighborhood)
