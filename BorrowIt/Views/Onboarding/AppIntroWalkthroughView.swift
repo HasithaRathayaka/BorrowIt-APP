@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Screen 0: App Intro & New User Walkthrough Flow
+@MainActor
 public struct AppIntroWalkthroughView: View {
     @EnvironmentObject var settings: AppSettingsManager
     @EnvironmentObject var authVM: AuthViewModel
@@ -26,7 +27,7 @@ public struct AppIntroWalkthroughView: View {
                     walkthroughPage(
                         index: 0,
                         visualContent: slideOneVisual,
-                        title: "Your Neighborhood Gear,\nPerfectely Shared",
+                        title: "Your Neighborhood Gear,\nPerfectly Shared",
                         subtitle: "Borrow drills, camping tents, ladders, and tools from verified neighbors right down your street."
                     )
                     .tag(0)

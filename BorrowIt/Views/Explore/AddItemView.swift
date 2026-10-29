@@ -74,11 +74,12 @@ public struct AddItemView: View {
                                     VStack {
                                         HStack {
                                             Spacer()
+                                            let hasCustomPhoto = addVM.selectedImageData != nil || addVM.selectedImageURL != nil
                                             PhotosPicker(selection: $selectedPhotoPickerItem, matching: .images) {
                                                 HStack(spacing: 6) {
                                                     Image(systemName: "camera.fill")
                                                         .font(.system(size: 13, weight: .semibold))
-                                                    Text(addVM.selectedImageData != nil || addVM.selectedImageURL != nil ? "Change Photo" : "Add Photo")
+                                                    Text(hasCustomPhoto ? "Change Photo" : "Add Photo")
                                                         .font(.system(size: 13, weight: .bold, design: .rounded))
                                                 }
                                                 .foregroundColor(.white)

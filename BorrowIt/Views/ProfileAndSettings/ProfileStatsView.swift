@@ -31,17 +31,19 @@ public struct ProfileStatsView: View {
                     VStack(spacing: 20) {
                         // 1. Profile Header Box with Photo Picker
                         VStack(spacing: 10) {
+                            let currentProfile = activeProfile
+                            let highContrast = settings.highContrastEnabled
                             PhotosPicker(selection: $selectedPhotoPickerItem, matching: .images) {
                                 ZStack(alignment: .bottomTrailing) {
                                     // Main Avatar Circle
                                     Group {
-                                        if let data = activeProfile.avatarImageData, let uiImage = UIImage(data: data) {
+                                        if let data = currentProfile.avatarImageData, let uiImage = UIImage(data: data) {
                                             Image(uiImage: uiImage)
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fill)
                                                 .frame(width: 84, height: 84)
                                                 .clipShape(Circle())
-                                        } else if let urlStr = activeProfile.avatarImageURL, let url = URL(string: urlStr) {
+                                        } else if let urlStr = currentProfile.avatarImageURL, let url = URL(string: urlStr) {
                                             AsyncImage(url: url) { phase in
                                                 switch phase {
                                                 case .success(let img):
@@ -51,11 +53,11 @@ public struct ProfileStatsView: View {
                                                         .frame(width: 84, height: 84)
                                                         .clipShape(Circle())
                                                 default:
-                                                    initialsAvatarView
+                                                    ProfileInitialsBadge(initials: currentProfile.initials, highContrast: highContrast)
                                                 }
                                             }
                                         } else {
-                                            initialsAvatarView
+                                            ProfileInitialsBadge(initials: currentProfile.initials, highContrast: highContrast)
                                         }
                                     }
                                     .frame(width: 84, height: 84)
@@ -68,7 +70,7 @@ public struct ProfileStatsView: View {
                                     // Camera Action Badge
                                     ZStack {
                                         Circle()
-                                            .fill(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                            .fill(ThemeColors.emerald(highContrast: highContrast))
                                             .frame(width: 28, height: 28)
                                         Image(systemName: "camera.fill")
                                             .font(.system(size: 13, weight: .semibold))
@@ -319,11 +321,25 @@ public struct ProfileStatsView: View {
     }
     
     private var initialsAvatarView: some View {
+        ProfileInitialsBadge(initials: activeProfile.initials, highContrast: settings.highContrastEnabled)
+    }
+}
+
+public struct ProfileInitialsBadge: View {
+    public let initials: String
+    public let highContrast: Bool
+    
+    public init(initials: String, highContrast: Bool) {
+        self.initials = initials
+        self.highContrast = highContrast
+    }
+    
+    public var body: some View {
         Circle()
-            .fill(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+            .fill(ThemeColors.emerald(highContrast: highContrast))
             .frame(width: 84, height: 84)
             .overlay(
-                Text(activeProfile.initials)
+                Text(initials)
                     .font(.system(size: 30, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
             )
