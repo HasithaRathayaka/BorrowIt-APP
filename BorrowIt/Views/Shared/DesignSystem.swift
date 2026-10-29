@@ -219,11 +219,64 @@ public struct ItemPhotoView: View {
         self.cornerRadius = cornerRadius
     }
     
-    private var effectiveImageURL: URL? {
-        if let urlString = item.imageURL, !urlString.trimmingCharacters(in: .whitespaces).isEmpty, let url = URL(string: urlString) {
+    // Resolve UIImage from Base64 Data URL, Local File Path, or Documents directory
+    private var localOrBase64Image: UIImage? {
+        guard let urlString = item.imageURL?.trimmingCharacters(in: .whitespacesAndNewlines), !urlString.isEmpty else {
+            return nil
+        }
+        
+        // 1. Base64 Data URI: "data:image/...;base64,...."
+        if urlString.starts(with: "data:image") {
+            let parts = urlString.components(separatedBy: ",")
+            if let base64Str = parts.last,
+               let data = Data(base64Encoded: base64Str, options: .ignoreUnknownCharacters) {
+                return UIImage(data: data)
+            }
+        }
+        
+        // 2. Direct base64 string
+        if urlString.count > 100 && !urlString.starts(with: "http") && !urlString.starts(with: "file:") {
+            if let data = Data(base64Encoded: urlString, options: .ignoreUnknownCharacters) {
+                return UIImage(data: data)
+            }
+        }
+        
+        // 3. Local file URL (file://...)
+        if urlString.starts(with: "file://") {
+            if let url = URL(string: urlString), let data = try? Data(contentsOf: url) {
+                return UIImage(data: data)
+            }
+        }
+        
+        // 4. File in Documents directory by filename
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let localURL = docs.appendingPathComponent(urlString)
+        if FileManager.default.fileExists(atPath: localURL.path), let data = try? Data(contentsOf: localURL) {
+            return UIImage(data: data)
+        }
+        
+        return nil
+    }
+    
+    private var effectiveHttpImageURL: URL? {
+        if let urlString = item.imageURL?.trimmingCharacters(in: .whitespacesAndNewlines),
+           urlString.starts(with: "http://") || urlString.starts(with: "https://"),
+           let url = URL(string: urlString) {
             return url
         }
         return defaultPhotoURL(for: item)
+    }
+    
+    private var photoOverlayGradient: some View {
+        LinearGradient(
+            gradient: Gradient(colors: [
+                Color.black.opacity(0.35),
+                Color.clear,
+                Color.black.opacity(0.1)
+            ]),
+            startPoint: .top,
+            endPoint: .bottom
+        )
     }
     
     private func defaultPhotoURL(for item: BorrowItem) -> URL? {
@@ -269,7 +322,15 @@ public struct ItemPhotoView: View {
     public var body: some View {
         ZStack(alignment: .topLeading) {
             Group {
-                if let url = effectiveImageURL {
+                if let uiImage = localOrBase64Image {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: height)
+                        .frame(maxWidth: .infinity)
+                        .clipped()
+                        .overlay(photoOverlayGradient)
+                } else if let url = effectiveHttpImageURL {
                     AsyncImage(url: url) { phase in
                         switch phase {
                         case .success(let image):
@@ -279,17 +340,7 @@ public struct ItemPhotoView: View {
                                 .frame(height: height)
                                 .frame(maxWidth: .infinity)
                                 .clipped()
-                                .overlay(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [
-                                            Color.black.opacity(0.35),
-                                            Color.clear,
-                                            Color.black.opacity(0.1)
-                                        ]),
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
+                                .overlay(photoOverlayGradient)
                         case .failure:
                             fallbackVisual
                         case .empty:

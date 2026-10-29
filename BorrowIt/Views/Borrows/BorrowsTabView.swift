@@ -35,11 +35,7 @@ public struct BorrowsTabView: View {
                             .padding(.horizontal, 20)
                             .padding(.top, 12)
                             
-                            // 1. Viva Interactive Lifecycle Demonstration Bar
-                            vivaLifecycleControlStrip
-                                .padding(.horizontal, 20)
-                            
-                            // 2. Active Borrow Card
+                            // Active Borrow Card
                             if let active = lifecycleVM.activeBorrow, active.state != .returned {
                                 activeBorrowCard(active)
                                     .padding(.horizontal, 20)
@@ -63,36 +59,6 @@ public struct BorrowsTabView: View {
             }
         }
         .liveAccessibilityScale()
-    }
-    
-    // MARK: - Viva Lifecycle Controls Strip
-    private var vivaLifecycleControlStrip: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: "slider.horizontal.below.rectangle")
-                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                Text("VIVA DEMO LIFECYCLE CONTROLLER")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.secondary)
-            }
-            
-            HStack(spacing: 8) {
-                LifecycleStepButton(title: "Approve (Bio)", icon: "faceid") {
-                    lifecycleVM.advanceToApproved()
-                }
-                LifecycleStepButton(title: "50m Arrive", icon: "location.fill") {
-                    lifecycleVM.advanceToHandoff()
-                }
-                LifecycleStepButton(title: "Scan QR", icon: "qrcode.viewfinder") {
-                    lifecycleVM.advanceToBorrowed()
-                }
-                LifecycleStepButton(title: "Return", icon: "arrow.counterclockwise") {
-                    lifecycleVM.advanceToReturned()
-                }
-            }
-        }
-        .padding(14)
-        .squircleCard()
     }
     
     // MARK: - Active Borrow Card
@@ -291,34 +257,6 @@ public struct BorrowsTabView: View {
             }
             .padding(14)
             .squircleCard()
-        }
-    }
-}
-
-// MARK: - Lifecycle Step Button Helper
-struct LifecycleStepButton: View {
-    let title: String
-    let icon: String
-    let action: () -> Void
-    @EnvironmentObject var settings: AppSettingsManager
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 14, weight: .semibold))
-                Text(title)
-                    .font(.system(size: 10, weight: .bold, design: .rounded))
-            }
-            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(Color.softMintTint)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .stroke(ThemeColors.emerald(highContrast: settings.highContrastEnabled).opacity(0.2), lineWidth: 1)
-            )
         }
     }
 }

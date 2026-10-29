@@ -288,9 +288,19 @@ public struct AddItemView: View {
                                 dismiss()
                             }
                         }) {
-                            Text("Publish Item")
-                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                            if addVM.isPublishing {
+                                HStack(spacing: 8) {
+                                    ProgressView()
+                                        .tint(.white)
+                                    Text("Recording to Database...")
+                                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                                }
+                            } else {
+                                Text("Publish Item")
+                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                            }
                         }
+                        .disabled(addVM.isPublishing)
                         .buttonStyle(BrandEmeraldButtonStyle())
                     }
                     .padding(.horizontal, 20)

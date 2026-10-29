@@ -276,7 +276,13 @@ public struct ProfileStatsView: View {
                     }
                     .padding(.bottom, 30)
                 }
+                .refreshable {
+                    await authVM.refreshUserProfile()
+                }
             }
+        }
+        .task {
+            await authVM.refreshUserProfile()
         }
         .navigationTitle("Profile & Stats")
         .navigationBarTitleDisplayMode(.inline)

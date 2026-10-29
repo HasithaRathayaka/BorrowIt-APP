@@ -18,6 +18,7 @@
         <attribute name="distanceMeters" optional="NO" attributeType="Double" defaultValueString="120.0"/>
         <attribute name="exactAddress" optional="YES" attributeType="String"/>
         <attribute name="id" optional="NO" attributeType="UUID"/>
+        <attribute name="imageURL" optional="YES" attributeType="String"/>
         <attribute name="isAvailable" optional="NO" attributeType="Boolean" defaultValueString="YES"/>
         <attribute name="isFavorite" optional="NO" attributeType="Boolean" defaultValueString="NO"/>
         <attribute name="itemDescription" optional="YES" attributeType="String"/>

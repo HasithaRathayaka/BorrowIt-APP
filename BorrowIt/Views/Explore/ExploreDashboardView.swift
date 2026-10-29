@@ -338,25 +338,21 @@ struct ItemFeedCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 12) {
-                // Visual Hero Box with Real Item Photo & Badges
+                // Visual Hero Box with Real Item Photo & Favorite Button
                 ZStack(alignment: .topTrailing) {
                     ItemPhotoView(item: item, height: 160, cornerRadius: 16)
                     
-                    // Top Bar inside Image: Favorite Heart + Core ML Badge
-                    HStack {
-                        CoreMLBadge(tag: item.coreMLTag, confidence: item.coreMLConfidence)
-                        Spacer()
-                        Button(action: {
-                            exploreVM.toggleFavorite(for: item)
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(Material.ultraThinMaterial)
-                                    .frame(width: 36, height: 36)
-                                Image(systemName: item.isFavorite ? "heart.fill" : "heart")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(item.isFavorite ? .red : .primary)
-                            }
+                    // Favorite Heart Button
+                    Button(action: {
+                        exploreVM.toggleFavorite(for: item)
+                    }) {
+                        ZStack {
+                            Circle()
+                                .fill(Material.ultraThinMaterial)
+                                .frame(width: 36, height: 36)
+                            Image(systemName: item.isFavorite ? "heart.fill" : "heart")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(item.isFavorite ? .red : .primary)
                         }
                     }
                     .padding(12)

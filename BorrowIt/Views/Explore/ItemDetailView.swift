@@ -22,13 +22,7 @@ public struct ItemDetailView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
                         // 1. Hero Image Box
-                        ZStack(alignment: .bottomLeading) {
-                            ItemPhotoView(item: item, height: 250, cornerRadius: 24)
-                            
-                            // Bottom-left Core ML Badge
-                            CoreMLBadge(tag: item.coreMLTag, confidence: item.coreMLConfidence)
-                                .padding(16)
-                        }
+                        ItemPhotoView(item: item, height: 250, cornerRadius: 24)
                         
                         // 2. Title, Rate, Distance, Rating
                         VStack(alignment: .leading, spacing: 8) {

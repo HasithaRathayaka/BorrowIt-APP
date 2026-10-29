@@ -131,11 +131,16 @@ public class PersistenceController {
         coreMLTagAttr.attributeType = .stringAttributeType
         coreMLTagAttr.isOptional = true
         
+        let imageURLAttr = NSAttributeDescription()
+        imageURLAttr.name = "imageURL"
+        imageURLAttr.attributeType = .stringAttributeType
+        imageURLAttr.isOptional = true
+        
         itemEntity.properties = [
             itemIdAttr, titleAttr, descAttr, categoryAttr, dailyRateAttr, depositAttr,
             distanceAttr, ratingAttr, isAvailableAttr, isFavoriteAttr, exactAddrAttr,
             approxAddrAttr, latAttr, lonAttr, lenderNameAttr, lenderInitialsAttr,
-            iconAttr, coreMLTagAttr
+            iconAttr, coreMLTagAttr, imageURLAttr
         ]
         
         // 2. CachedBorrowEntity

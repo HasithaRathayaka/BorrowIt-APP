@@ -220,6 +220,13 @@ public class AuthViewModel: ObservableObject {
         self.isAuthenticated = true
     }
     
+    // Refresh User Profile from Supabase Cloud
+    public func refreshUserProfile() async {
+        if let fresh = try? await backendService.fetchUserProfile() {
+            self.currentUser = fresh
+        }
+    }
+    
     // Update Profile Photo
     public func updateProfilePhoto(data: Data) {
         var updated = currentUser
@@ -229,5 +236,9 @@ public class AuthViewModel: ObservableObject {
         try? data.write(to: fileURL)
         updated.avatarImageURL = fileURL.absoluteString
         self.currentUser = updated
+        
+        Task {
+            try? await backendService.updateUserProfile(updated)
+        }
     }
 }

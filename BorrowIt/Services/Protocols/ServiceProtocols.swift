@@ -13,6 +13,7 @@ public protocol BackendServiceProtocol {
     func fetchBorrow(id: UUID) async throws -> BorrowTransaction?
     func createBorrow(_ transaction: BorrowTransaction) async throws -> BorrowTransaction
     func updateBorrowState(id: UUID, state: BorrowState) async throws -> BorrowTransaction
+    func updateHandoffToken(borrowId: UUID, token: String, expiresAt: Date) async throws
     func submitReview(borrowId: UUID, rating: Int, comment: String) async throws
     
     func fetchConversations() async throws -> [ChatConversation]

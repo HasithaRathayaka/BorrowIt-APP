@@ -36,6 +36,7 @@ public class AddItemViewModel: ObservableObject {
     @Published public var selectedImageURL: String? = TestImagePreset.presets[0].imageURL
     @Published public var selectedImageData: Data? = nil
     @Published public var itemPublishedSuccessfully: Bool = false
+    @Published public var isPublishing: Bool = false
     
     private let classifier: ClassifierProtocol
     private let backendService: BackendServiceProtocol
@@ -68,16 +69,23 @@ public class AddItemViewModel: ObservableObject {
         self.isClassifying = false
     }
     
-    // Custom photo selected by user from photo library
+    // Custom photo selected by user from photo library or camera
     public func setCustomPhoto(data: Data) {
-        self.selectedImageData = data
+        guard let originalImage = UIImage(data: data) else { return }
+        
+        // Prepare optimized image with fixed orientation and compact compression
+        let (optimizedData, dataURI) = prepareOptimizedImage(from: originalImage)
+        
+        self.selectedImageData = optimizedData
+        self.selectedImageURL = dataURI
+        
+        // Also persist a copy to local app documents directory as fallback cache
         let filename = "\(UUID().uuidString).jpg"
         let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
-        try? data.write(to: fileURL)
-        self.selectedImageURL = fileURL.absoluteString
+        try? optimizedData.write(to: fileURL)
         
         // Trigger Core ML / Vision classification on custom image
-        if let uiImage = UIImage(data: data), let cgImage = uiImage.cgImage {
+        if let cgImage = originalImage.cgImage {
             self.isClassifying = true
             Task {
                 if let result = try? await self.classifier.classify(image: cgImage) {
@@ -96,11 +104,47 @@ public class AddItemViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Image Optimization Helper
+    private func prepareOptimizedImage(from image: UIImage, maxDimension: CGFloat = 800) -> (Data, String) {
+        // 1. Fix EXIF orientation so image displays right-side up
+        let normalizedImage: UIImage
+        if image.imageOrientation == .up {
+            normalizedImage = image
+        } else {
+            UIGraphicsBeginImageContextWithOptions(image.size, false, image.scale)
+            image.draw(in: CGRect(origin: .zero, size: image.size))
+            normalizedImage = UIGraphicsGetImageFromCurrentImageContext() ?? image
+            UIGraphicsEndImageContext()
+        }
+        
+        // 2. Downscale to max dimension for efficient database storage
+        let size = normalizedImage.size
+        let maxSide = max(size.width, size.height)
+        let scaleFactor = maxSide > maxDimension ? (maxDimension / maxSide) : 1.0
+        let targetSize = CGSize(width: size.width * scaleFactor, height: size.height * scaleFactor)
+        
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        let resizedImage = renderer.image { _ in
+            normalizedImage.draw(in: CGRect(origin: .zero, size: targetSize))
+        }
+        
+        let jpegData = resizedImage.jpegData(compressionQuality: 0.72) ?? normalizedImage.jpegData(compressionQuality: 0.72) ?? Data()
+        let base64 = jpegData.base64EncodedString()
+        let dataURI = "data:image/jpeg;base64,\(base64)"
+        return (jpegData, dataURI)
+    }
+    
     // MARK: - Publish Action
     public func publishItem() async -> BorrowItem {
+        self.isPublishing = true
+        defer { self.isPublishing = false }
+        
+        // Fetch current active user profile so item has authentic lender info
+        let currentUser = (try? await backendService.fetchUserProfile()) ?? UserProfile.currentUser
+        
         let newItem = BorrowItem(
-            title: title,
-            description: itemDescription,
+            title: title.trimmingCharacters(in: .whitespacesAndNewlines),
+            description: itemDescription.trimmingCharacters(in: .whitespacesAndNewlines),
             category: selectedCategory,
             dailyRate: isLendingForFree ? 0.0 : dailyRate,
             depositHold: depositHold,
@@ -112,21 +156,45 @@ public class AddItemViewModel: ObservableObject {
             approximateAddress: "Cedar Grove · 80m away",
             exactAddress: exactAddress,
             coordinate: Coordinate(latitude: 37.7752, longitude: -122.4190),
-            lender: LenderProfile(name: "Alex Morgan", initials: "AM", rating: 5.0),
+            lender: LenderProfile(
+                id: currentUser.id,
+                name: currentUser.name,
+                rating: currentUser.communityRating,
+                initials: currentUser.initials,
+                joinedYear: 2026,
+                totalLends: currentUser.totalLends,
+                reviewCount: currentUser.reviewCount,
+                avatarColorHex: "#10B981"
+            ),
             systemImageName: selectedPreset.symbol,
             imageURL: selectedImageURL,
             coreMLConfidence: coreMLConfidence,
             coreMLTag: coreMLTag
         )
         
-        _ = try? await backendService.addItem(newItem)
-        self.itemPublishedSuccessfully = true
-        return newItem
+        do {
+            let savedItem = try await backendService.addItem(newItem)
+            
+            // Increment total lends count on the user profile and persist to Supabase
+            var updatedProfile = currentUser
+            updatedProfile.totalLends += 1
+            Task {
+                try? await self.backendService.updateUserProfile(updatedProfile)
+            }
+            
+            self.itemPublishedSuccessfully = true
+            return savedItem
+        } catch {
+            print("AddItemViewModel: Error recording item to backend: \(error)")
+            self.itemPublishedSuccessfully = true
+            return newItem
+        }
     }
     
     public func resetForm() {
         isLendingForFree = false
         selectPreset(TestImagePreset.presets[0])
         itemPublishedSuccessfully = false
+        isPublishing = false
     }
 }

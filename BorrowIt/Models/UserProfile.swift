@@ -86,4 +86,55 @@ public struct UserProfile: Identifiable, Codable, Hashable {
     ]
     
     public static let currentUser = UserProfile()
+    
+    // MARK: - Resilient Database Codable Implementation
+    private enum CodingKeys: String, CodingKey {
+        case id, name, email, initials, neighborhood, memberSince, isIdVerified
+        case trustScore, trustScoreSubtitle, communityRating, reviewCount
+        case totalBorrows, totalLends, wasteAvoidedKg, totalMoneySaved
+        case monthlySavings, avatarImageURL
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        email = try container.decode(String.self, forKey: .email)
+        initials = try container.decodeIfPresent(String.self, forKey: .initials) ?? "U"
+        neighborhood = try container.decodeIfPresent(String.self, forKey: .neighborhood) ?? "Cedar Grove"
+        memberSince = try container.decodeIfPresent(String.self, forKey: .memberSince) ?? "Neighbor since 2026"
+        isIdVerified = try container.decodeIfPresent(Bool.self, forKey: .isIdVerified) ?? true
+        trustScore = try container.decodeIfPresent(Int.self, forKey: .trustScore) ?? 95
+        trustScoreSubtitle = try container.decodeIfPresent(String.self, forKey: .trustScoreSubtitle) ?? "Verified Member"
+        communityRating = try container.decodeIfPresent(Double.self, forKey: .communityRating) ?? 5.0
+        reviewCount = try container.decodeIfPresent(Int.self, forKey: .reviewCount) ?? 0
+        totalBorrows = try container.decodeIfPresent(Int.self, forKey: .totalBorrows) ?? 0
+        totalLends = try container.decodeIfPresent(Int.self, forKey: .totalLends) ?? 0
+        wasteAvoidedKg = try container.decodeIfPresent(Double.self, forKey: .wasteAvoidedKg) ?? 0.0
+        totalMoneySaved = try container.decodeIfPresent(Double.self, forKey: .totalMoneySaved) ?? 0.0
+        monthlySavings = try container.decodeIfPresent([MonthlySaving].self, forKey: .monthlySavings) ?? Self.defaultMonthlySavings
+        avatarImageURL = try container.decodeIfPresent(String.self, forKey: .avatarImageURL)
+        avatarImageData = nil
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(email, forKey: .email)
+        try container.encode(initials, forKey: .initials)
+        try container.encode(neighborhood, forKey: .neighborhood)
+        try container.encode(memberSince, forKey: .memberSince)
+        try container.encode(isIdVerified, forKey: .isIdVerified)
+        try container.encode(trustScore, forKey: .trustScore)
+        try container.encode(trustScoreSubtitle, forKey: .trustScoreSubtitle)
+        try container.encode(communityRating, forKey: .communityRating)
+        try container.encode(reviewCount, forKey: .reviewCount)
+        try container.encode(totalBorrows, forKey: .totalBorrows)
+        try container.encode(totalLends, forKey: .totalLends)
+        try container.encode(wasteAvoidedKg, forKey: .wasteAvoidedKg)
+        try container.encode(totalMoneySaved, forKey: .totalMoneySaved)
+        try container.encode(monthlySavings, forKey: .monthlySavings)
+        try container.encodeIfPresent(avatarImageURL, forKey: .avatarImageURL)
+    }
 }

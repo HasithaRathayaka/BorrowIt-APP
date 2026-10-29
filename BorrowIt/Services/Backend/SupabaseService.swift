@@ -275,7 +275,7 @@ public class SupabaseService: BackendServiceProtocol {
     // MARK: - Items REST / Seed
     public func fetchItems() async throws -> [BorrowItem] {
         if isLiveConfigured {
-            if let request = makeRequest(endpoint: "/rest/v1/items?select=*") {
+            if let request = makeRequest(endpoint: "/rest/v1/items?select=*&order=createdAt.desc") {
                 do {
                     let (data, response) = try await session.data(for: request)
                     if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
@@ -315,13 +315,37 @@ public class SupabaseService: BackendServiceProtocol {
     }
     
     public func addItem(_ item: BorrowItem) async throws -> BorrowItem {
-        localItems.insert(item, at: 0)
+        if let idx = localItems.firstIndex(where: { $0.id == item.id }) {
+            localItems[idx] = item
+        } else {
+            localItems.insert(item, at: 0)
+        }
         
         if isLiveConfigured {
-            if let body = try? jsonEncoder.encode(item),
-               var request = makeRequest(endpoint: "/rest/v1/items", method: "POST", body: body) {
+            do {
+                let body = try jsonEncoder.encode(item)
+                guard var request = makeRequest(endpoint: "/rest/v1/items", method: "POST", body: body) else {
+                    return item
+                }
                 request.addValue("return=representation", forHTTPHeaderField: "Prefer")
-                _ = try? await session.data(for: request)
+                
+                let (data, response) = try await session.data(for: request)
+                if let httpResponse = response as? HTTPURLResponse {
+                    if httpResponse.statusCode == 200 || httpResponse.statusCode == 201 {
+                        if let decodedList = try? jsonDecoder.decode([BorrowItem].self, from: data), let saved = decodedList.first {
+                            if let idx = localItems.firstIndex(where: { $0.id == item.id }) {
+                                localItems[idx] = saved
+                            }
+                            print("Item recorded in Supabase database: \(saved.id)")
+                            return saved
+                        }
+                    } else {
+                        let errStr = String(data: data, encoding: .utf8) ?? "HTTP \(httpResponse.statusCode)"
+                        print("Supabase addItem error (\(httpResponse.statusCode)): \(errStr)")
+                    }
+                }
+            } catch {
+                print("Supabase addItem request failed: \(error)")
             }
         }
         return item
@@ -412,6 +436,10 @@ public class SupabaseService: BackendServiceProtocol {
             localProfile.totalBorrows += 1
             localProfile.wasteAvoidedKg += 3.5
             localProfile.totalMoneySaved += localBorrows[index].item.dailyRate * Double(localBorrows[index].totalDays)
+            let updated = localProfile
+            Task {
+                try? await self.updateUserProfile(updated)
+            }
         }
         
         if isLiveConfigured {
@@ -442,6 +470,36 @@ public class SupabaseService: BackendServiceProtocol {
                    let request = makeRequest(endpoint: "/rest/v1/borrows?id=eq.\(borrowId.uuidString)", method: "PATCH", body: body) {
                     _ = try? await session.data(for: request)
                 }
+            }
+            
+            // If the current user is the lender being reviewed, update their profile rating and review count
+            if localBorrows[index].lenderId == localProfile.id {
+                let currentCount = localProfile.reviewCount
+                let newRating = ((localProfile.communityRating * Double(currentCount)) + Double(rating)) / Double(currentCount + 1)
+                localProfile.communityRating = (newRating * 10).rounded() / 10
+                localProfile.reviewCount += 1
+                let updated = localProfile
+                Task {
+                    try? await self.updateUserProfile(updated)
+                }
+            }
+        }
+    }
+    
+    public func updateHandoffToken(borrowId: UUID, token: String, expiresAt: Date) async throws {
+        if let idx = localBorrows.firstIndex(where: { $0.id == borrowId }) {
+            localBorrows[idx].handoffToken = token
+            localBorrows[idx].handoffTokenExpiresAt = expiresAt
+        }
+        
+        if isLiveConfigured {
+            let payload: [String: Any] = [
+                "handoffToken": token,
+                "handoffTokenExpiresAt": ISO8601DateFormatter().string(from: expiresAt)
+            ]
+            if let body = try? JSONSerialization.data(withJSONObject: payload),
+               let request = makeRequest(endpoint: "/rest/v1/borrows?id=eq.\(borrowId.uuidString)", method: "PATCH", body: body) {
+                _ = try? await session.data(for: request)
             }
         }
     }
@@ -518,10 +576,28 @@ public class SupabaseService: BackendServiceProtocol {
         self.localProfile = profile
         
         if isLiveConfigured {
-            if let body = try? jsonEncoder.encode(profile),
-               var request = makeRequest(endpoint: "/rest/v1/profiles", method: "POST", body: body) {
+            do {
+                let body = try jsonEncoder.encode(profile)
+                guard var request = makeRequest(endpoint: "/rest/v1/profiles", method: "POST", body: body) else {
+                    return
+                }
                 request.addValue("resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
-                _ = try? await session.data(for: request)
+                request.addValue("return=representation", forHTTPHeaderField: "Prefer")
+                
+                let (data, response) = try await session.data(for: request)
+                if let http = response as? HTTPURLResponse {
+                    if http.statusCode == 200 || http.statusCode == 201 {
+                        if let decodedList = try? jsonDecoder.decode([UserProfile].self, from: data), let saved = decodedList.first {
+                            self.localProfile = saved
+                            print("User profile synchronized in Supabase database: \(saved.name) (\(saved.id))")
+                        }
+                    } else {
+                        let errStr = String(data: data, encoding: .utf8) ?? "HTTP \(http.statusCode)"
+                        print("Supabase updateUserProfile error (\(http.statusCode)): \(errStr)")
+                    }
+                }
+            } catch {
+                print("Supabase updateUserProfile failed: \(error)")
             }
         }
     }
@@ -579,6 +655,12 @@ public class MockBackendService: BackendServiceProtocol {
         }
         try borrows[idx].transition(to: state)
         return borrows[idx]
+    }
+    public func updateHandoffToken(borrowId: UUID, token: String, expiresAt: Date) async throws {
+        if let idx = borrows.firstIndex(where: { $0.id == borrowId }) {
+            borrows[idx].handoffToken = token
+            borrows[idx].handoffTokenExpiresAt = expiresAt
+        }
     }
     public func submitReview(borrowId: UUID, rating: Int, comment: String) async throws {
         if let idx = borrows.firstIndex(where: { $0.id == borrowId }) {

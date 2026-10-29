@@ -99,13 +99,14 @@ public class BorrowLifecycleViewModel: ObservableObject {
     
     public func regenerateRotatingQRPayload(for borrow: BorrowTransaction) {
         let isReturnAction = (borrow.state == .borrowed)
+        let token = UUID().uuidString.prefix(8).uppercased()
         let payload = QRPayload(
             borrowId: borrow.id,
             borrowerId: borrow.borrowerId,
             borrowerName: borrow.borrowerName,
             action: isReturnAction ? .returnVerification : .pickup,
             timestamp: Date(),
-            rotatingToken: UUID().uuidString.prefix(8).uppercased()
+            rotatingToken: token
         )
         self.currentHandoffPayload = payload
         self.qrCountdownSecondsRemaining = 300
@@ -113,6 +114,15 @@ public class BorrowLifecycleViewModel: ObservableObject {
         
         // Cache to Core Data for offline badge support
         PersistenceController.shared.cacheOfflineQRPass(payload: payload)
+        
+        // Sync token to Supabase cloud database
+        Task {
+            try? await self.backendService.updateHandoffToken(
+                borrowId: borrow.id,
+                token: token,
+                expiresAt: Date().addingTimeInterval(300)
+            )
+        }
     }
     
     // MARK: - State Machine Transitions
