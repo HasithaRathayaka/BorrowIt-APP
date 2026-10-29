@@ -97,7 +97,14 @@ public class LocationGeofenceService: NSObject, ObservableObject, GeofenceServic
     
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let latest = locations.last else { return }
-        self.userCoordinate = Coordinate(latitude: latest.coordinate.latitude, longitude: latest.coordinate.longitude)
+        let lat = latest.coordinate.latitude
+        let lon = latest.coordinate.longitude
+        // If simulator defaults to US/Cupertino coordinates (lat > 20 or lon < 0), preserve Colombo 07 center
+        if lat > 20.0 || lon < 0.0 {
+            self.userCoordinate = AppConfig.cedarGroveCenter
+        } else {
+            self.userCoordinate = Coordinate(latitude: lat, longitude: lon)
+        }
     }
     
     public func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {

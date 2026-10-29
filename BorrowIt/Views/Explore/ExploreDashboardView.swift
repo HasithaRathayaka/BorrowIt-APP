@@ -20,33 +20,55 @@ public struct ExploreDashboardView: View {
     
     public var body: some View {
         NavigationStack {
-            ZStack {
+            ZStack(alignment: .top) {
                 Color(uiColor: .systemGroupedBackground)
                     .ignoresSafeArea()
                 
-                VStack(spacing: 0) {
-                    // Top App Header
-                    exploreHeaderView
-                        .padding(.horizontal, 20)
-                        .padding(.top, 10)
-                        .padding(.bottom, 12)
-                    
-                    // Search Bar & Filter Button
-                    searchAndFilterBar
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 12)
-                    
-                    // Category Filter Chips
-                    categoryChipsScrollView
-                        .padding(.bottom, 12)
-                    
-                    // Body: Empty State OR Feed List OR Map View
-                    if settings.simulateEmptyState || exploreVM.filteredItems.isEmpty {
-                        EmptyExploreStateView()
-                    } else if exploreVM.isFeedMode {
-                        feedListView
-                    } else {
+                if exploreVM.isFeedMode {
+                    // Feed Mode Layout
+                    VStack(spacing: 0) {
+                        exploreHeaderView
+                            .padding(.horizontal, 20)
+                            .padding(.top, 10)
+                            .padding(.bottom, 12)
+                        
+                        searchAndFilterBar
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 12)
+                        
+                        categoryChipsScrollView
+                            .padding(.bottom, 12)
+                        
+                        if settings.simulateEmptyState || exploreVM.filteredItems.isEmpty {
+                            EmptyExploreStateView()
+                        } else {
+                            feedListView
+                        }
+                    }
+                } else {
+                    // Map Mode: Immersive Edge-to-Edge Map with Glassmorphic Floating Top Bar
+                    ZStack(alignment: .top) {
                         mapModeView
+                            .ignoresSafeArea(edges: .top)
+                        
+                        // Floating Glassmorphic Top Controls
+                        VStack(spacing: 8) {
+                            exploreHeaderView
+                                .padding(.horizontal, 20)
+                                .padding(.top, 8)
+                            
+                            searchAndFilterBar
+                                .padding(.horizontal, 20)
+                            
+                            categoryChipsScrollView
+                                .padding(.bottom, 8)
+                        }
+                        .background(
+                            Rectangle()
+                                .fill(.ultraThinMaterial)
+                                .ignoresSafeArea(edges: .top)
+                                .shadow(color: Color.black.opacity(0.12), radius: 10, y: 5)
+                        )
                     }
                 }
             }
@@ -246,34 +268,83 @@ public struct ExploreDashboardView: View {
     }
     
     // MARK: - Screen 3: Map Mode View
+    // Neighborhood Center: Defaults to Colombo 07, or tracks user GPS if within 25km of Colombo
+    private var neighborhoodCenter: CLLocationCoordinate2D {
+        if let userCoord = locationService.userCoordinate {
+            let userLoc = CLLocation(latitude: userCoord.latitude, longitude: userCoord.longitude)
+            let colomboLoc = CLLocation(latitude: AppConfig.cedarGroveCenter.latitude, longitude: AppConfig.cedarGroveCenter.longitude)
+            if userLoc.distance(from: colomboLoc) < 25_000 {
+                return userCoord.clCoordinate
+            }
+        }
+        return AppConfig.cedarGroveCenter.clCoordinate
+    }
+    
+    // Calculates a 64-point circle perimeter for high-visibility boundary line rendering
+    private func circleCoordinates(center: CLLocationCoordinate2D, radiusMeters: Double, points: Int = 64) -> [CLLocationCoordinate2D] {
+        let earthRadius = 6378137.0
+        let dLat = radiusMeters / earthRadius
+        let dLon = dLat / cos(center.latitude * .pi / 180.0)
+        
+        var coords: [CLLocationCoordinate2D] = []
+        for i in 0...points {
+            let angle = Double(i) * (2.0 * .pi / Double(points))
+            let lat = center.latitude + (dLat * sin(angle)) * (180.0 / .pi)
+            let lon = center.longitude + (dLon * cos(angle)) * (180.0 / .pi)
+            coords.append(CLLocationCoordinate2D(latitude: lat, longitude: lon))
+        }
+        return coords
+    }
+    
     private var mapModeView: some View {
-        let currentCenter = locationService.userCoordinate?.clCoordinate ?? AppConfig.cedarGroveCenter.clCoordinate
+        let center = neighborhoodCenter
+        let perimeterCoords = circleCoordinates(center: center, radius: exploreVM.searchRadiusMeters)
         
         return ZStack(alignment: .bottom) {
             Map(position: $cameraPosition) {
-                // Translucent 500m Walkable Neighborhood Circle
-                MapCircle(center: currentCenter, radius: exploreVM.searchRadiusMeters)
-                    .foregroundStyle(Color.brandEmerald.opacity(0.12))
-                    .stroke(Color.brandEmerald.opacity(0.6), lineWidth: 2)
+                // 1. Translucent Walkable Neighborhood Zone Fill
+                MapCircle(center: center, radius: exploreVM.searchRadiusMeters)
+                    .foregroundStyle(Color.brandEmerald.opacity(0.18))
+                    .mapOverlayLevel(level: .aboveRoads)
                 
-                // User Location Dot
-                Annotation("You", coordinate: currentCenter) {
+                // 2. High-Visibility Boundary Perimeter Ring
+                MapPolyline(coordinates: perimeterCoords)
+                    .stroke(Color.brandEmerald, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round, dash: [8, 5]))
+                    .mapOverlayLevel(level: .aboveRoads)
+                
+                // 3. Perimeter Badge Annotation (at top of circle)
+                Annotation("", coordinate: CLLocationCoordinate2D(latitude: center.latitude + (exploreVM.searchRadiusMeters / 110574.0), longitude: center.longitude)) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "figure.walk")
+                            .font(.system(size: 9, weight: .bold))
+                        Text("\(Int(exploreVM.searchRadiusMeters))m Zone")
+                            .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 4)
+                    .background(Color.brandEmerald)
+                    .clipShape(Capsule())
+                    .shadow(color: Color.black.opacity(0.25), radius: 4, y: 2)
+                }
+                
+                // 4. User Location Beacon Dot
+                Annotation("", coordinate: center) {
                     ZStack {
                         Circle()
                             .fill(Color.blue.opacity(0.25))
-                            .frame(width: 28, height: 28)
+                            .frame(width: 32, height: 32)
                         Circle()
                             .fill(Color.blue)
                             .frame(width: 14, height: 14)
-                        Circle()
-                            .stroke(Color.white, lineWidth: 2)
-                            .frame(width: 14, height: 14)
+                            .overlay(Circle().stroke(Color.white, lineWidth: 2.5))
+                            .shadow(color: Color.blue.opacity(0.4), radius: 5)
                     }
                 }
                 
-                // Item Pins (Custom Distance Pills)
+                // 5. Item Pins (Empty annotation title to prevent MapKit raw text clutter!)
                 ForEach(exploreVM.filteredItems) { item in
-                    Annotation(item.title, coordinate: item.coordinate.clCoordinate) {
+                    Annotation("", coordinate: item.coordinate.clCoordinate) {
                         MapItemPillPin(
                             item: item,
                             isSelected: exploreVM.selectedItemForMapPreview?.id == item.id
@@ -287,13 +358,87 @@ public struct ExploreDashboardView: View {
             }
             .mapStyle(.standard(elevation: .realistic))
             
+            // Floating Recenter & Radius Controls on Map (right side)
+            VStack(spacing: 12) {
+                // Radius toggle button (500m <-> 1000m)
+                Button(action: {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                        if exploreVM.searchRadiusMeters <= 500 {
+                            exploreVM.searchRadiusMeters = 1000
+                            cameraPosition = .region(
+                                MKCoordinateRegion(
+                                    center: center,
+                                    latitudinalMeters: 2600,
+                                    longitudinalMeters: 2600
+                                )
+                            )
+                        } else {
+                            exploreVM.searchRadiusMeters = 500
+                            cameraPosition = .region(
+                                MKCoordinateRegion(
+                                    center: center,
+                                    latitudinalMeters: 1400,
+                                    longitudinalMeters: 1400
+                                )
+                            )
+                        }
+                    }
+                }) {
+                    VStack(spacing: 2) {
+                        Image(systemName: "circle.circle")
+                            .font(.system(size: 15, weight: .bold))
+                        Text("\(Int(exploreVM.searchRadiusMeters))m")
+                            .font(.system(size: 9, weight: .heavy, design: .rounded))
+                    }
+                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                    .frame(width: 44, height: 44)
+                    .background(.ultraThinMaterial)
+                    .clipShape(Circle())
+                    .shadow(color: Color.black.opacity(0.18), radius: 6, y: 3)
+                    .overlay(Circle().stroke(Color.primary.opacity(0.1), lineWidth: 1))
+                }
+                .accessibilityLabel("Toggle search radius")
+                
+                // Recenter Camera on Colombo 07
+                Button(action: {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                        cameraPosition = .region(
+                            MKCoordinateRegion(
+                                center: center,
+                                latitudinalMeters: exploreVM.searchRadiusMeters * 2.8,
+                                longitudinalMeters: exploreVM.searchRadiusMeters * 2.8
+                            )
+                        )
+                    }
+                }) {
+                    Image(systemName: "location.fill")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                        .frame(width: 44, height: 44)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Circle())
+                        .shadow(color: Color.black.opacity(0.18), radius: 6, y: 3)
+                        .overlay(Circle().stroke(Color.primary.opacity(0.1), lineWidth: 1))
+                }
+                .accessibilityLabel("Recenter map on neighborhood")
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(.trailing, 16)
+            .padding(.bottom, exploreVM.selectedItemForMapPreview != nil ? 148 : 24)
+            
             // Bottom Floating Item Preview Card
             if let selected = exploreVM.selectedItemForMapPreview {
-                FloatingMapItemCard(item: selected) {
-                    exploreVM.selectedItemForDetail = selected
-                }
+                FloatingMapItemCard(
+                    item: selected,
+                    onDetailsTap: { exploreVM.selectedItemForDetail = selected },
+                    onDismiss: {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                            exploreVM.selectedItemForMapPreview = nil
+                        }
+                    }
+                )
                 .padding(.horizontal, 16)
-                .padding(.bottom, 20)
+                .padding(.bottom, 12)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
@@ -432,11 +577,17 @@ struct MapItemPillPin: View {
     
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 4) {
+            HStack(spacing: 5) {
                 Image(systemName: item.systemImageName)
                     .font(.system(size: 11, weight: .bold))
-                Text("\(item.category.rawValue.prefix(5)) \(Int(item.distanceMeters))m")
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(isSelected ? .white : Color(hex: item.category.colorHex))
+                
+                Text(item.isFree ? "FREE" : "Rs.\(Int(item.dailyRate))")
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                
+                Text("· \(Int(item.distanceMeters))m")
+                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                    .foregroundColor(isSelected ? .white.opacity(0.9) : .secondary)
             }
             .foregroundColor(isSelected ? .white : .primary)
             .padding(.horizontal, 10)
@@ -447,14 +598,14 @@ struct MapItemPillPin: View {
                 Color(uiColor: .systemBackground)
             )
             .clipShape(Capsule())
-            .shadow(color: Color.black.opacity(0.18), radius: 6, y: 3)
+            .shadow(color: Color.black.opacity(isSelected ? 0.25 : 0.14), radius: isSelected ? 8 : 5, y: isSelected ? 4 : 2)
             .overlay(
                 Capsule()
-                    .stroke(isSelected ? Color.white : Color.primary.opacity(0.1), lineWidth: isSelected ? 1.5 : 1)
+                    .stroke(isSelected ? Color.white : Color.primary.opacity(0.12), lineWidth: isSelected ? 1.5 : 1)
             )
-            .scaleEffect(isSelected && !settings.reduceMotionEnabled ? 1.08 : 1.0)
+            .scaleEffect(isSelected && !settings.reduceMotionEnabled ? 1.1 : 1.0)
         }
-        .accessibilityLabel("\(item.title) pin at \(Int(item.distanceMeters)) meters")
+        .accessibilityLabel("\(item.title), \(item.formattedRate), \(Int(item.distanceMeters)) meters away")
     }
 }
 
@@ -462,13 +613,14 @@ struct MapItemPillPin: View {
 struct FloatingMapItemCard: View {
     let item: BorrowItem
     let onDetailsTap: () -> Void
+    var onDismiss: (() -> Void)? = nil
     @EnvironmentObject var settings: AppSettingsManager
     
     var body: some View {
         HStack(spacing: 12) {
             // Mini Photo Box
-            ItemPhotoView(item: item, height: 64, cornerRadius: 14)
-                .frame(width: 64, height: 64)
+            ItemPhotoView(item: item, height: 68, cornerRadius: 14)
+                .frame(width: 68, height: 68)
             
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.title)
@@ -478,29 +630,26 @@ struct FloatingMapItemCard: View {
                 
                 HStack(spacing: 6) {
                     if item.isFree {
-                        HStack(spacing: 4) {
+                        HStack(spacing: 3) {
                             Image(systemName: "gift.fill")
                                 .font(.system(size: 10))
                             Text("FREE")
-                                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                                .font(.system(size: 11, weight: .heavy, design: .rounded))
                         }
                         .foregroundColor(.white)
                         .padding(.horizontal, 7)
                         .padding(.vertical, 2)
                         .background(Color.brandEmerald)
                         .clipShape(Capsule())
-                        .fixedSize()
                     } else {
                         Text(item.formattedRate)
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                            .lineLimit(1)
-                            .fixedSize()
                     }
                     
                     Text("•")
                         .font(.system(size: 11))
-                        .foregroundColor(.secondary.opacity(0.6))
+                        .foregroundColor(.secondary.opacity(0.5))
                     
                     HStack(spacing: 3) {
                         Image(systemName: "figure.walk")
@@ -509,33 +658,47 @@ struct FloatingMapItemCard: View {
                             .font(.system(size: 12, weight: .medium))
                     }
                     .foregroundColor(.secondary)
-                    .lineLimit(1)
-                    .fixedSize()
                 }
                 
                 RatingStarRow(rating: item.rating)
             }
             .layoutPriority(1)
             
-            Spacer(minLength: 6)
+            Spacer(minLength: 4)
             
-            Button(action: onDetailsTap) {
-                Text("View")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
+            VStack(alignment: .trailing, spacing: 6) {
+                if let onDismiss = onDismiss {
+                    Button(action: onDismiss) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Dismiss card")
+                }
+                
+                Button(action: onDetailsTap) {
+                    HStack(spacing: 4) {
+                        Text("View")
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 10, weight: .bold))
+                    }
                     .foregroundColor(.white)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
                     .background(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
                     .clipShape(Capsule())
+                }
+                .fixedSize()
             }
-            .fixedSize()
         }
         .padding(12)
         .background(Color(uiColor: .systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .shadow(color: Color.black.opacity(0.15), radius: 14, y: 6)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(color: Color.black.opacity(0.18), radius: 16, y: 6)
         .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .stroke(Color.primary.opacity(0.08), lineWidth: 1)
         )
     }
