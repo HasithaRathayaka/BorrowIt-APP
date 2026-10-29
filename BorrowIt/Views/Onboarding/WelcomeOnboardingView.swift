@@ -87,10 +87,6 @@ public struct WelcomeOnboardingView: View {
                             .transition(.opacity.combined(with: .move(edge: .trailing)))
                     }
                     
-                    // Trust & Community Badges
-                    trustBadgesStrip
-                        .padding(.top, 4)
-                    
                     // Terms Footer
                     Text("By continuing, you agree to BorrowIt Community Safety & Deposit Hold Terms.")
                         .font(.system(size: 11))
@@ -321,18 +317,21 @@ public struct WelcomeOnboardingView: View {
             .padding(.horizontal, 24)
             
             // Divider
-            HStack(spacing: 12) {
+            HStack(spacing: 14) {
                 Rectangle()
-                    .fill(Color.primary.opacity(0.08))
+                    .fill(Color.primary.opacity(0.12))
                     .frame(height: 1)
-                Text("OR CONTINUE WITH")
-                    .font(.system(size: 11, weight: .bold))
+                
+                Text("or continue with")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundColor(.secondary)
+                    .fixedSize()
+                
                 Rectangle()
-                    .fill(Color.primary.opacity(0.08))
+                    .fill(Color.primary.opacity(0.12))
                     .frame(height: 1)
             }
-            .padding(.horizontal, 32)
+            .padding(.horizontal, 24)
             .padding(.vertical, 4)
             
             // Official Native Apple Sign In Button
@@ -354,25 +353,6 @@ public struct WelcomeOnboardingView: View {
             .frame(height: 52)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .padding(.horizontal, 24)
-            
-            // Quick Demo Auto-fill Helper for Reviewers
-            Button(action: {
-                loginEmail = "alex.morgan@borrowit.lk"
-                loginPassword = "password123"
-            }) {
-                HStack(spacing: 6) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 11))
-                    Text("Auto-fill Demo Neighbor (Alex M.)")
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                }
-                .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(Color.softMintTint)
-                .clipShape(Capsule())
-            }
-            .padding(.top, 4)
         }
     }
     
@@ -524,36 +504,5 @@ public struct WelcomeOnboardingView: View {
             .padding(.horizontal, 24)
             .padding(.top, 4)
         }
-    }
-    
-    // MARK: - Trust Badges Strip
-    private var trustBadgesStrip: some View {
-        HStack(spacing: 16) {
-            HStack(spacing: 5) {
-                Image(systemName: "checkmark.shield.fill")
-                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                Text("ID Verified")
-            }
-            
-            Text("·")
-                .foregroundColor(.secondary.opacity(0.4))
-            
-            HStack(spacing: 5) {
-                Image(systemName: "lock.shield.fill")
-                    .foregroundColor(.blue)
-                Text("Deposit Escrow")
-            }
-            
-            Text("·")
-                .foregroundColor(.secondary.opacity(0.4))
-            
-            HStack(spacing: 5) {
-                Image(systemName: "mappin.and.ellipse")
-                    .foregroundColor(.orange)
-                Text("Neighborhood")
-            }
-        }
-        .font(.system(size: 11, weight: .medium, design: .rounded))
-        .foregroundColor(.secondary)
     }
 }
