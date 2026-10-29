@@ -12,12 +12,6 @@ public class AuthViewModel: ObservableObject {
     @Published public var isAuthenticating: Bool = false
     @Published public var faceIDEnabledForAccount: Bool = true
     
-    // Interactive Guidance & Simulator Modals
-    @Published public var showFaceIDEnrollmentGuidance: Bool = false
-    @Published public var showAppleSignInSandboxPrompt: Bool = false
-    @Published public var pendingAppleName: String = "Hasitha Rathnayaka"
-    @Published public var pendingAppleEmail: String = "hasithar02@gmail.com"
-    
     // MARK: - Session Persistence Keys
     private let userDefaultsProfileKey = "borrowit_saved_user_profile"
     private let authStateKey = "borrowit_is_authenticated"
@@ -72,8 +66,7 @@ public class AuthViewModel: ObservableObject {
         authErrorMessage = nil
         defer { isAuthenticating = false }
         
-        let targetName = loadSavedUser()?.name ?? currentUser.name
-        let reason = "Sign in to BorrowIt as \(targetName)"
+        let reason = "Sign in to BorrowIt with Face ID"
         let result = await biometricService.authenticate(reason: reason)
         
         switch result {
@@ -81,31 +74,32 @@ public class AuthViewModel: ObservableObject {
             if success {
                 let user = loadSavedUser() ?? currentUser
                 saveSession(user: user, method: "faceid")
+                self.isAuthenticated = true
+                self.authErrorMessage = nil
                 return true
             } else {
-                self.authErrorMessage = "Face ID verification failed. Please try again or use your email and password."
+                self.authErrorMessage = "Face ID not recognized. Please try again."
                 return false
             }
         case .failure(let error):
             let nsError = error as NSError
             if nsError.domain == LAErrorDomain && (nsError.code == LAError.userCancel.rawValue || nsError.code == LAError.appCancel.rawValue) {
-                // User explicitly pressed Cancel - silent dismiss without error banner
+                // User pressed Cancel on Face ID prompt - stay on login dashboard cleanly
+                self.authErrorMessage = nil
+                return false
+            } else if nsError.domain == LAErrorDomain && nsError.code == LAError.authenticationFailed.rawValue {
+                // Face ID did not recognize - stay on login dashboard
+                self.authErrorMessage = "Face ID not recognized. Please try again or use your password."
                 return false
             } else if nsError.domain == LAErrorDomain && nsError.code == LAError.biometryNotEnrolled.rawValue {
-                // Face ID not enrolled in this simulator/device
-                self.showFaceIDEnrollmentGuidance = true
+                // Not enrolled in simulator
+                self.authErrorMessage = "Face ID is not enrolled. In Simulator menu, choose Features → Face ID → Enrolled."
                 return false
             } else {
                 self.authErrorMessage = error.localizedDescription
                 return false
             }
         }
-    }
-    
-    public func continueWithBiometricSandboxProfile() {
-        let user = loadSavedUser() ?? currentUser
-        saveSession(user: user, method: "faceid")
-        self.showFaceIDEnrollmentGuidance = false
     }
     
     // MARK: - Sign In with Apple (AuthenticationServices)
@@ -150,7 +144,7 @@ public class AuthViewModel: ObservableObject {
                 let initials: String
                 if parts.count >= 2 {
                     initials = "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-                } else if let first = parts.first {
+                } else if let first = nameParts.first {
                     initials = String(first.prefix(2)).uppercased()
                 } else {
                     initials = "AP"
@@ -176,6 +170,7 @@ public class AuthViewModel: ObservableObject {
                 )
                 
                 saveSession(user: appleProfile, method: "apple")
+                self.authErrorMessage = nil
                 
                 Task {
                     try? await SupabaseService.shared.updateUserProfile(appleProfile)
@@ -185,39 +180,13 @@ public class AuthViewModel: ObservableObject {
         case .failure(let error):
             let asError = error as? ASAuthorizationError
             if asError?.code == .canceled {
-                // User closed the Apple ID sheet
+                // User closed the Apple ID sheet - stay on login dashboard
+                self.authErrorMessage = nil
                 return
             } else {
-                // Simulator without iCloud configured - present sandbox option
-                self.showAppleSignInSandboxPrompt = true
+                self.authErrorMessage = "Apple Sign In was canceled or could not be completed."
             }
         }
-    }
-    
-    public func continueWithAppleSandboxProfile(name: String = "Hasitha Rathnayaka", email: String = "hasithar02@gmail.com") {
-        let parts = name.split(separator: " ")
-        let initials: String
-        if parts.count >= 2 {
-            initials = "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        } else {
-            initials = String(name.prefix(2)).uppercased()
-        }
-        
-        let profile = UserProfile(
-            id: UUID(),
-            name: name,
-            email: email,
-            initials: initials,
-            neighborhood: "Colombo, Sri Lanka",
-            memberSince: "Apple Verified · 2026",
-            isIdVerified: true,
-            trustScore: 99,
-            trustScoreSubtitle: "Apple Verified · Top Neighbor",
-            communityRating: 5.0,
-            reviewCount: 3
-        )
-        saveSession(user: profile, method: "apple")
-        showAppleSignInSandboxPrompt = false
     }
     
     // MARK: - Sign In with Email & Password
@@ -246,7 +215,6 @@ public class AuthViewModel: ObservableObject {
                 return false
             }
         } else {
-            // Local fallback simulation when Supabase anon key is dummy
             try? await Task.sleep(nanoseconds: 350_000_000)
             let nameFromEmail = trimmedEmail.components(separatedBy: "@").first?.capitalized ?? "Neighbor"
             let profile = UserProfile(
