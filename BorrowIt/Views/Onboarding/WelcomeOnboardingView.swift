@@ -1,7 +1,7 @@
 import SwiftUI
 import AuthenticationServices
 
-// MARK: - Screen 1: Welcome, Sign In & Sign Up with Face ID
+// MARK: - Screen 1: Welcome, Sign In & Sign Up
 public struct WelcomeOnboardingView: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var authVM: AuthViewModel
@@ -27,41 +27,39 @@ public struct WelcomeOnboardingView: View {
     
     public var body: some View {
         ZStack {
+            // 1. Dynamic Ambient Background with Soft Emerald Glow
             Color(uiColor: .systemGroupedBackground)
                 .ignoresSafeArea()
             
+            GeometryReader { geo in
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color.brandEmerald.opacity(colorScheme == .dark ? 0.22 : 0.15),
+                                Color.brandEmerald.opacity(0.0)
+                            ],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: geo.size.width * 0.6
+                        )
+                    )
+                    .frame(width: geo.size.width * 1.2, height: geo.size.width * 1.2)
+                    .offset(x: -geo.size.width * 0.1, y: -geo.size.width * 0.45)
+                    .blur(radius: 40)
+            }
+            .ignoresSafeArea()
+            
+            // 2. Main Scrollable Content
             ScrollView {
-                VStack(spacing: 20) {
-                    // 1. App Header & Logo
-                    VStack(spacing: 10) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.softMintTint)
-                                .frame(width: 80, height: 80)
-                            
-                            Image(systemName: "hand.raised.square.on.square.fill")
-                                .font(.system(size: 38, weight: .bold))
-                                .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                        }
-                        .shadow(color: Color.brandEmerald.opacity(0.18), radius: 12, y: 4)
-                        .padding(.top, 24)
-                        
-                        Text("BorrowIt")
-                            .font(.system(size: 30, weight: .bold, design: .rounded))
-                            .foregroundColor(.primary)
-                        
-                        Text("Peer-to-Peer Neighborhood Lending")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-                    }
+                VStack(spacing: 22) {
+                    // Hero Brand Presentation
+                    heroBrandHeader
+                        .padding(.top, 28)
                     
-                    // 2. Mode Selector: Log In vs Sign Up
-                    Picker("Auth Mode", selection: $authMode) {
-                        Text("Log In").tag(0)
-                        Text("Sign Up").tag(1)
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal, 24)
+                    // Mode Selector: Log In vs Sign Up
+                    authModeSelector
+                        .padding(.horizontal, 24)
                     
                     // Error Banner if present
                     if let error = authVM.authErrorMessage {
@@ -75,61 +73,222 @@ public struct WelcomeOnboardingView: View {
                         }
                         .padding(12)
                         .background(Color.red.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .padding(.horizontal, 24)
+                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
                     }
                     
-                    // 3. Tab Content
+                    // Active Form Section
                     if authMode == 0 {
                         loginSection
+                            .transition(.opacity.combined(with: .move(edge: .leading)))
                     } else {
                         signUpSection
+                            .transition(.opacity.combined(with: .move(edge: .trailing)))
                     }
                     
-                    // Footer
+                    // Trust & Community Badges
+                    trustBadgesStrip
+                        .padding(.top, 4)
+                    
+                    // Terms Footer
                     Text("By continuing, you agree to BorrowIt Community Safety & Deposit Hold Terms.")
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
-                        .padding(.bottom, 24)
+                        .padding(.bottom, 28)
                 }
             }
         }
         .liveAccessibilityScale()
     }
     
+    // MARK: - Hero Brand Header
+    private var heroBrandHeader: some View {
+        VStack(spacing: 12) {
+            ZStack {
+                // Ambient Shadow Glow
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color(hex: "#10B981"), Color(hex: "#059669")],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 78, height: 78)
+                    .blur(radius: 14)
+                    .opacity(0.35)
+                    .offset(y: 4)
+                
+                // Icon Squircle Container
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(uiColor: .systemBackground),
+                                Color(uiColor: .secondarySystemBackground)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 78, height: 78)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [
+                                        Color.brandEmerald.opacity(0.35),
+                                        Color.clear
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.5
+                            )
+                    )
+                    .shadow(color: Color.black.opacity(0.08), radius: 10, y: 5)
+                
+                // Foreground Brand Glyph
+                Image(systemName: "hand.raised.square.on.square.fill")
+                    .font(.system(size: 38, weight: .bold))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color(hex: "#10B981"), Color(hex: "#059669")],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
+            
+            VStack(spacing: 4) {
+                Text("BorrowIt")
+                    .font(.system(size: 32, weight: .heavy, design: .rounded))
+                    .foregroundColor(.primary)
+                
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                        .frame(width: 6, height: 6)
+                    Text("Peer-to-Peer Neighborhood Lending")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Custom Sliding Mode Selector
+    private var authModeSelector: some View {
+        HStack(spacing: 0) {
+            Button(action: {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    authMode = 0
+                }
+            }) {
+                Text("Log In")
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(authMode == 0 ? .primary : .secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        authMode == 0 ?
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color(uiColor: .systemBackground))
+                            .shadow(color: Color.black.opacity(0.08), radius: 4, y: 2)
+                        : nil
+                    )
+            }
+            
+            Button(action: {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    authMode = 1
+                }
+            }) {
+                Text("Sign Up")
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(authMode == 1 ? .primary : .secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        authMode == 1 ?
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color(uiColor: .systemBackground))
+                            .shadow(color: Color.black.opacity(0.08), radius: 4, y: 2)
+                        : nil
+                    )
+            }
+        }
+        .padding(4)
+        .background(Color(uiColor: .tertiarySystemFill))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+    
     // MARK: - Log In Section
     private var loginSection: some View {
         VStack(spacing: 16) {
-            // Email & Password Fields
+            // Email & Password Inputs
             VStack(spacing: 12) {
+                // Email Field
                 HStack(spacing: 12) {
                     Image(systemName: "envelope.fill")
-                        .foregroundColor(.secondary)
-                        .frame(width: 20)
+                        .font(.system(size: 15))
+                        .foregroundColor(loginEmail.isEmpty ? .secondary : ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                        .frame(width: 22)
+                    
                     TextField("Email address", text: $loginEmail)
                         .textInputAutocapitalization(.never)
                         .keyboardType(.emailAddress)
                         .autocorrectionDisabled()
+                        .font(.system(size: 15))
+                    
+                    if !loginEmail.isEmpty {
+                        Button(action: { loginEmail = "" }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.secondary.opacity(0.6))
+                                .font(.system(size: 14))
+                        }
+                    }
                 }
-                .padding(14)
+                .padding(15)
                 .background(Color(uiColor: .secondarySystemGroupedBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(loginEmail.isEmpty ? Color.primary.opacity(0.06) : ThemeColors.emerald(highContrast: settings.highContrastEnabled).opacity(0.4), lineWidth: 1)
+                )
                 
+                // Password Field
                 HStack(spacing: 12) {
                     Image(systemName: "lock.fill")
-                        .foregroundColor(.secondary)
-                        .frame(width: 20)
+                        .font(.system(size: 15))
+                        .foregroundColor(loginPassword.isEmpty ? .secondary : ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                        .frame(width: 22)
+                    
                     SecureField("Password", text: $loginPassword)
+                        .font(.system(size: 15))
+                    
+                    if !loginPassword.isEmpty {
+                        Button(action: { loginPassword = "" }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.secondary.opacity(0.6))
+                                .font(.system(size: 14))
+                        }
+                    }
                 }
-                .padding(14)
+                .padding(15)
                 .background(Color(uiColor: .secondarySystemGroupedBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(loginPassword.isEmpty ? Color.primary.opacity(0.06) : ThemeColors.emerald(highContrast: settings.highContrastEnabled).opacity(0.4), lineWidth: 1)
+                )
             }
             .padding(.horizontal, 24)
             
-            // Log In CTA Button
+            // Log In Primary Action CTA
             Button(action: {
                 Task {
                     exploreVM.resetToFeed()
@@ -139,19 +298,44 @@ public struct WelcomeOnboardingView: View {
                 HStack(spacing: 8) {
                     if authVM.isAuthenticating {
                         ProgressView().tint(.white)
+                    } else {
+                        Text("Log In")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 14, weight: .bold))
                     }
-                    Text("Log In")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
                 }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 15)
-                .background(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                .padding(.vertical, 16)
+                .background(
+                    LinearGradient(
+                        colors: [Color(hex: "#10B981"), Color(hex: "#059669")],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .shadow(color: Color.brandEmerald.opacity(0.35), radius: 10, y: 5)
             }
             .padding(.horizontal, 24)
             
-            // Official Native Apple Sign In Button (AuthenticationServices)
+            // Divider
+            HStack(spacing: 12) {
+                Rectangle()
+                    .fill(Color.primary.opacity(0.08))
+                    .frame(height: 1)
+                Text("OR CONTINUE WITH")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.secondary)
+                Rectangle()
+                    .fill(Color.primary.opacity(0.08))
+                    .frame(height: 1)
+            }
+            .padding(.horizontal, 32)
+            .padding(.vertical, 4)
+            
+            // Official Native Apple Sign In Button
             SignInWithAppleButton(
                 .signIn,
                 onRequest: { request in
@@ -167,13 +351,32 @@ public struct WelcomeOnboardingView: View {
                 }
             )
             .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-            .frame(height: 50)
+            .frame(height: 52)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .padding(.horizontal, 24)
+            
+            // Quick Demo Auto-fill Helper for Reviewers
+            Button(action: {
+                loginEmail = "alex.morgan@borrowit.lk"
+                loginPassword = "password123"
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 11))
+                    Text("Auto-fill Demo Neighbor (Alex M.)")
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                }
+                .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color.softMintTint)
+                .clipShape(Capsule())
+            }
+            .padding(.top, 4)
         }
     }
     
-    // MARK: - Sign Up Section (New User Registration)
+    // MARK: - Sign Up Section
     private var signUpSection: some View {
         VStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 4) {
@@ -187,17 +390,19 @@ public struct WelcomeOnboardingView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 24)
             
-            // Form Fields
+            // Registration Form Fields
             VStack(spacing: 12) {
                 HStack(spacing: 12) {
                     Image(systemName: "person.fill")
                         .foregroundColor(.secondary)
                         .frame(width: 20)
                     TextField("Full Name (e.g. Kasun Perera)", text: $signUpName)
+                        .font(.system(size: 15))
                 }
                 .padding(14)
                 .background(Color(uiColor: .secondarySystemGroupedBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.primary.opacity(0.06), lineWidth: 1))
                 
                 HStack(spacing: 12) {
                     Image(systemName: "envelope.fill")
@@ -207,30 +412,36 @@ public struct WelcomeOnboardingView: View {
                         .textInputAutocapitalization(.never)
                         .keyboardType(.emailAddress)
                         .autocorrectionDisabled()
+                        .font(.system(size: 15))
                 }
                 .padding(14)
                 .background(Color(uiColor: .secondarySystemGroupedBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.primary.opacity(0.06), lineWidth: 1))
                 
                 HStack(spacing: 12) {
                     Image(systemName: "lock.fill")
                         .foregroundColor(.secondary)
                         .frame(width: 20)
                     SecureField("Choose a Password", text: $signUpPassword)
+                        .font(.system(size: 15))
                 }
                 .padding(14)
                 .background(Color(uiColor: .secondarySystemGroupedBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.primary.opacity(0.06), lineWidth: 1))
                 
                 HStack(spacing: 12) {
                     Image(systemName: "mappin.and.ellipse")
                         .foregroundColor(.secondary)
                         .frame(width: 20)
                     TextField("City / Area (e.g. Colombo 07, Sri Lanka)", text: $signUpNeighborhood)
+                        .font(.system(size: 15))
                 }
                 .padding(14)
                 .background(Color(uiColor: .secondarySystemGroupedBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.primary.opacity(0.06), lineWidth: 1))
                 
                 HStack(spacing: 12) {
                     Image(systemName: "phone.fill")
@@ -238,10 +449,12 @@ public struct WelcomeOnboardingView: View {
                         .frame(width: 20)
                     TextField("Phone Number (e.g. +94 77 123 4567)", text: $signUpPhone)
                         .keyboardType(.phonePad)
+                        .font(.system(size: 15))
                 }
                 .padding(14)
                 .background(Color(uiColor: .secondarySystemGroupedBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.primary.opacity(0.06), lineWidth: 1))
             }
             .padding(.horizontal, 24)
             
@@ -288,46 +501,59 @@ public struct WelcomeOnboardingView: View {
                 HStack(spacing: 8) {
                     if authVM.isAuthenticating {
                         ProgressView().tint(.white)
+                    } else {
+                        Text("Create Account & Sign In")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 14, weight: .bold))
                     }
-                    Text("Create Account & Sign In")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
                 }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 15)
-                .background(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                .padding(.vertical, 16)
+                .background(
+                    LinearGradient(
+                        colors: [Color(hex: "#10B981"), Color(hex: "#059669")],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .shadow(color: Color.brandEmerald.opacity(0.35), radius: 10, y: 5)
             }
             .padding(.horizontal, 24)
             .padding(.top, 4)
         }
     }
-}
-
-// MARK: - Feature Bullet Row Helper
-struct FeatureBulletRow: View {
-    let icon: String
-    let title: String
-    let subtitle: String
-    @EnvironmentObject var settings: AppSettingsManager
     
-    var body: some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                .frame(width: 28)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundColor(.primary)
-                Text(subtitle)
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary)
+    // MARK: - Trust Badges Strip
+    private var trustBadgesStrip: some View {
+        HStack(spacing: 16) {
+            HStack(spacing: 5) {
+                Image(systemName: "checkmark.shield.fill")
+                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                Text("ID Verified")
             }
-            Spacer()
+            
+            Text("·")
+                .foregroundColor(.secondary.opacity(0.4))
+            
+            HStack(spacing: 5) {
+                Image(systemName: "lock.shield.fill")
+                    .foregroundColor(.blue)
+                Text("Deposit Escrow")
+            }
+            
+            Text("·")
+                .foregroundColor(.secondary.opacity(0.4))
+            
+            HStack(spacing: 5) {
+                Image(systemName: "mappin.and.ellipse")
+                    .foregroundColor(.orange)
+                Text("Neighborhood")
+            }
         }
-        .accessibilityElement(children: .combine)
+        .font(.system(size: 11, weight: .medium, design: .rounded))
+        .foregroundColor(.secondary)
     }
 }
