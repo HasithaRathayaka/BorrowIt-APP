@@ -366,6 +366,15 @@ public class SupabaseService: BackendServiceProtocol {
         return item
     }
     
+    public func deleteItem(id: UUID) async throws {
+        localItems.removeAll(where: { $0.id == id })
+        if isLiveConfigured {
+            if let request = makeRequest(endpoint: "/rest/v1/items?id=eq.\(id.uuidString)", method: "DELETE") {
+                _ = try? await session.data(for: request)
+            }
+        }
+    }
+    
     public func toggleFavorite(itemId: UUID) async throws -> Bool {
         if let idx = localItems.firstIndex(where: { $0.id == itemId }) {
             localItems[idx].isFavorite.toggle()
@@ -650,6 +659,9 @@ public class MockBackendService: BackendServiceProtocol {
     public func addItem(_ item: BorrowItem) async throws -> BorrowItem {
         items.append(item)
         return item
+    }
+    public func deleteItem(id: UUID) async throws {
+        items.removeAll(where: { $0.id == id })
     }
     public func toggleFavorite(itemId: UUID) async throws -> Bool {
         if let idx = items.firstIndex(where: { $0.id == itemId }) {

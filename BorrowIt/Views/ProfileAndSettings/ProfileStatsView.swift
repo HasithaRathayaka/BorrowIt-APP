@@ -7,6 +7,7 @@ import UIKit
 public struct ProfileStatsView: View {
     @EnvironmentObject var settings: AppSettingsManager
     @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var exploreVM: ExploreViewModel
     @State private var selectedPhotoPickerItem: PhotosPickerItem? = nil
     
     public var profile: UserProfile = .currentUser
@@ -272,6 +273,33 @@ public struct ProfileStatsView: View {
                             .padding(14)
                             .squircleCard()
                         }
+                        .padding(.horizontal, 20)
+                        
+                        // 5. My Listed Items Hub Card
+                        let userItems = exploreVM.myListedItems(for: activeProfile)
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "square.stack.3d.up.fill")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                    Text("MY LISTED GEAR")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                                Text("\(userItems.count) listed")
+                                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                            }
+                            
+                            Text("You can view, edit availability, and track all gear you've uploaded in the **Borrows & Listings** tab.")
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                                .lineSpacing(2)
+                        }
+                        .padding(14)
+                        .squircleCard()
                         .padding(.horizontal, 20)
                     }
                     .padding(.bottom, 30)

@@ -7,6 +7,7 @@ public protocol BackendServiceProtocol {
     func fetchItems() async throws -> [BorrowItem]
     func fetchItem(id: UUID) async throws -> BorrowItem?
     func addItem(_ item: BorrowItem) async throws -> BorrowItem
+    func deleteItem(id: UUID) async throws
     func toggleFavorite(itemId: UUID) async throws -> Bool
     
     func fetchBorrows() async throws -> [BorrowTransaction]
@@ -68,3 +69,8 @@ public protocol CalendarServiceProtocol {
     func requestAccess() async -> Bool
     func addBorrowEvents(itemTitle: String, lenderName: String, startDate: Date, endDate: Date) async -> Bool
 }
+
+public extension BackendServiceProtocol {
+    func deleteItem(id: UUID) async throws {}
+}
+

@@ -97,6 +97,31 @@ public class ExploreViewModel: ObservableObject {
         searchRadiusMeters = 1000.0
     }
     
+    // MARK: - User's Uploaded / Listed Items Management
+    public func myListedItems(for user: UserProfile) -> [BorrowItem] {
+        items.filter { item in
+            item.lender.id == user.id ||
+            item.lender.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == user.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        }
+    }
+    
+    public func toggleItemAvailability(for item: BorrowItem) {
+        Task {
+            if let idx = items.firstIndex(where: { $0.id == item.id }) {
+                items[idx].isAvailable.toggle()
+                let updated = items[idx]
+                _ = try? await backendService.addItem(updated)
+            }
+        }
+    }
+    
+    public func deleteItem(_ item: BorrowItem) {
+        Task {
+            items.removeAll(where: { $0.id == item.id })
+            try? await backendService.deleteItem(id: item.id)
+        }
+    }
+    
     // MARK: - Navigation & Mode Reset
     /// Directly switches to Feed mode and dismisses any active map pin preview card or pushed detail view.
     public func resetToFeed() {
