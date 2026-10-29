@@ -144,7 +144,7 @@ public class AuthViewModel: ObservableObject {
                 let initials: String
                 if parts.count >= 2 {
                     initials = "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-                } else if let first = nameParts.first {
+                } else if let first = parts.first {
                     initials = String(first.prefix(2)).uppercased()
                 } else {
                     initials = "AP"

@@ -33,6 +33,7 @@ public struct ProfileStatsView: View {
                         VStack(spacing: 10) {
                             let currentProfile = activeProfile
                             let highContrast = settings.highContrastEnabled
+                            let initials = currentProfile.initials
                             PhotosPicker(selection: $selectedPhotoPickerItem, matching: .images) {
                                 ZStack(alignment: .bottomTrailing) {
                                     // Main Avatar Circle
@@ -53,11 +54,11 @@ public struct ProfileStatsView: View {
                                                         .frame(width: 84, height: 84)
                                                         .clipShape(Circle())
                                                 default:
-                                                    ProfileInitialsBadge(initials: currentProfile.initials, highContrast: highContrast)
+                                                    ProfileInitialsBadge(initials: initials, highContrast: highContrast)
                                                 }
                                             }
                                         } else {
-                                            ProfileInitialsBadge(initials: currentProfile.initials, highContrast: highContrast)
+                                            ProfileInitialsBadge(initials: initials, highContrast: highContrast)
                                         }
                                     }
                                     .frame(width: 84, height: 84)

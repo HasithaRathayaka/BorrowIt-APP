@@ -1,7 +1,7 @@
 import Foundation
 
 // MARK: - Monthly Saving Data Point for Swift Charts
-public struct MonthlySaving: Identifiable, Codable, Hashable {
+public struct MonthlySaving: Identifiable, Codable, Hashable, Sendable {
     public var id: UUID
     public var month: String
     public var amountSaved: Double
@@ -16,7 +16,7 @@ public struct MonthlySaving: Identifiable, Codable, Hashable {
 }
 
 // MARK: - User Profile Model
-public struct UserProfile: Identifiable, Codable, Hashable {
+public struct UserProfile: Identifiable, Codable, Hashable, Sendable {
     public var id: UUID
     public var name: String
     public var email: String
