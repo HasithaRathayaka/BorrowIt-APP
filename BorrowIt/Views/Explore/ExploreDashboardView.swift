@@ -338,25 +338,8 @@ struct ItemFeedCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 12) {
-                // Visual Hero Box with Real Item Photo & Favorite Button
-                ZStack(alignment: .topTrailing) {
-                    ItemPhotoView(item: item, height: 160, cornerRadius: 16)
-                    
-                    // Favorite Heart Button
-                    Button(action: {
-                        exploreVM.toggleFavorite(for: item)
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Material.ultraThinMaterial)
-                                .frame(width: 36, height: 36)
-                            Image(systemName: item.isFavorite ? "heart.fill" : "heart")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(item.isFavorite ? .red : .primary)
-                        }
-                    }
-                    .padding(12)
-                }
+                // Visual Hero Box with Real Item Photo
+                ItemPhotoView(item: item, height: 160, cornerRadius: 16)
                 
                 // Item Info Row
                 VStack(alignment: .leading, spacing: 6) {

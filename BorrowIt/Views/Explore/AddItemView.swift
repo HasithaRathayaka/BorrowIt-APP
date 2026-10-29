@@ -66,10 +66,6 @@ public struct AddItemView: View {
                                     .frame(maxWidth: .infinity)
                                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                                     
-                                    // Bottom-left Core ML classification pill
-                                    CoreMLBadge(tag: addVM.coreMLTag, confidence: addVM.coreMLConfidence)
-                                        .padding(14)
-                                    
                                     // Top-right Add Photo Button (PhotosPicker)
                                     VStack {
                                         HStack {
