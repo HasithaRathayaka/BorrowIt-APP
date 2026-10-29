@@ -182,39 +182,36 @@ public struct iPadSplitDashboardView: View {
                         CategoryChip(
                             title: "All",
                             icon: "sparkles",
-                            isSelected: exploreVM.selectedCategory == nil && !exploreVM.filterFreeOnly,
-                            action: {
-                                exploreVM.selectedCategory = nil
-                                exploreVM.filterFreeOnly = false
-                            }
-                        )
+                            isSelected: exploreVM.selectedCategory == nil && !exploreVM.filterFreeOnly
+                        ) {
+                            exploreVM.selectedCategory = nil
+                            exploreVM.filterFreeOnly = false
+                        }
                         
                         CategoryChip(
                             title: "Free Items",
                             icon: "gift.fill",
-                            isSelected: exploreVM.filterFreeOnly,
-                            action: {
-                                exploreVM.filterFreeOnly.toggle()
-                                if exploreVM.filterFreeOnly {
-                                    exploreVM.selectedCategory = nil
-                                }
+                            isSelected: exploreVM.filterFreeOnly
+                        ) {
+                            exploreVM.filterFreeOnly.toggle()
+                            if exploreVM.filterFreeOnly {
+                                exploreVM.selectedCategory = nil
                             }
-                        )
+                        }
                         
                         ForEach(ItemCategory.allCases) { cat in
                             CategoryChip(
-                                title: cat.displayName,
-                                icon: cat.systemImageName,
-                                isSelected: exploreVM.selectedCategory == cat,
-                                action: {
-                                    if exploreVM.selectedCategory == cat {
-                                        exploreVM.selectedCategory = nil
-                                    } else {
-                                        exploreVM.selectedCategory = cat
-                                        exploreVM.filterFreeOnly = false
-                                    }
+                                title: cat.rawValue,
+                                icon: cat.sfSymbol,
+                                isSelected: exploreVM.selectedCategory == cat
+                            ) {
+                                if exploreVM.selectedCategory == cat {
+                                    exploreVM.selectedCategory = nil
+                                } else {
+                                    exploreVM.selectedCategory = cat
+                                    exploreVM.filterFreeOnly = false
                                 }
-                            )
+                            }
                         }
                     }
                     .padding(.horizontal, 16)
