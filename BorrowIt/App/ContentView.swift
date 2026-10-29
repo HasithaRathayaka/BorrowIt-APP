@@ -35,7 +35,7 @@ public struct ContentView: View {
             set: { settings.isAppLocked = $0 }
         )) {
             BiometricGateView(
-                reasonPrompt: "Welcome back — Sign in securely to see what your neighbors are sharing"
+                reasonPrompt: "Welcome back, \(authVM.currentUser.name) — Unlock with Face ID to continue"
             )
         }
         .alert("Within 50m of Handoff Point!", isPresented: $lifecycleVM.isGeofenceAlertPresented) {
@@ -49,6 +49,7 @@ public struct ContentView: View {
         .onChange(of: authVM.isAuthenticated) { oldValue, newValue in
             if newValue {
                 // Once logged in, guarantee landing directly on Explore Dashboard in Feed mode
+                settings.isAppLocked = false
                 selectedTab = 0
                 withAnimation(settings.reduceMotionEnabled ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
                     exploreVM.resetToFeed()
@@ -64,7 +65,11 @@ public struct ContentView: View {
             }
         }
         .onAppear {
-            settings.isAppLocked = false
+            if authVM.isAuthenticated && settings.faceIDLockEnabled {
+                settings.isAppLocked = true
+            } else {
+                settings.isAppLocked = false
+            }
             if authVM.isAuthenticated {
                 selectedTab = 0
                 exploreVM.resetToFeed()

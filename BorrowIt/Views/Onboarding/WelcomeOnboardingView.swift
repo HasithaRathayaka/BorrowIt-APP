@@ -102,62 +102,6 @@ public struct WelcomeOnboardingView: View {
     // MARK: - Log In Section
     private var loginSection: some View {
         VStack(spacing: 16) {
-            // Prominent Face ID / Biometric Button
-            Button(action: {
-                Task {
-                    let success = await authVM.signInWithFaceID()
-                    if success {
-                        exploreVM.resetToFeed()
-                    }
-                }
-            }) {
-                HStack(spacing: 14) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.softMintTint)
-                            .frame(width: 48, height: 48)
-                        Image(systemName: "faceid")
-                            .font(.system(size: 26, weight: .bold))
-                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Sign in with Face ID")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(.primary)
-                        Text("One-tap secure biometric login")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Spacer()
-                    
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.secondary)
-                }
-                .padding(14)
-                .background(Color(uiColor: .secondarySystemGroupedBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(ThemeColors.emerald(highContrast: settings.highContrastEnabled).opacity(0.35), lineWidth: 1.5)
-                )
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 24)
-            
-            // Divider
-            HStack {
-                Rectangle().frame(height: 1).foregroundColor(Color.primary.opacity(0.1))
-                Text("OR USE EMAIL")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.secondary)
-                Rectangle().frame(height: 1).foregroundColor(Color.primary.opacity(0.1))
-            }
-            .padding(.horizontal, 28)
-            .padding(.vertical, 4)
-            
             // Email & Password Fields
             VStack(spacing: 12) {
                 HStack(spacing: 12) {

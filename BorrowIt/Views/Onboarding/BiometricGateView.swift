@@ -91,10 +91,20 @@ public struct BiometricGateView: View {
                             onCancel?()
                             settings.unlockApp()
                         }) {
-                            Text("Cancel / Simulator Passcode Bypass")
+                            Text("Simulator Passcode Bypass")
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.secondary)
-                                .padding(.vertical, 8)
+                                .padding(.vertical, 6)
+                        }
+                        
+                        Button(action: {
+                            settings.unlockApp()
+                            authVM.signOut()
+                        }) {
+                            Text("Log Out / Switch Account")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.red.opacity(0.85))
+                                .padding(.vertical, 4)
                         }
                     }
                 }

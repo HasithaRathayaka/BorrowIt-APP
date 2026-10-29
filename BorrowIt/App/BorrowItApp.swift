@@ -34,8 +34,8 @@ struct BorrowItApp: App {
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background {
-                // If Face ID Lock is enabled, lock app when sent to background
-                if settingsManager.faceIDLockEnabled {
+                // If user is actively logged in and Face ID Lock is enabled, lock app when sent to background
+                if authViewModel.isAuthenticated && settingsManager.faceIDLockEnabled {
                     settingsManager.isAppLocked = true
                 }
             }
