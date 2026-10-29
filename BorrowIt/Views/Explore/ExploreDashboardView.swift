@@ -538,22 +538,6 @@ struct ItemFeedCard: View {
                         RatingStarRow(rating: item.rating)
                         
                         Spacer()
-                        
-                        // Available Today Pill
-                        if item.isAvailable {
-                            HStack(spacing: 3) {
-                                Circle()
-                                    .fill(Color.brandEmerald)
-                                    .frame(width: 5, height: 5)
-                                Text("Available today")
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .foregroundColor(Color.statusEmeraldText)
-                            }
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 3)
-                            .background(Color.statusEmeraldBg)
-                            .clipShape(Capsule())
-                        }
                     }
                 }
                 .padding(.horizontal, 4)
