@@ -108,11 +108,11 @@ public struct BorrowsTabView: View {
     
     // MARK: - Borrowing View
     private var borrowingView: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
             // Subtitle Stats
             HStack {
                 Text("\(activeCount) active · \(completedCount + 11) completed")
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundColor(.secondary)
                 Spacer()
             }
@@ -121,10 +121,10 @@ public struct BorrowsTabView: View {
             
             // 1. Pending Requests Section (Awaiting Lender Approval)
             if !pendingBorrows.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 6) {
                         Image(systemName: "clock.arrow.circlepath")
-                            .font(.system(size: 13, weight: .bold))
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundColor(.orange)
                         Text("PENDING REQUESTS (\(pendingBorrows.count))")
                             .font(.system(size: 11, weight: .bold))
@@ -454,36 +454,34 @@ public struct BorrowsTabView: View {
     
     // MARK: - Pending Borrow Card (Awaiting Lender Approval)
     private func pendingBorrowCard(_ borrow: BorrowTransaction) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top, spacing: 12) {
-                // Item Photo Thumbnail or Fallback Icon
-                ItemPhotoView(item: borrow.item, height: 68, cornerRadius: 14)
-                    .frame(width: 68, height: 68)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .shadow(color: Color.black.opacity(0.06), radius: 4, y: 2)
+        VStack(alignment: .leading, spacing: 10) {
+            // Main Content Row
+            HStack(spacing: 12) {
+                // Item Thumbnail (50x50 matching active card)
+                ItemPhotoView(item: borrow.item, height: 50, cornerRadius: 12)
+                    .frame(width: 50, height: 50)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(borrow.item.title)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundColor(.primary)
-                        .lineLimit(2)
+                        .lineLimit(1)
                     
-                    Text("Requested from \(borrow.lenderName) · \(borrow.totalDays) \(borrow.totalDays == 1 ? "day" : "days")")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                    
-                    HStack(spacing: 6) {
-                        Text(borrow.item.isFree ? "Free Community Lend" : "Rs. \(Int(borrow.item.dailyRate * Double(borrow.totalDays))) total")
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
-                            .foregroundColor(borrow.item.isFree ? ThemeColors.emerald(highContrast: settings.highContrastEnabled) : .primary)
-                        
-                        Text("·")
+                    HStack(spacing: 5) {
+                        Text("From \(borrow.lenderName)")
                             .foregroundColor(.secondary)
-                        
-                        Text("Awaiting Approval")
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(.orange)
+                        Text("·")
+                            .foregroundColor(.secondary.opacity(0.6))
+                        Text("\(borrow.totalDays)d")
+                            .foregroundColor(.secondary)
+                        Text("·")
+                            .foregroundColor(.secondary.opacity(0.6))
+                        Text(borrow.item.isFree ? "Free" : "Rs. \(Int(borrow.item.dailyRate * Double(borrow.totalDays)))")
+                            .foregroundColor(borrow.item.isFree ? ThemeColors.emerald(highContrast: settings.highContrastEnabled) : .primary)
+                            .fontWeight(.semibold)
                     }
+                    .font(.system(size: 12))
                 }
                 
                 Spacer()
@@ -492,50 +490,57 @@ public struct BorrowsTabView: View {
             }
             
             Divider()
+                .opacity(0.6)
             
-            // Bottom Action Strip
-            HStack(spacing: 10) {
+            // Bottom Action Strip: Review Status + Action Controls
+            HStack {
                 HStack(spacing: 6) {
-                    ProgressView()
-                        .tint(.orange)
-                        .scaleEffect(0.75)
-                    Text("Lender will review")
+                    Circle()
+                        .fill(Color.orange)
+                        .frame(width: 6, height: 6)
+                    Text("Awaiting lender approval")
                         .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundColor(.secondary)
                 }
                 
                 Spacer()
                 
-                // Demo Simulator Approval Button (Face ID gated)
-                Button(action: {
-                    Task {
-                        _ = await lifecycleVM.approveBorrow(id: borrow.id)
+                HStack(spacing: 8) {
+                    // Demo Simulator Approval Button
+                    Button(action: {
+                        Task {
+                            _ = await lifecycleVM.approveBorrow(id: borrow.id)
+                        }
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 11))
+                            Text("Approve (Demo)")
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                        }
+                        .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 5)
+                        .background(Color.softMintTint)
+                        .clipShape(Capsule())
                     }
-                }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle.fill")
-                        Text("Approve (Demo)")
+                    
+                    // Cancel Request Button
+                    Button(action: {
+                        lifecycleVM.cancelBorrowRequest(id: borrow.id)
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.secondary)
+                            .frame(width: 22, height: 22)
+                            .background(Color(uiColor: .tertiarySystemFill))
+                            .clipShape(Circle())
                     }
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.softMintTint)
-                    .clipShape(Capsule())
+                    .accessibilityLabel("Cancel request")
                 }
-                
-                // Cancel Request Button
-                Button(action: {
-                    lifecycleVM.cancelBorrowRequest(id: borrow.id)
-                }) {
-                    Image(systemName: "xmark.circle")
-                        .font(.system(size: 16))
-                        .foregroundColor(.secondary)
-                }
-                .accessibilityLabel("Cancel borrow request")
             }
         }
-        .padding(14)
+        .padding(12)
         .squircleCard()
     }
     
