@@ -55,6 +55,14 @@ public struct iPadSplitDashboardView: View {
                 }
             }
         }
+        .sheet(isPresented: $exploreVM.isAddItemPresented) {
+            AddItemView()
+        }
+        .onAppear {
+            if selectedItem == nil {
+                selectedItem = exploreVM.filteredItems.first ?? BorrowItem.dewaltDrill
+            }
+        }
         .liveAccessibilityScale()
     }
     
@@ -121,39 +129,141 @@ public struct iPadSplitDashboardView: View {
         switch selectedSection {
         case .explore, .none:
             VStack(spacing: 0) {
-                // Mini Explore Filter Header
+                // Explore Header with Add Button
                 HStack {
-                    Text("Colombo 07 Items")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Colombo 07")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                        Text("\(exploreVM.filteredCount) items within 500m")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                    }
+                    
                     Spacer()
+                    
                     Button(action: {
                         exploreVM.isAddItemPresented = true
                     }) {
                         Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 24))
+                            .font(.system(size: 26))
                             .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
                     }
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .padding(.top, 14)
+                .padding(.bottom, 8)
+                
+                // Search Bar
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 14))
+                    TextField("Search Colombo items...", text: $exploreVM.searchQuery)
+                        .font(.system(size: 14))
+                        .textFieldStyle(.plain)
+                    if !exploreVM.searchQuery.isEmpty {
+                        Button(action: { exploreVM.searchQuery = "" }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.secondary)
+                                .font(.system(size: 14))
+                        }
+                    }
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .background(Color(uiColor: .secondarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
+                
+                // Horizontal Category Chips
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        CategoryChip(
+                            title: "All",
+                            icon: "sparkles",
+                            isSelected: exploreVM.selectedCategory == nil && !exploreVM.filterFreeOnly,
+                            action: {
+                                exploreVM.selectedCategory = nil
+                                exploreVM.filterFreeOnly = false
+                            }
+                        )
+                        
+                        CategoryChip(
+                            title: "Free Items",
+                            icon: "gift.fill",
+                            isSelected: exploreVM.filterFreeOnly,
+                            action: {
+                                exploreVM.filterFreeOnly.toggle()
+                                if exploreVM.filterFreeOnly {
+                                    exploreVM.selectedCategory = nil
+                                }
+                            }
+                        )
+                        
+                        ForEach(ItemCategory.allCases) { cat in
+                            CategoryChip(
+                                title: cat.displayName,
+                                icon: cat.systemImageName,
+                                isSelected: exploreVM.selectedCategory == cat,
+                                action: {
+                                    if exploreVM.selectedCategory == cat {
+                                        exploreVM.selectedCategory = nil
+                                    } else {
+                                        exploreVM.selectedCategory = cat
+                                        exploreVM.filterFreeOnly = false
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
+                }
+                
+                Divider()
                 
                 // Item Feed Selection List
                 List(exploreVM.filteredItems, selection: $selectedItem) { item in
                     HStack(spacing: 12) {
-                        Image(systemName: item.systemImageName)
-                            .font(.system(size: 22))
-                            .foregroundColor(Color(hex: item.category.colorHex))
-                            .frame(width: 36)
+                        ItemPhotoView(item: item, height: 48, cornerRadius: 10)
+                            .frame(width: 48, height: 48)
                         
-                        VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: 3) {
                             Text(item.title)
                                 .font(.system(size: 14, weight: .bold, design: .rounded))
-                            Text("\(item.formattedRate) · \(item.formattedDistance)")
-                                .font(.system(size: 12))
+                                .lineLimit(1)
+                            
+                            HStack(spacing: 6) {
+                                if item.isFree {
+                                    Text("FREE")
+                                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.brandEmerald)
+                                        .clipShape(Capsule())
+                                } else {
+                                    Text(item.formattedRate)
+                                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                                        .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                }
+                                
+                                Text("•")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.secondary)
+                                
+                                HStack(spacing: 3) {
+                                    Image(systemName: "figure.walk")
+                                        .font(.system(size: 10))
+                                    Text(item.formattedDistance)
+                                        .font(.system(size: 11, weight: .medium))
+                                }
                                 .foregroundColor(.secondary)
+                            }
                         }
                     }
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 3)
                 }
                 .listStyle(.plain)
             }
@@ -188,7 +298,7 @@ public struct iPadSplitDashboardView: View {
                             .foregroundColor(.secondary)
                             .padding(.horizontal, 20)
                         
-                        ChatThreadView(conversation: ChatConversation.convMaya)
+                        ChatThreadView(conversation: chatVM.getOrCreateConversation(with: item.lender, itemTitle: item.title))
                             .frame(height: 380)
                             .squircleCard()
                             .padding(.horizontal, 20)
