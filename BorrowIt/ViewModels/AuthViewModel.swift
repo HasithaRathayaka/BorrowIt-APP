@@ -27,13 +27,12 @@ public class AuthViewModel: ObservableObject {
         self.biometricService = biometricService
         self.backendService = backendService
         
-        // Restore saved session if previously authenticated
-        if UserDefaults.standard.bool(forKey: "borrowit_is_authenticated"),
-           let data = UserDefaults.standard.data(forKey: "borrowit_saved_user_profile"),
+        // Pre-populate saved user profile if available, but require login on app launch
+        if let data = UserDefaults.standard.data(forKey: "borrowit_saved_user_profile"),
            let saved = try? JSONDecoder().decode(UserProfile.self, from: data) {
             self.currentUser = saved
-            self.isAuthenticated = true
         }
+        self.isAuthenticated = false
     }
     
     // MARK: - Session Persistence Helpers

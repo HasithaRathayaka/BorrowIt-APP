@@ -29,7 +29,10 @@ public struct ContentView: View {
                 }
             }
         }
-        .fullScreenCover(isPresented: $settings.isAppLocked) {
+        .fullScreenCover(isPresented: Binding(
+            get: { authVM.isAuthenticated && settings.isAppLocked },
+            set: { settings.isAppLocked = $0 }
+        )) {
             BiometricGateView(
                 reasonPrompt: "Welcome back — Sign in securely to see what your neighbors are sharing"
             )
@@ -52,12 +55,10 @@ public struct ContentView: View {
             }
         }
         .onAppear {
+            settings.isAppLocked = false
             if authVM.isAuthenticated {
                 selectedTab = 0
                 exploreVM.resetToFeed()
-                if settings.faceIDLockEnabled {
-                    settings.lockAppWithFaceID()
-                }
             }
         }
     }
