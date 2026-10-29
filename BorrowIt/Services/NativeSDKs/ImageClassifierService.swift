@@ -9,6 +9,7 @@ public struct TestImagePreset: Identifiable, Hashable {
     public var id: String { name }
     public var name: String
     public var category: ItemCategory
+    public var suggestedCategory: ItemCategory { category }
     public var symbol: String
     public var suggestedTitle: String
     public var suggestedPrice: Double

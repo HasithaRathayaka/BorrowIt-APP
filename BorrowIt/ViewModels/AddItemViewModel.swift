@@ -68,7 +68,7 @@ public class AddItemViewModel: ObservableObject {
             self.selectedImageData = nil
             self.coreMLTag = item.coreMLTag.isEmpty ? item.category.rawValue : item.coreMLTag
             self.coreMLConfidence = item.coreMLConfidence > 0 ? item.coreMLConfidence : 0.95
-            if let matchingPreset = TestImagePreset.presets.first(where: { $0.suggestedCategory == item.category }) {
+            if let matchingPreset = TestImagePreset.presets.first(where: { $0.category == item.category }) {
                 self.selectedPreset = matchingPreset
             }
         } else {
