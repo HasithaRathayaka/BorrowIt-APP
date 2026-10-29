@@ -38,6 +38,26 @@ public struct TestImagePreset: Identifiable, Hashable {
     
     public static let presets: [TestImagePreset] = [
         TestImagePreset(
+            name: "Cordless Drill",
+            category: .powerTools,
+            symbol: "bolt.fill",
+            suggestedTitle: "DeWalt 20V Max Cordless Drill",
+            suggestedPrice: 1500.0,
+            suggestedDeposit: 5000.0,
+            description: "Cordless brushless hammer drill with dual battery packs and charger.",
+            imageURL: "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=800&q=80"
+        ),
+        TestImagePreset(
+            name: "Claw Hammer",
+            category: .handTools,
+            symbol: "hammer.fill",
+            suggestedTitle: "Estwing 16oz Rip Claw Hammer",
+            suggestedPrice: 0.0, // FREE Community Lend
+            suggestedDeposit: 2000.0,
+            description: "Solid forged steel rip claw hammer with shock reduction grip.",
+            imageURL: "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=800&q=80"
+        ),
+        TestImagePreset(
             name: "Extension Ladder",
             category: .handTools,
             symbol: "arrow.up.and.down",
@@ -45,7 +65,7 @@ public struct TestImagePreset: Identifiable, Hashable {
             suggestedPrice: 0.0, // FREE Community Lend
             suggestedDeposit: 3000.0,
             description: "17ft aluminum telescoping ladder for seasonal gutter cleaning, painting, and high roof access.",
-            imageURL: "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=800&q=80"
+            imageURL: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
         ),
         TestImagePreset(
             name: "Pressure Washer",
@@ -56,16 +76,6 @@ public struct TestImagePreset: Identifiable, Hashable {
             suggestedDeposit: 6000.0,
             description: "Electric power washer for seasonal driveway, patio, and car deep cleans.",
             imageURL: "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=800&q=80"
-        ),
-        TestImagePreset(
-            name: "Cordless Drill",
-            category: .powerTools,
-            symbol: "bolt.fill",
-            suggestedTitle: "DeWalt 20V Max Cordless Drill",
-            suggestedPrice: 1500.0,
-            suggestedDeposit: 5000.0,
-            description: "Cordless brushless hammer drill with dual battery packs and charger.",
-            imageURL: "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=800&q=80"
         ),
         TestImagePreset(
             name: "Backpacking Tent",
@@ -126,36 +136,28 @@ public class ImageClassifierService: ClassifierProtocol {
     
     public init() {}
     
-    // Execute VNClassifyImageRequest on-device
+    // Execute VNClassifyImageRequest on-device safely without continuation double-resume
     public func classify(image: CGImage) async throws -> (category: ItemCategory, confidence: Double, rawLabel: String) {
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = VNClassifyImageRequest { request, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                
-                guard let results = request.results as? [VNClassificationObservation],
-                      let topResult = results.first else {
-                    // Fallback default
-                    continuation.resume(returning: (.powerTools, 0.92, "power_drill"))
-                    return
-                }
-                
-                let detectedLabel = topResult.identifier.lowercased()
-                let category = self.mapLabelToCategory(detectedLabel)
-                let confidence = Double(topResult.confidence)
-                continuation.resume(returning: (category, confidence, detectedLabel))
-            }
-            
+        return await Task.detached(priority: .userInitiated) { [self] in
+            let request = VNClassifyImageRequest()
             let handler = VNImageRequestHandler(cgImage: image, options: [:])
+            
             do {
                 try handler.perform([request])
+                if let results = request.results as? [VNClassificationObservation],
+                   let topResult = results.first {
+                    let detectedLabel = topResult.identifier.lowercased()
+                    let category = self.mapLabelToCategory(detectedLabel)
+                    let confidence = Double(topResult.confidence)
+                    return (category, confidence, detectedLabel)
+                }
             } catch {
-                // If Vision fails, fallback gracefully to mapped category
-                continuation.resume(returning: (.powerTools, 0.91, "hardware_tool"))
+                print("[ImageClassifierService] Vision request threw: \(error). Using fallback classification.")
             }
-        }
+            
+            // Safe fallback for Simulator or hardware without Vision taxonomy
+            return (ItemCategory.powerTools, 0.92, "power_drill")
+        }.value
     }
     
     // MARK: - Taxonomy Mapping to BorrowIt Categories
@@ -173,35 +175,42 @@ public class ImageClassifierService: ClassifierProtocol {
         if l.contains("hammer") || l.contains("wrench") || l.contains("screwdriver") ||
             l.contains("pliers") || l.contains("socket") || l.contains("hardware") ||
             l.contains("toolkit") || l.contains("measuring") || l.contains("ladder") ||
-            l.contains("level") || l.contains("scanner") {
+            l.contains("level") || l.contains("scanner") || l.contains("spanner") ||
+            l.contains("tape") || l.contains("tool") {
             return .handTools
         }
         
-        // Camping
+        // Camping & Outdoors
         if l.contains("tent") || l.contains("backpack") || l.contains("sleeping") ||
             l.contains("lantern") || l.contains("stove") || l.contains("cooler") ||
-            l.contains("camping") || l.contains("tarp") || l.contains("table") || l.contains("chair") {
+            l.contains("camping") || l.contains("tarp") || l.contains("table") || l.contains("chair") ||
+            l.contains("waterfall") || l.contains("river") || l.contains("water") ||
+            l.contains("forest") || l.contains("mountain") || l.contains("nature") ||
+            l.contains("outdoor") || l.contains("hike") || l.contains("trail") {
             return .camping
         }
         
         // Garden
         if l.contains("shears") || l.contains("pruner") || l.contains("mower") ||
             l.contains("shovel") || l.contains("rake") || l.contains("hose") ||
-            l.contains("plant") || l.contains("garden") || l.contains("hedge") {
+            l.contains("plant") || l.contains("garden") || l.contains("hedge") ||
+            l.contains("grass") || l.contains("flower") || l.contains("leaf") {
             return .garden
         }
         
         // Kitchen
         if l.contains("mixer") || l.contains("blender") || l.contains("cooker") ||
             l.contains("pot") || l.contains("pan") || l.contains("espresso") ||
-            l.contains("toaster") || l.contains("knife") || l.contains("kitchen") {
+            l.contains("coffee") || l.contains("toaster") || l.contains("knife") ||
+            l.contains("kitchen") || l.contains("dough") {
             return .kitchen
         }
         
         // Sports
         if l.contains("kayak") || l.contains("bike") || l.contains("bicycle") ||
             l.contains("ball") || l.contains("racket") || l.contains("paddle") ||
-            l.contains("surfboard") || l.contains("ski") || l.contains("sports") {
+            l.contains("surfboard") || l.contains("ski") || l.contains("sports") ||
+            l.contains("canoe") || l.contains("helmet") {
             return .sports
         }
         

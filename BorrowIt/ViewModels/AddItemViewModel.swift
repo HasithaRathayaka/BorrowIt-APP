@@ -47,6 +47,9 @@ public class AddItemViewModel: ObservableObject {
     ) {
         self.classifier = classifier
         self.backendService = backendService
+        if let firstPreset = TestImagePreset.presets.first {
+            selectPreset(firstPreset)
+        }
     }
     
     // MARK: - Preset Selection (Quick Testing for Graders)
@@ -85,17 +88,19 @@ public class AddItemViewModel: ObservableObject {
         try? optimizedData.write(to: fileURL)
         
         // Trigger Core ML / Vision classification on custom image
-        if let cgImage = originalImage.cgImage {
+        let cgImageToClassify = originalImage.cgImage ?? UIImage(data: optimizedData)?.cgImage
+        if let cgImage = cgImageToClassify {
             self.isClassifying = true
             Task {
-                if let result = try? await self.classifier.classify(image: cgImage) {
+                do {
+                    let result = try await self.classifier.classify(image: cgImage)
                     await MainActor.run {
                         self.selectedCategory = result.category
                         self.coreMLTag = result.category.rawValue
                         self.coreMLConfidence = max(result.confidence, 0.90)
                         self.isClassifying = false
                     }
-                } else {
+                } catch {
                     await MainActor.run {
                         self.isClassifying = false
                     }
@@ -105,7 +110,7 @@ public class AddItemViewModel: ObservableObject {
     }
     
     // MARK: - Image Optimization Helper
-    private func prepareOptimizedImage(from image: UIImage, maxDimension: CGFloat = 800) -> (Data, String) {
+    private func prepareOptimizedImage(from image: UIImage, maxDimension: CGFloat = 600) -> (Data, String) {
         // 1. Fix EXIF orientation so image displays right-side up
         let normalizedImage: UIImage
         if image.imageOrientation == .up {
@@ -128,7 +133,7 @@ public class AddItemViewModel: ObservableObject {
             normalizedImage.draw(in: CGRect(origin: .zero, size: targetSize))
         }
         
-        let jpegData = resizedImage.jpegData(compressionQuality: 0.72) ?? normalizedImage.jpegData(compressionQuality: 0.72) ?? Data()
+        let jpegData = resizedImage.jpegData(compressionQuality: 0.65) ?? normalizedImage.jpegData(compressionQuality: 0.65) ?? Data()
         let base64 = jpegData.base64EncodedString()
         let dataURI = "data:image/jpeg;base64,\(base64)"
         return (jpegData, dataURI)

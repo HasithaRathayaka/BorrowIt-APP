@@ -24,11 +24,18 @@ public class SupabaseService: BackendServiceProtocol {
     public init(
         baseURL: URL = AppConfig.supabaseURL,
         apiKey: String = AppConfig.supabaseAnonKey,
-        session: URLSession = .shared
+        session: URLSession? = nil
     ) {
         self.baseURL = baseURL
         self.apiKey = apiKey
-        self.session = session
+        if let customSession = session {
+            self.session = customSession
+        } else {
+            let config = URLSessionConfiguration.default
+            config.timeoutIntervalForRequest = 15.0
+            config.timeoutIntervalForResource = 30.0
+            self.session = URLSession(configuration: config)
+        }
         self.isLiveConfigured = AppConfig.isSupabaseConfigured
         
         // Initialize Cedar Grove Seed Dataset
@@ -46,6 +53,7 @@ public class SupabaseService: BackendServiceProtocol {
         guard let url = URL(string: "\(baseURL.absoluteString)\(endpoint)") else { return nil }
         var request = URLRequest(url: url)
         request.httpMethod = method
+        request.timeoutInterval = 15.0
         let token = currentAccessToken ?? apiKey
         request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.addValue(apiKey, forHTTPHeaderField: "apikey")
@@ -281,8 +289,15 @@ public class SupabaseService: BackendServiceProtocol {
                     if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                         let decoded = try jsonDecoder.decode([BorrowItem].self, from: data)
                         if !decoded.isEmpty {
-                            self.localItems = decoded
-                            return decoded
+                            // Merge cloud items with any local items not yet in cloud
+                            var merged = decoded
+                            for localItem in self.localItems {
+                                if !merged.contains(where: { $0.id == localItem.id }) {
+                                    merged.insert(localItem, at: 0)
+                                }
+                            }
+                            self.localItems = merged
+                            return merged
                         } else {
                             // Cloud items table is empty: auto-seed Cedar Grove items into Supabase
                             Task {
