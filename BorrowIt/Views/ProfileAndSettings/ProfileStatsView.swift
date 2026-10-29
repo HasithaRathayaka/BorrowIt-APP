@@ -4,6 +4,7 @@ import PhotosUI
 import UIKit
 
 // MARK: - Screen 15: User Profile & Swift Charts Stats
+@MainActor
 public struct ProfileStatsView: View {
     @EnvironmentObject var settings: AppSettingsManager
     @EnvironmentObject var authVM: AuthViewModel

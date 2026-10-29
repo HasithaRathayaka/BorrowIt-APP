@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 
 // MARK: - Screen 9: Add an Item with On-Device Core ML Auto-Categorization
+@MainActor
 public struct AddItemView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var addVM = AddItemViewModel()

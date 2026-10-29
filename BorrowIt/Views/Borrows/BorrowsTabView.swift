@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Screen 13: Your Borrows & My Listed Items Activity Hub
+@MainActor
 public struct BorrowsTabView: View {
     @EnvironmentObject var lifecycleVM: BorrowLifecycleViewModel
     @EnvironmentObject var exploreVM: ExploreViewModel
@@ -54,7 +55,7 @@ public struct BorrowsTabView: View {
                     }
                     .refreshable {
                         await exploreVM.fetchItems()
-                        await lifecycleVM.fetchBorrows()
+                        await lifecycleVM.loadBorrows()
                     }
                 }
             }

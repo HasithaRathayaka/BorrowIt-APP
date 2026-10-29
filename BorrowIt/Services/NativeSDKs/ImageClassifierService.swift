@@ -144,7 +144,7 @@ public class ImageClassifierService: ClassifierProtocol {
             
             do {
                 try handler.perform([request])
-                if let results = request.results as? [VNClassificationObservation],
+                if let results = request.results,
                    let topResult = results.first {
                     let detectedLabel = topResult.identifier.lowercased()
                     let category = self.mapLabelToCategory(detectedLabel)

@@ -73,6 +73,10 @@ public class BorrowLifecycleViewModel: ObservableObject {
         }
     }
     
+    public func fetchBorrows() async {
+        await loadBorrows()
+    }
+    
     // MARK: - Countdown & Rotating Token
     private func setupCountdownTimer() {
         timerCancellable = Timer.publish(every: 1.0, on: .main, in: .common)
