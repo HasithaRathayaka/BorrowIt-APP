@@ -33,7 +33,7 @@ public struct ChatThreadView: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 16)
                     }
-                    .onChange(of: chatVM.messages.count) { _ in
+                    .onChange(of: chatVM.messages.count) { _, _ in
                         if let last = chatVM.messages.last {
                             withAnimation {
                                 proxy.scrollTo(last.id, anchor: .bottom)

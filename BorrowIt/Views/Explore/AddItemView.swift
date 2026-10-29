@@ -90,7 +90,7 @@ public struct AddItemView: View {
                                         Spacer()
                                     }
                                 }
-                                .onChange(of: selectedPhotoPickerItem) { newItem in
+                                .onChange(of: selectedPhotoPickerItem) { _, newItem in
                                     Task {
                                         if let data = try? await newItem?.loadTransferable(type: Data.self) {
                                             addVM.setCustomPhoto(data: data)

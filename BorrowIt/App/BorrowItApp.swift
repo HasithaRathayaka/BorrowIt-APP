@@ -32,7 +32,7 @@ struct BorrowItApp: App {
                     }
                 }
         }
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background {
                 // If Face ID Lock is enabled, lock app when sent to background
                 if settingsManager.faceIDLockEnabled {

@@ -159,11 +159,11 @@ public class AddItemViewModel: ObservableObject {
             lender: LenderProfile(
                 id: currentUser.id,
                 name: currentUser.name,
-                rating: currentUser.communityRating,
                 initials: currentUser.initials,
+                rating: currentUser.communityRating,
+                reviewCount: currentUser.reviewCount,
                 joinedYear: 2026,
                 totalLends: currentUser.totalLends,
-                reviewCount: currentUser.reviewCount,
                 avatarColorHex: "#10B981"
             ),
             systemImageName: selectedPreset.symbol,

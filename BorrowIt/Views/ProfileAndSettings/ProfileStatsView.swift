@@ -81,7 +81,7 @@ public struct ProfileStatsView: View {
                                 }
                             }
                             .buttonStyle(.plain)
-                            .onChange(of: selectedPhotoPickerItem) { newItem in
+                            .onChange(of: selectedPhotoPickerItem) { _, newItem in
                                 Task {
                                     if let data = try? await newItem?.loadTransferable(type: Data.self) {
                                         await MainActor.run {

@@ -18,6 +18,7 @@ public class BiometricAuthService: BiometricServiceProtocol {
         var error: NSError?
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
             switch context.biometryType {
+            case .none: return "None"
             case .faceID: return "Face ID"
             case .touchID: return "Touch ID"
             case .opticID: return "Optic ID"
