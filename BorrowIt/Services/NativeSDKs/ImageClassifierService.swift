@@ -184,7 +184,7 @@ public class ImageClassifierService: ClassifierProtocol {
         // Camping & Outdoors
         if l.contains("tent") || l.contains("backpack") || l.contains("sleeping") ||
             l.contains("lantern") || l.contains("stove") || l.contains("cooler") ||
-            l.contains("camping") || l.contains("tarp") || l.contains("table") || l.contains("chair") ||
+            l.contains("camping") || l.contains("tarp") || l.contains("folding table") || l.contains("chair") ||
             l.contains("waterfall") || l.contains("river") || l.contains("water") ||
             l.contains("forest") || l.contains("mountain") || l.contains("nature") ||
             l.contains("outdoor") || l.contains("hike") || l.contains("trail") {

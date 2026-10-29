@@ -252,7 +252,7 @@ public struct ExploreDashboardView: View {
     // MARK: - Screen 4: Feed Mode List
     private var feedListView: some View {
         ScrollView {
-            LazyVStack(spacing: 16) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 320, maximum: 600), spacing: 16)], spacing: 16) {
                 ForEach(exploreVM.filteredItems) { item in
                     ItemFeedCard(item: item) {
                         exploreVM.selectedItemForDetail = item

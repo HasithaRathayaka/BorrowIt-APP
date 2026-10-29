@@ -95,6 +95,8 @@ public struct WelcomeOnboardingView: View {
                         .padding(.horizontal, 32)
                         .padding(.bottom, 28)
                 }
+                .frame(maxWidth: 460)
+                .frame(maxWidth: .infinity)
             }
         }
         .liveAccessibilityScale()

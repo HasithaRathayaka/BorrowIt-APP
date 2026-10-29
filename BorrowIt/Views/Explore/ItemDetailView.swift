@@ -73,20 +73,6 @@ public struct ItemDetailView: View {
                                 RatingStarRow(rating: item.rating)
                                 
                                 Spacer(minLength: 4)
-                                
-                                HStack(spacing: 4) {
-                                    Circle()
-                                        .fill(Color.brandEmerald)
-                                        .frame(width: 6, height: 6)
-                                    Text("Available today")
-                                        .font(.system(size: 11, weight: .semibold))
-                                        .foregroundColor(Color.statusEmeraldText)
-                                }
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.statusEmeraldBg)
-                                .clipShape(Capsule())
-                                .fixedSize()
                             }
                         }
                         
