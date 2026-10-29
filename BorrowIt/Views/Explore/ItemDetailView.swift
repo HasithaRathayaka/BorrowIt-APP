@@ -255,7 +255,7 @@ public struct ItemDetailView: View {
                     ShareLink(
                         item: "Borrow '\(item.title)' from \(item.lender.name) on BorrowIt!",
                         subject: Text("BorrowIt: \(item.title)"),
-                        message: Text("Check out this \(item.title) nearby in Cedar Grove for Rs. \(Int(item.dailyRate))/day on BorrowIt.")
+                        message: Text("Check out this \(item.title) nearby in Colombo 07 for Rs. \(Int(item.dailyRate))/day on BorrowIt.")
                     ) {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 16, weight: .medium))

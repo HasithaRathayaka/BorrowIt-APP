@@ -8,8 +8,9 @@ public struct AppConfig {
     // Shared App Group for WidgetKit & AppIntents
     public static let appGroupIdentifier = "group.com.borrowit.shared"
     
-    // Cedar Grove Neighborhood Default Center (San Francisco walkable reference)
-    public static let cedarGroveCenter = Coordinate(latitude: 37.7749, longitude: -122.4194)
+    // Colombo 07 (Cinnamon Gardens / Reid Ave) Neighborhood Default Center
+    public static let colomboCenter = Coordinate(latitude: 6.9064, longitude: 79.8708)
+    public static let cedarGroveCenter = colomboCenter // Alias for backward compatibility
     public static let defaultSearchRadiusMeters: Double = 500.0
     public static let geofenceArrivalRadiusMeters: Double = 50.0
     public static let qrTokenExpirationSeconds: TimeInterval = 300.0 // 5 minutes

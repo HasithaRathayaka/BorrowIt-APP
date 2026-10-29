@@ -142,7 +142,7 @@ public class ChatViewModel: ObservableObject {
                 senderId: LenderProfile.maya.id,
                 senderName: conv.participant.name,
                 isFromCurrentUser: false,
-                content: "✅ Request Approved! The pickup address is 148 Cedar Grove Lane.",
+                content: "✅ Request Approved! The pickup address is 148 Reid Avenue, Colombo 07.",
                 timestamp: Date(),
                 isSystemNotification: true
             )

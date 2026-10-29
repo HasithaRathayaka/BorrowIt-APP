@@ -209,7 +209,7 @@ struct BorrowItTests {
             dailyRate: 7.0,
             depositHold: 30.0,
             distanceMeters: 90.0,
-            coordinate: Coordinate(latitude: 37.775, longitude: -122.419),
+            coordinate: Coordinate(latitude: 6.9070, longitude: 79.8713),
             lender: .maya,
             systemImageName: "ladder"
         )

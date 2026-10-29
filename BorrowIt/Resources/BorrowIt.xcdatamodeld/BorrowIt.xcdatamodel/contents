@@ -22,10 +22,10 @@
         <attribute name="isAvailable" optional="NO" attributeType="Boolean" defaultValueString="YES"/>
         <attribute name="isFavorite" optional="NO" attributeType="Boolean" defaultValueString="NO"/>
         <attribute name="itemDescription" optional="YES" attributeType="String"/>
-        <attribute name="latitude" optional="NO" attributeType="Double" defaultValueString="37.7749"/>
+        <attribute name="latitude" optional="NO" attributeType="Double" defaultValueString="6.9064"/>
         <attribute name="lenderInitials" optional="YES" attributeType="String"/>
         <attribute name="lenderName" optional="YES" attributeType="String"/>
-        <attribute name="longitude" optional="NO" attributeType="Double" defaultValueString="-122.4194"/>
+        <attribute name="longitude" optional="NO" attributeType="Double" defaultValueString="79.8708"/>
         <attribute name="rating" optional="NO" attributeType="Double" defaultValueString="4.9"/>
         <attribute name="systemImageName" optional="YES" attributeType="String"/>
         <attribute name="title" optional="NO" attributeType="String"/>

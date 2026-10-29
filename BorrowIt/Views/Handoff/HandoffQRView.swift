@@ -218,7 +218,7 @@ public struct HandoffQRView: View {
                         .clipShape(Capsule())
                     }
                     
-                    Text("Agreed Handoff Location: \(lifecycleVM.activeBorrow?.item.locationName ?? "Cedar Grove") (\(Int(lifecycleVM.handoffDistanceMeters))m away)")
+                    Text("Agreed Handoff Location: \(lifecycleVM.activeBorrow?.item.locationName ?? "Colombo 07") (\(Int(lifecycleVM.handoffDistanceMeters))m away)")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.primary)
                     

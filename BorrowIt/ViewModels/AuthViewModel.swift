@@ -294,7 +294,7 @@ public class AuthViewModel: ObservableObject {
                     email: trimmedEmail,
                     password: password,
                     name: trimmedName,
-                    neighborhood: neighborhood.isEmpty ? "Cedar Grove" : neighborhood,
+                    neighborhood: neighborhood.isEmpty ? "Colombo 07" : neighborhood,
                     initials: initials
                 )
                 saveSession(user: userProfile, method: "email")

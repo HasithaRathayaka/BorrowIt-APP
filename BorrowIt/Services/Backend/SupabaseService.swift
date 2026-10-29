@@ -235,7 +235,7 @@ public class SupabaseService: BackendServiceProtocol {
                 
                 let metadata = userDict["user_metadata"] as? [String: Any]
                 let name = (metadata?["name"] as? String) ?? email.components(separatedBy: "@").first?.capitalized ?? "Neighbor"
-                let neighborhood = (metadata?["neighborhood"] as? String) ?? "Cedar Grove"
+                let neighborhood = (metadata?["neighborhood"] as? String) ?? "Colombo 07"
                 let initials = (metadata?["initials"] as? String) ?? String(name.prefix(2)).uppercased()
                 
                 let profile = UserProfile(

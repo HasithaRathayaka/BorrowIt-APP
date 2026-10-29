@@ -5,8 +5,9 @@ import MapKit
 public struct ExploreDashboardView: View {
     @EnvironmentObject var exploreVM: ExploreViewModel
     @EnvironmentObject var settings: AppSettingsManager
+    @ObservedObject private var locationService = LocationGeofenceService.shared
     
-    // Map position centered on Cedar Grove
+    // Map position centered on Colombo 07 (Cinnamon Gardens)
     @State private var cameraPosition: MapCameraPosition = .region(
         MKCoordinateRegion(
             center: AppConfig.cedarGroveCenter.clCoordinate,
@@ -58,6 +59,9 @@ public struct ExploreDashboardView: View {
             .navigationDestination(item: $exploreVM.selectedItemForDetail) { item in
                 ItemDetailView(item: item)
             }
+            .onAppear {
+                locationService.requestPermissions()
+            }
         }
         .liveAccessibilityScale()
     }
@@ -74,7 +78,7 @@ public struct ExploreDashboardView: View {
                     Image(systemName: "mappin.circle.fill")
                         .font(.system(size: 12))
                         .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
-                    Text("Cedar Grove · within \(Int(exploreVM.searchRadiusMeters))m")
+                    Text("Colombo 07 · within \(Int(exploreVM.searchRadiusMeters))m")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.secondary)
                 }
@@ -243,15 +247,17 @@ public struct ExploreDashboardView: View {
     
     // MARK: - Screen 3: Map Mode View
     private var mapModeView: some View {
-        ZStack(alignment: .bottom) {
+        let currentCenter = locationService.userCoordinate?.clCoordinate ?? AppConfig.cedarGroveCenter.clCoordinate
+        
+        return ZStack(alignment: .bottom) {
             Map(position: $cameraPosition) {
                 // Translucent 500m Walkable Neighborhood Circle
-                MapCircle(center: AppConfig.cedarGroveCenter.clCoordinate, radius: exploreVM.searchRadiusMeters)
+                MapCircle(center: currentCenter, radius: exploreVM.searchRadiusMeters)
                     .foregroundStyle(Color.brandEmerald.opacity(0.12))
                     .stroke(Color.brandEmerald.opacity(0.6), lineWidth: 2)
                 
                 // User Location Dot
-                Annotation("You", coordinate: AppConfig.cedarGroveCenter.clCoordinate) {
+                Annotation("You", coordinate: currentCenter) {
                     ZStack {
                         Circle()
                             .fill(Color.blue.opacity(0.25))

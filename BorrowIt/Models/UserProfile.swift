@@ -41,7 +41,7 @@ public struct UserProfile: Identifiable, Codable, Hashable, Sendable {
         name: String = "You",
         email: String = "neighbor@borrowit.app",
         initials: String = "ME",
-        neighborhood: String = "Cedar Grove",
+        neighborhood: String = "Colombo 07",
         memberSince: String = "Neighbor since 2025",
         isIdVerified: Bool = true,
         trustScore: Int = 94,
@@ -101,7 +101,7 @@ public struct UserProfile: Identifiable, Codable, Hashable, Sendable {
         name = try container.decode(String.self, forKey: .name)
         email = try container.decode(String.self, forKey: .email)
         initials = try container.decodeIfPresent(String.self, forKey: .initials) ?? "U"
-        neighborhood = try container.decodeIfPresent(String.self, forKey: .neighborhood) ?? "Cedar Grove"
+        neighborhood = try container.decodeIfPresent(String.self, forKey: .neighborhood) ?? "Colombo 07"
         memberSince = try container.decodeIfPresent(String.self, forKey: .memberSince) ?? "Neighbor since 2026"
         isIdVerified = try container.decodeIfPresent(Bool.self, forKey: .isIdVerified) ?? true
         trustScore = try container.decodeIfPresent(Int.self, forKey: .trustScore) ?? 95

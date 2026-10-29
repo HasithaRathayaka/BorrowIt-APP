@@ -123,7 +123,7 @@ public struct iPadSplitDashboardView: View {
             VStack(spacing: 0) {
                 // Mini Explore Filter Header
                 HStack {
-                    Text("Cedar Grove Items")
+                    Text("Colombo 07 Items")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
                     Spacer()
                     Button(action: {

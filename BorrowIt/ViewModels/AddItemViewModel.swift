@@ -32,7 +32,7 @@ public class AddItemViewModel: ObservableObject {
     
     @Published public var isAvailableNow: Bool = true
     @Published public var pickupAddressSharedAfterApproval: Bool = true
-    @Published public var exactAddress: String = "148 Cedar Grove Lane"
+    @Published public var exactAddress: String = "148 Reid Avenue, Colombo 07"
     
     // Core ML State
     @Published public var coreMLTag: String = "Power Tools"
@@ -216,9 +216,9 @@ public class AddItemViewModel: ObservableObject {
                 isAvailable: isAvailableNow,
                 isAvailableWeekend: true,
                 pickupAddressSharedAfterApproval: pickupAddressSharedAfterApproval,
-                approximateAddress: "Cedar Grove · 80m away",
+                approximateAddress: "Colombo 07 · 80m away",
                 exactAddress: exactAddress,
-                coordinate: Coordinate(latitude: 37.7752, longitude: -122.4190),
+                coordinate: LocationGeofenceService.shared.userCoordinate ?? Coordinate(latitude: 6.9068, longitude: 79.8710),
                 lender: LenderProfile(
                     id: currentUser.id,
                     name: currentUser.name,

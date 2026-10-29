@@ -24,15 +24,21 @@ public class LocationGeofenceService: NSObject, ObservableObject, GeofenceServic
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         
-        // Initialize default user location to Cedar Grove Center (37.7749, -122.4194)
+        // Initialize default user location to Colombo 07 Center (6.9064, 79.8708)
         self.userCoordinate = AppConfig.cedarGroveCenter
         
         let status = locationManager.authorizationStatus
         self.isAuthorized = (status == .authorizedWhenInUse || status == .authorizedAlways)
+        if isAuthorized {
+            locationManager.startUpdatingLocation()
+        }
     }
     
     public func requestPermissions() {
         locationManager.requestWhenInUseAuthorization()
+        if isAuthorized {
+            locationManager.startUpdatingLocation()
+        }
     }
     
     // MARK: - Distance Calculation in Meters

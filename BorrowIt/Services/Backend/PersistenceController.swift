@@ -104,12 +104,12 @@ public class PersistenceController {
         let latAttr = NSAttributeDescription()
         latAttr.name = "latitude"
         latAttr.attributeType = .doubleAttributeType
-        latAttr.defaultValue = 37.7749
+        latAttr.defaultValue = 6.9064
         
         let lonAttr = NSAttributeDescription()
         lonAttr.name = "longitude"
         lonAttr.attributeType = .doubleAttributeType
-        lonAttr.defaultValue = -122.4194
+        lonAttr.defaultValue = 79.8708
         
         let lenderNameAttr = NSAttributeDescription()
         lenderNameAttr.name = "lenderName"

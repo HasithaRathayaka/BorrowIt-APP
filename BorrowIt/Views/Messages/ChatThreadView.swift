@@ -79,7 +79,7 @@ public struct ChatThreadView: View {
                     Text(conversation.relatedItemTitle)
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(.primary)
-                    Text("Cedar Grove · Handoff spot: 148 Cedar Grove Lane")
+                    Text("Colombo 07 · Handoff spot: 148 Reid Avenue, Colombo 07")
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
                 }
