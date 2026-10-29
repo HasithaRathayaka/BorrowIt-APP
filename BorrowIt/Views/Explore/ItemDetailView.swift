@@ -5,6 +5,7 @@ public struct ItemDetailView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var exploreVM: ExploreViewModel
     @EnvironmentObject var settings: AppSettingsManager
+    @EnvironmentObject var chatVM: ChatViewModel
     public let item: BorrowItem
     
     @State private var isSchedulePresented: Bool = false
@@ -89,39 +90,63 @@ public struct ItemDetailView: View {
                             }
                         }
                         
-                        // 3. Lender Profile Card
-                        HStack(spacing: 14) {
-                            Circle()
-                                .fill(Color(hex: item.lender.avatarColorHex))
-                                .frame(width: 52, height: 52)
-                                .overlay(
-                                    Text(item.lender.initials)
-                                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                )
-                            
-                            VStack(alignment: .leading, spacing: 3) {
-                                HStack {
-                                    Text(item.lender.name)
-                                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                                        .foregroundColor(.primary)
+                        // 3. Tappable Lender Profile Card -> Direct Message with Owner
+                        NavigationLink(destination: ChatThreadView(conversation: chatVM.getOrCreateConversation(with: item.lender, itemTitle: item.title))) {
+                            HStack(spacing: 14) {
+                                Circle()
+                                    .fill(Color(hex: item.lender.avatarColorHex))
+                                    .frame(width: 52, height: 52)
+                                    .overlay(
+                                        Text(item.lender.initials)
+                                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                                            .foregroundColor(.white)
+                                    )
+                                
+                                VStack(alignment: .leading, spacing: 3) {
+                                    HStack(spacing: 4) {
+                                        Text(item.lender.name)
+                                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                                            .foregroundColor(.primary)
+                                        
+                                        Image(systemName: "checkmark.seal.fill")
+                                            .font(.system(size: 13))
+                                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                    }
                                     
-                                    Image(systemName: "checkmark.seal.fill")
-                                        .font(.system(size: 13))
-                                        .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                    Text("Neighbor since \(item.lender.joinedYear) · \(item.lender.totalLends) lends")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                    
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "bubble.left.fill")
+                                            .font(.system(size: 10))
+                                        Text("Tap to message \(item.lender.name)")
+                                            .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                    }
+                                    .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                    .padding(.top, 1)
                                 }
                                 
-                                Text("Neighbor since \(item.lender.joinedYear) · \(item.lender.totalLends) lends")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.secondary)
+                                Spacer()
+                                
+                                VStack(alignment: .trailing, spacing: 6) {
+                                    RatingStarRow(rating: item.lender.rating)
+                                    
+                                    HStack(spacing: 3) {
+                                        Text("Chat")
+                                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 11, weight: .bold))
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
                             }
-                            
-                            Spacer()
-                            
-                            RatingStarRow(rating: item.lender.rating)
+                            .padding(14)
+                            .squircleCard()
                         }
-                        .padding(16)
-                        .squircleCard()
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Message lender \(item.lender.name)")
                         
                         // 4. Two Side-by-Side Spec Cards
                         HStack(spacing: 12) {
@@ -187,8 +212,22 @@ public struct ItemDetailView: View {
                     .padding(20)
                 }
                 
-                // Bottom CTA
-                VStack {
+                // Bottom CTAs: Quick Message Shortcut + Request to Borrow
+                HStack(spacing: 12) {
+                    NavigationLink(destination: ChatThreadView(conversation: chatVM.getOrCreateConversation(with: item.lender, itemTitle: item.title))) {
+                        Image(systemName: "bubble.left.and.bubble.right.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(ThemeColors.emerald(highContrast: settings.highContrastEnabled))
+                            .frame(width: 52, height: 52)
+                            .background(Color.softMintTint)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .stroke(ThemeColors.emerald(highContrast: settings.highContrastEnabled).opacity(0.3), lineWidth: 1.5)
+                            )
+                    }
+                    .accessibilityLabel("Message \(item.lender.name)")
+                    
                     Button(action: {
                         isSchedulePresented = true
                     }) {

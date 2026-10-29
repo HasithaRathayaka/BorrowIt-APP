@@ -47,12 +47,53 @@ public class ChatViewModel: ObservableObject {
     public func loadMessages(for conv: ChatConversation) async {
         do {
             self.messages = try await backendService.fetchMessages(conversationId: conv.id)
-            if self.messages.isEmpty && conv.id == ChatConversation.convMaya.id {
-                self.messages = ChatMessage.mayaThread
+            if self.messages.isEmpty {
+                if conv.id == ChatConversation.convMaya.id {
+                    self.messages = ChatMessage.mayaThread
+                } else {
+                    // Seed initial inquiry greeting from lender
+                    self.messages = [
+                        ChatMessage(
+                            conversationId: conv.id,
+                            senderId: conv.participant.id,
+                            senderName: conv.participant.name,
+                            isFromCurrentUser: false,
+                            content: "Hi neighbor! Thanks for checking out '\(conv.relatedItemTitle)'. Feel free to ask any questions about pickup or availability!",
+                            timestamp: Date().addingTimeInterval(-120)
+                        )
+                    ]
+                }
             }
         } catch {
             print("Failed to load messages: \(error)")
         }
+    }
+    
+    public func getOrCreateConversation(with lender: LenderProfile, itemTitle: String) -> ChatConversation {
+        if let existing = conversations.first(where: { $0.participant.id == lender.id && $0.relatedItemTitle == itemTitle }) {
+            return existing
+        }
+        if let existingLender = conversations.first(where: { $0.participant.id == lender.id || $0.participant.name == lender.name }) {
+            var updated = existingLender
+            updated.relatedItemTitle = itemTitle
+            if let idx = conversations.firstIndex(where: { $0.id == existingLender.id }) {
+                conversations[idx] = updated
+            }
+            return updated
+        }
+        let newConv = ChatConversation(
+            id: UUID(),
+            participant: lender,
+            relatedBorrowId: nil,
+            relatedItemTitle: itemTitle,
+            lastMessage: "Inquiry about \(itemTitle)",
+            lastMessageTime: Date(),
+            unreadCount: 0,
+            status: .pending,
+            canApproveRequest: false
+        )
+        conversations.insert(newConv, at: 0)
+        return newConv
     }
     
     public func sendMessage() async {
