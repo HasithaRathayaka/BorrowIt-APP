@@ -3,6 +3,7 @@ import SwiftUI
 // MARK: - Root Content View (Adaptive iPhone TabView vs iPad NavigationSplitView)
 public struct ContentView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @Environment(\.scenePhase) var scenePhase
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var settings: AppSettingsManager
     @EnvironmentObject var exploreVM: ExploreViewModel
@@ -51,6 +52,14 @@ public struct ContentView: View {
                 selectedTab = 0
                 withAnimation(settings.reduceMotionEnabled ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
                     exploreVM.resetToFeed()
+                }
+            }
+        }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .background {
+                // Lock the app when leaving only if the user is actively logged in
+                if authVM.isAuthenticated && settings.faceIDLockEnabled {
+                    settings.isAppLocked = true
                 }
             }
         }
