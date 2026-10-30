@@ -3,7 +3,7 @@ import Combine
 import AuthenticationServices
 import LocalAuthentication
 
-// MARK: - Auth ViewModel
+// Auth ViewModel
 @MainActor
 public class AuthViewModel: ObservableObject {
     @Published public var isAuthenticated: Bool = false
@@ -12,7 +12,7 @@ public class AuthViewModel: ObservableObject {
     @Published public var isAuthenticating: Bool = false
     @Published public var faceIDEnabledForAccount: Bool = true
     
-    // MARK: - Session Persistence Keys
+    // Session Persistence Keys
     private let userDefaultsProfileKey = "borrowit_saved_user_profile"
     private let authStateKey = "borrowit_is_authenticated"
     private let authMethodKey = "borrowit_auth_method"
@@ -38,7 +38,7 @@ public class AuthViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Session Persistence Helpers
+    // Session Persistence Helpers
     public var hasSavedSession: Bool {
         return UserDefaults.standard.bool(forKey: authStateKey) && UserDefaults.standard.data(forKey: userDefaultsProfileKey) != nil
     }
@@ -62,7 +62,7 @@ public class AuthViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Sign In with Face ID (Biometrics)
+    // Sign In with Face ID (Biometrics)
     public func signInWithFaceID() async -> Bool {
         isAuthenticating = true
         authErrorMessage = nil
@@ -104,7 +104,7 @@ public class AuthViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Sign In with Apple (AuthenticationServices)
+    // Sign In with Apple (AuthenticationServices)
     public func handleAppleSignInResult(_ result: Result<ASAuthorization, Error>) async {
         isAuthenticating = true
         authErrorMessage = nil
@@ -191,7 +191,7 @@ public class AuthViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Sign In with Email & Password
+    // Sign In with Email and Password
     public func signInWithEmail(email: String, password: String = "password") async -> Bool {
         isAuthenticating = true
         authErrorMessage = nil
@@ -244,7 +244,7 @@ public class AuthViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Create Account / Sign Up
+    // Create Account / Sign Up
     public func signUp(
         name: String,
         email: String,
@@ -351,7 +351,7 @@ public class AuthViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Sign Out & Clear Session
+    // Sign Out and Clear Session
     public func signOut() {
         Task {
             await SupabaseService.shared.signOut()

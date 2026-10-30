@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 
-// MARK: - Explore Dashboard ViewModel
+// Explore Dashboard ViewModel
 @MainActor
 public class ExploreViewModel: ObservableObject {
     @Published public var items: [BorrowItem] = []
@@ -28,7 +28,7 @@ public class ExploreViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Filtering Logic
+    // Filtering Logic
     public var filteredItems: [BorrowItem] {
         items.filter { item in
             // Search text match (title, description, lender)
@@ -60,7 +60,7 @@ public class ExploreViewModel: ObservableObject {
         filteredItems.count
     }
     
-    // MARK: - Actions
+    // Actions
     public func fetchItems() async {
         isLoading = true
         do {
@@ -97,7 +97,7 @@ public class ExploreViewModel: ObservableObject {
         searchRadiusMeters = 1000.0
     }
     
-    // MARK: - User's Uploaded / Listed Items Management
+    // User's Uploaded / Listed Items Management
     public func myListedItems(for user: UserProfile) -> [BorrowItem] {
         items.filter { item in
             item.lender.id == user.id ||
@@ -130,7 +130,7 @@ public class ExploreViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Navigation & Mode Reset
+    // Navigation and Mode Reset
     /// Directly switches to Feed mode and dismisses any active map pin preview card or pushed detail view.
     public func resetToFeed() {
         isFeedMode = true

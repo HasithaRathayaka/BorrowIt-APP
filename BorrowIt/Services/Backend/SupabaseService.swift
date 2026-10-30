@@ -1,15 +1,15 @@
 import Foundation
 import Combine
 
-// MARK: - Supabase Service & Local Seed Fallback
+// Supabase Service
 public class SupabaseService: BackendServiceProtocol {
     public static let shared = SupabaseService()
     
-    // In-Memory & Local Cache stores
+    // In-Memory and Local Cache stores
     private var localItems: [BorrowItem]
     private var localBorrows: [BorrowTransaction]
     private var localConversations: [ChatConversation]
-    private var localMessages: [UUID: [ChatMessage]] // conversationId -> messages
+    private var localMessages: [UUID: [ChatMessage]] 
     private var localProfile: UserProfile
     
     private let session: URLSession
@@ -48,7 +48,7 @@ public class SupabaseService: BackendServiceProtocol {
         self.localProfile = UserProfile.currentUser
     }
     
-    // MARK: - HTTP Helpers
+    // HTTP Helpers
     private func makeRequest(endpoint: String, method: String = "GET", body: Data? = nil) -> URLRequest? {
         guard let url = URL(string: "\(baseURL.absoluteString)\(endpoint)") else { return nil }
         var request = URLRequest(url: url)
@@ -86,9 +86,9 @@ public class SupabaseService: BackendServiceProtocol {
         return encoder
     }
     
-    // MARK: - Supabase Cloud Authentication (GoTrue REST)
+    // Supabase Cloud Authentication
     
-    /// Sign Up new user with Email, Password & Metadata on Supabase Auth
+    /// Sign Up new user with Email, Password and Metadata on Supabase Auth
     public func signUp(
         email: String,
         password: String,
@@ -186,7 +186,7 @@ public class SupabaseService: BackendServiceProtocol {
         throw URLError(.cannotParseResponse)
     }
     
-    /// Sign In with Email & Password on Supabase Auth
+    /// Sign In with Email and Password on Supabase Auth
     public func signIn(email: String, password: String) async throws -> UserProfile {
         if !isLiveConfigured {
             // Local fallback simulation if credentials are dummy
@@ -280,7 +280,7 @@ public class SupabaseService: BackendServiceProtocol {
         self.currentUserId = nil
     }
     
-    // MARK: - Items REST / Seed
+    // Items REST / Seed
     public func fetchItems() async throws -> [BorrowItem] {
         if isLiveConfigured {
             if let request = makeRequest(endpoint: "/rest/v1/items?select=*&order=createdAt.desc") {
@@ -433,7 +433,7 @@ public class SupabaseService: BackendServiceProtocol {
         return false
     }
     
-    // MARK: - Borrows Lifecycle REST / Seed
+    // Borrows Lifecycle REST / Seed
     public func fetchBorrows() async throws -> [BorrowTransaction] {
         if isLiveConfigured {
             if let request = makeRequest(endpoint: "/rest/v1/borrows?select=*&order=createdAt.desc") {
@@ -569,7 +569,7 @@ public class SupabaseService: BackendServiceProtocol {
         }
     }
     
-    // MARK: - Realtime Chat REST / Seed
+    // Realtime Chat REST
     public func fetchConversations() async throws -> [ChatConversation] {
         if isLiveConfigured {
             if let request = makeRequest(endpoint: "/rest/v1/conversations?select=*&order=lastMessageTime.desc") {
@@ -621,7 +621,7 @@ public class SupabaseService: BackendServiceProtocol {
         return message
     }
     
-    // MARK: - User Profile & Stats
+    // User Profile and Stats
     public func fetchUserProfile() async throws -> UserProfile {
         if isLiveConfigured, let userId = currentUserId {
             if let request = makeRequest(endpoint: "/rest/v1/profiles?id=eq.\(userId.uuidString)&select=*") {
@@ -674,7 +674,7 @@ public class SupabaseService: BackendServiceProtocol {
     }
 }
 
-// MARK: - MockBackendService for Swift Testing Suite
+// MockBackendService for Swift Testing Suite
 public class MockBackendService: BackendServiceProtocol {
     public var items: [BorrowItem]
     public var borrows: [BorrowTransaction]

@@ -2,11 +2,11 @@ import Foundation
 import Testing
 @testable import BorrowIt
 
-// MARK: - Swift Testing Suite (Component 4 Rubric Requirement: import Testing ONLY)
+//Swift Testing
 @Suite("BorrowIt Core Logic & State Machine Tests")
 struct BorrowItTests {
 
-    // MARK: - Test 1: Valid Transitions
+    // Test Valid Transitions
     @Test("Borrow lifecycle valid transitions: Pending -> Approved -> Handoff -> Borrowed -> Returned")
     func testValidBorrowLifecycleTransitions() throws {
         var transaction = BorrowTransaction(
@@ -18,29 +18,28 @@ struct BorrowItTests {
         #expect(transaction.state == .pending)
         #expect(transaction.state.timelineStepIndex == 1)
         
-        // 1. Pending -> Approved
         try transaction.transition(to: .approved)
         #expect(transaction.state == .approved)
         #expect(transaction.state.timelineStepIndex == 2)
         
-        // 2. Approved -> Handoff (within 50m geofence)
+        // Handoff within 50m geofence
         try transaction.transition(to: .handoff)
         #expect(transaction.state == .handoff)
         
-        // 3. Handoff -> Borrowed (Vision QR verification)
+        // Vision QR verification
         try transaction.transition(to: .borrowed)
         #expect(transaction.state == .borrowed)
         #expect(transaction.pickedUpAt != nil)
         #expect(transaction.state.timelineStepIndex == 3)
         
-        // 4. Borrowed -> Returned (Return QR verification)
+        // Return QR verification
         try transaction.transition(to: .returned)
         #expect(transaction.state == .returned)
         #expect(transaction.returnedAt != nil)
         #expect(transaction.state.timelineStepIndex == 4)
     }
 
-    // MARK: - Test 2: Invalid Transitions Rejected
+    // Invalid Transitions Rejected
     @Test("Invalid borrow state transitions are rejected with BorrowStateError.invalidTransition")
     func testInvalidBorrowTransitionsAreRejected() {
         var pendingTransaction = BorrowTransaction(item: .dewaltDrill, state: .pending)
@@ -62,7 +61,7 @@ struct BorrowItTests {
         }
     }
 
-    // MARK: - Test 3: Price, Duration & Deposit Calculation
+    // Price, Duration and Deposit Calculation
     @Test("Borrow price, duration, and refundable deposit calculation")
     func testBorrowCostAndDepositCalculations() {
         let dailyRate = 1500.0
@@ -75,7 +74,7 @@ struct BorrowItTests {
         #expect(calculation.depositHold == 5000.0) // Rs. 5000 hold
         #expect(calculation.grandTotal == 9500.0)  // Rs. 4500 + Rs. 5000 = Rs. 9500
         
-        // Verify multi-day calculation on Transaction model
+        // Verify multi day calculation on Transaction model
         let start = Date()
         let end = Calendar.current.date(byAdding: .day, value: 5, to: start)!
         let tx = BorrowTransaction(item: .standMixer, startDate: start, endDate: end)
@@ -85,7 +84,7 @@ struct BorrowItTests {
         #expect(tx.depositHoldAmount == 12000.0)
     }
 
-    // MARK: - Test 4: Explore Filter Logic (Radius & Categories)
+    // Explore Filter Logic Radius and Categories
     @Test("Explore filter logic: radius slider (500m) and category filtering")
     @MainActor
     func testExploreViewModelFilters() async {
@@ -121,7 +120,7 @@ struct BorrowItTests {
         #expect(vm.filteredItems.first?.title.contains("DeWalt") == true)
     }
 
-    // MARK: - Test 5: Core ML & Vision Taxonomy Mapping
+    // Core ML and Vision Taxonomy Mapping
     @Test("On-device Core ML & Vision category classifier mapping")
     func testClassifierCategoryMapping() {
         let classifier = ImageClassifierService.shared
@@ -150,7 +149,7 @@ struct BorrowItTests {
         #expect(classifier.mapLabelToCategory("inflatable_kayak, paddle") == .sports)
     }
 
-    // MARK: - Test 6: Rotating QR Pass Token & Expiration Validation
+    // Rotating QR Pass Token and Expiration Validation
     @Test("QR Handoff token generation, Vision decoding, and expiration validation")
     func testQRPayloadGenerationAndExpiration() throws {
         let borrowId = UUID()
@@ -165,20 +164,16 @@ struct BorrowItTests {
             rotatingToken: "PASS-7721"
         )
         
-        // 1. Serialization
         let jsonString = freshPayload.toJSONString()
         #expect(jsonString != nil)
         
-        // 2. Deserialization & Integrity
         let decoded = try QRPayload.from(jsonString: jsonString!)
         #expect(decoded.borrowId == borrowId)
         #expect(decoded.rotatingToken == "PASS-7721")
         #expect(decoded.action == .pickup)
         
-        // 3. Expiration window validation (fresh should be valid within 300s)
         #expect(freshPayload.isValid(windowSeconds: 300) == true)
         
-        // 4. Stale token generated 10 minutes ago should be expired
         let expiredPayload = QRPayload(
             borrowId: borrowId,
             borrowerId: borrowerId,
@@ -190,7 +185,7 @@ struct BorrowItTests {
         #expect(expiredPayload.isValid(windowSeconds: 300) == false)
     }
 
-    // MARK: - Test 7: Protocol-Oriented DI with MockBackendService
+    // Protocol Oriented DI with MockBackendService
     @Test("Protocol-Oriented Dependency Injection with MockBackendService")
     @MainActor
     func testProtocolOrientedDependencyInjection() async throws {
@@ -218,7 +213,7 @@ struct BorrowItTests {
         #expect(exploreVM.items.contains(where: { $0.title == "Test Injected Ladder" }))
     }
     
-    // MARK: - Test 8: Free Community Lending
+    // Free Community Lending
     @Test("Community free lending items have zero daily rate and correct rate formatting")
     func testFreeCommunityLending() {
         let freeLadder = BorrowItem.telescopingLadder
@@ -230,7 +225,7 @@ struct BorrowItTests {
         #expect(paidDrill.formattedRate.contains("Rs."))
     }
     
-    // MARK: - Test 9: Explore Mode Reset to Feed
+    // Explore Mode Reset to Feed
     @Test("ExploreViewModel resets cleanly to Feed mode from Map mode and clears preview/detail")
     @MainActor
     func testResetToFeed() {
@@ -250,7 +245,7 @@ struct BorrowItTests {
         #expect(vm.selectedItemForDetail == nil)
     }
 
-    // MARK: - Test 10: Face ID Biometric Gate & App Lock State Machine
+    // Face ID Biometric Gate and App Lock State Machine
     @Test("Face ID security gate: lifecycle app lock, biometric authentication, and lock/unlock transitions")
     @MainActor
     func testFaceIDBiometricLockAndUnlock() async {
@@ -258,15 +253,15 @@ struct BorrowItTests {
         let authVM = AuthViewModel(biometricService: mockBio, backendService: MockBackendService())
         let settings = AppSettingsManager()
         
-        // 1. Initial State: App starts unlocked
+        // App starts unlocked
         settings.isAppLocked = false
         #expect(!settings.isAppLocked)
         
-        // 2. Lifecycle Trigger: Minimizing or backgrounding the app locks it
+        // Minimizing or backgrounding the app locks it
         settings.lockAppWithFaceID()
         #expect(settings.isAppLocked)
         
-        // 3. Successful Face ID verification unlocks the app
+        // Successful Face ID verification unlocks the app
         mockBio.shouldSucceed = true
         let unlockSuccess = await authVM.authenticateWithBiometrics(reason: "Unlock BorrowIt Test")
         #expect(unlockSuccess == true)
@@ -277,7 +272,7 @@ struct BorrowItTests {
         settings.unlockApp()
         #expect(!settings.isAppLocked)
         
-        // 4. Failed Face ID verification keeps the app securely locked
+        // Failed Face ID verification keeps the app securely locked
         settings.lockAppWithFaceID()
         #expect(settings.isAppLocked)
         
@@ -287,13 +282,13 @@ struct BorrowItTests {
         #expect(authVM.authErrorMessage != nil)
         #expect(settings.isAppLocked) // Privacy shield remains locked
         
-        // 5. Native Biometric Service properties
+        // Native Biometric Service properties
         #expect(mockBio.biometricTypeString == "Face ID")
         #expect(mockBio.isBiometricsAvailable == true)
     }
 }
 
-// MARK: - Mock Biometric Service for Unit Testing
+// Mock Biometric Service for Unit Testing
 private class MockBiometricService: BiometricServiceProtocol {
     var shouldSucceed: Bool = true
     var isBiometricsAvailable: Bool = true

@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 
-// MARK: - App Settings & Live Accessibility Manager
+// App Settings and Live Accessibility Manager
 @MainActor
 public class AppSettingsManager: ObservableObject {
     // 6 Functional Rubric Toggles
@@ -13,7 +13,7 @@ public class AppSettingsManager: ObservableObject {
     @AppStorage("settings_high_contrast") public var highContrastEnabled: Bool = false
     @AppStorage("has_completed_onboarding_walkthrough") public var hasCompletedOnboardingWalkthrough: Bool = false
     
-    // Live UI Security & Viva Demo State
+    // Live UI Security 
     @Published public var isAppLocked: Bool = false
     @Published public var simulateEmptyState: Bool = false
     @Published public var demoBannerMessage: String? = nil
@@ -23,7 +23,6 @@ public class AppSettingsManager: ObservableObject {
         self.isAppLocked = false
     }
     
-    // MARK: - Viva Demo Toolkit Actions
     public func lockAppWithFaceID() {
         withAnimation(reduceMotionEnabled ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
             self.isAppLocked = true

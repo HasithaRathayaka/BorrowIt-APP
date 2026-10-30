@@ -1,13 +1,13 @@
 import Foundation
 import CryptoKit
 
-// MARK: - QR Action Type
+// QR Action Type
 public enum QRAction: String, Codable {
     case pickup = "pickup"
     case returnVerification = "returnVerification"
 }
 
-// MARK: - Signed QR Payload
+// Signed QR Payload
 public struct QRPayload: Codable, Hashable {
     public var borrowId: UUID
     public var borrowerId: UUID
@@ -38,7 +38,7 @@ public struct QRPayload: Codable, Hashable {
         self.signature = digest.map { String(format: "%02hhx", $0) }.joined().prefix(16).description
     }
     
-    // MARK: - JSON Serialization
+    // JSON Serialization
     public func toJSONString() -> String? {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601

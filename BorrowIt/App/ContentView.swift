@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Root Content View (Adaptive iPhone TabView vs iPad NavigationSplitView)
+// Content View (Adaptive iPhone TabView vs iPad NavigationSplitView)
 public struct ContentView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.scenePhase) var scenePhase
@@ -26,13 +26,12 @@ public struct ContentView: View {
                         // iPadOS Adaptive NavigationSplitView
                         iPadSplitDashboardView()
                     } else {
-                        // iPhone 5-Tab TabView
                         iphoneTabView
                     }
                 }
             }
             
-            // Native Full-Screen Privacy & Face ID Security Shield (Banking App Style)
+            //  Privacy and Face ID Security
             if authVM.isAuthenticated && settings.faceIDLockEnabled && settings.isAppLocked {
                 BiometricGateView(
                     reasonPrompt: "Welcome back, \(authVM.currentUser.name) — Unlock with Face ID to continue"
@@ -51,7 +50,6 @@ public struct ContentView: View {
         }
         .onChange(of: authVM.isAuthenticated) { oldValue, newValue in
             if newValue {
-                // Once logged in, guarantee landing directly on Explore Dashboard in Feed mode
                 settings.isAppLocked = false
                 selectedTab = 0
                 withAnimation(settings.reduceMotionEnabled ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
@@ -61,7 +59,6 @@ public struct ContentView: View {
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .background {
-                // Lock the app when leaving only if the user is actively logged in
                 if authVM.isAuthenticated && settings.faceIDLockEnabled {
                     settings.isAppLocked = true
                 }
@@ -80,15 +77,11 @@ public struct ContentView: View {
         }
     }
     
-    // MARK: - iPhone 5-Tab Navigation Architecture
-    // Intercepts tab taps: whenever the user taps the Explore tab button below (tag 0),
-    // even if already on Explore or currently in Map mode, directly resets to Feed mode.
     private var tabSelectionBinding: Binding<Int> {
         Binding(
             get: { selectedTab },
             set: { newTab in
                 if newTab == 0 {
-                    // Pressed the Explore button below -> directly return to Feed
                     withAnimation(settings.reduceMotionEnabled ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
                         exploreVM.resetToFeed()
                     }
@@ -100,35 +93,35 @@ public struct ContentView: View {
     
     private var iphoneTabView: some View {
         TabView(selection: tabSelectionBinding) {
-            // 1. Explore Tab
+            // Explore Tab
             ExploreDashboardView()
                 .tabItem {
                     Label("Explore", systemImage: "safari.fill")
                 }
                 .tag(0)
             
-            // 2. Messages Tab
+            // Messages Tab
             MessagesInboxView()
                 .tabItem {
                     Label("Messages", systemImage: "bubble.left.and.bubble.right.fill")
                 }
                 .tag(1)
             
-            // 3. Handoff QR Pass Tab
+            // Handoff QR Pass Tab
             HandoffQRView()
                 .tabItem {
                     Label("Handoff QR", systemImage: "qrcode.viewfinder")
                 }
                 .tag(2)
             
-            // 4. Borrows Tab
+            // Borrows Tab
             BorrowsTabView()
                 .tabItem {
                     Label("Borrows", systemImage: "shippingbox.fill")
                 }
                 .tag(3)
             
-            // 5. Settings Tab
+            // Settings Tab
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")

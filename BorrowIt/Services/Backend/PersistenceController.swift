@@ -1,7 +1,7 @@
 import Foundation
 import CoreData
 
-// MARK: - Core Data Offline Persistence Controller
+// Core Data Offline Persistence Controller
 public class PersistenceController {
     public static let shared = PersistenceController()
     
@@ -237,7 +237,7 @@ public class PersistenceController {
         }
     }
     
-    // MARK: - Offline QR Pass Caching
+    // Offline QR Pass Caching
     public func cacheOfflineQRPass(payload: QRPayload) {
         let context = container.viewContext
         let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "OfflineQRPassEntity")

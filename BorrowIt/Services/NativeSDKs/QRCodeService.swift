@@ -4,7 +4,7 @@ import CoreImage.CIFilterBuiltins
 import Vision
 import SwiftUI
 
-// MARK: - On-Device QR Code Generation & Vision Barcode Verification
+// On Device QR Code Generation and Vision Barcode Verification
 public class QRCodeService: QRServiceProtocol {
     public static let shared = QRCodeService()
     
@@ -12,7 +12,7 @@ public class QRCodeService: QRServiceProtocol {
     
     public init() {}
     
-    // MARK: - CoreImage QR Generation
+    // CoreImage QR Generation
     public func generateQRCodeImage(from payload: QRPayload) -> CGImage? {
         guard let jsonString = payload.toJSONString(),
               let data = jsonString.data(using: .utf8) else {
@@ -32,7 +32,7 @@ public class QRCodeService: QRServiceProtocol {
         return context.createCGImage(scaledCIImage, from: scaledCIImage.extent)
     }
     
-    // MARK: - Vision VNDetectBarcodesRequest Decoding (On-Device)
+    // Vision Decoding On-Device
     public func decodeQRCode(from image: CGImage) async throws -> QRPayload {
         return try await withCheckedThrowingContinuation { continuation in
             var hasResumed = false
@@ -77,9 +77,9 @@ public class QRCodeService: QRServiceProtocol {
         }
     }
     
-    // MARK: - Payload Verification & Expiration Validation
+    // Payload Verification and Expiration Validation
     public func verifyPayload(_ payload: QRPayload) -> Bool {
-        // Must have non-empty rotating token and valid signature within 5m window
+        // Must have non empty rotating token and valid signature within 5m window
         guard !payload.rotatingToken.isEmpty else { return false }
         return payload.isValid(windowSeconds: AppConfig.qrTokenExpirationSeconds)
     }
